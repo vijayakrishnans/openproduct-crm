@@ -50,7 +50,9 @@ spec:
 
     # Here-strings, not `echo | grep -q`: grep exiting early on a large page
     # SIGPIPEs echo and fails the step under pipefail.
-    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && grep -q '<title>OpenProduct CRM</title>' <<< \"${html}\""
+    # A just-created workers.dev script answers 404 for a few seconds, so the
+    # first deploy's smoke retries on any error for about a minute.
+    smokeCommand: "html=$(curl -sfL --retry 12 --retry-delay 5 --retry-all-errors \"${DEPLOYED_URL}/\") && grep -q '<title>OpenProduct CRM</title>' <<< \"${html}\""
   labels:
     team: platform
     layer: delivery

@@ -1,0 +1,14 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-5
+  title: "crm-web smoke waits out a new Worker's propagation"
+spec:
+  goal: crm-web's deploy smoke tolerates the seconds a newly created workers.dev script takes to answer, so stage and prod deploy on main.
+  affects:
+    - apps/crm-web/component.yaml
+    - tasks/CRM-5.TaskContract.yaml
+  doneWhen:
+    - the smoke retries on HTTP errors for up to about a minute before failing
+    - after the merge, crm-web stage and prod deploy on main and answer with the title OpenProduct CRM
+  gates: []
