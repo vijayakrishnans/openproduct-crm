@@ -1,0 +1,16 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-1
+spec:
+  goal: The CRM port has its design of record, its progress ledger and its waiting list in the repository.
+  affects:
+    - specs/epics/openproduct-crm-port/**
+    - ai/context/crm-port-ledger.md
+    - WAITING.md
+    - tasks/**
+  doneWhen:
+    - specs/epics/openproduct-crm-port/ holds README, design, implementation plan, risks and status
+    - ai/context/crm-port-ledger.md records the inputs, the milestone table and the decisions taken so far
+    - WAITING.md lists every step that needs a human, or says there are none
+  gates: []
