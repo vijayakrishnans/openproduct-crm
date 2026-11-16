@@ -111,3 +111,17 @@ describe("isLinkActive", () => {
     expect(isLinkActive("/orgs", null)).toBe(false);
   });
 });
+
+describe("buildNavSections — CRM link (CRM-3)", () => {
+  const crmUrl = "https://openproduct-crm-crm-web-stage.example.workers.dev";
+
+  it("leads the org section with an external CRM link when the URL is known", () => {
+    const org = buildNavSections({ orgSlug: "acme", crmUrl }, false).find((s) => s.id === "org")!;
+    expect(org.links[0]).toEqual({ href: crmUrl, label: "CRM", icon: "Contact", external: true });
+  });
+
+  it("omits the CRM link when the environment is unknown", () => {
+    const org = buildNavSections({ orgSlug: "acme" }, false).find((s) => s.id === "org")!;
+    expect(org.links.some((l) => l.label === "CRM")).toBe(false);
+  });
+});

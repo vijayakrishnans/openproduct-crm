@@ -6,6 +6,7 @@ import { useParams, usePathname } from "next/navigation";
 import {
   Building2,
   ChevronDown,
+  Contact,
   ChevronLeft,
   ChevronRight,
   FolderKanban,
@@ -27,6 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { appConfig, crmWebWorkersDevUrl } from "@/lib/app-config";
 import { buildNavSections, isLinkActive } from "./nav-items";
 import { buildSettingsNav, flattenSettingsNav, isSettingsLinkActive } from "./settings-nav";
 import { SidebarAccount } from "./sidebar-account";
@@ -35,6 +37,7 @@ import { SidebarFind } from "./sidebar-find";
 
 const ICONS: Record<string, LucideIcon> = {
   Building2,
+  Contact,
   FolderKanban,
   Boxes,
   KeyRound,
@@ -122,7 +125,9 @@ function ProductNav({
   onNavigate?: (() => void) | undefined;
   mobile: boolean;
 }) {
-  const sections = buildNavSections({ orgSlug, projectSlug });
+  const deployEnv = appConfig().deployEnv;
+  const crmUrl = deployEnv ? crmWebWorkersDevUrl(deployEnv) : null;
+  const sections = buildNavSections({ orgSlug, projectSlug, crmUrl });
   return (
     <nav className={cn("px-2 pb-4 pt-3", mobile ? "space-y-5" : "space-y-6")}>
       {sections.map((section) => (
