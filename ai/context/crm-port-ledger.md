@@ -4,11 +4,12 @@ The authoritative progress record for porting Atomic CRM onto this Lumen
 product. Read it first on every resume, then `gh pr list --state all` and
 `orun baseline new … --status`. Do not redo merged work.
 
-## Summary (2026-11-16)
+## Summary (2026-11-17)
 
-Phase A is done: the workspace exists, every Lumen phase landed, and stage and
-prod are deployed. This session's scope ends at CRM0, CRM-A and M0; M1–M7 are
-not started.
+Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3) and the public
+listing (CRM-2) have landed. M1 onward is **blocked**: every Supabase
+database on the account stopped resolving on 2026-11-17 (see WAITING.md),
+so migrations cannot run and api-edge reports `degraded` on stage and prod.
 
 ## Inputs used
 
@@ -29,11 +30,11 @@ not started.
 | Milestone | Task | State | PR | Merge | Verification |
 |---|---|---|---|---|---|
 | Phase A bootstrap | BASE-1..8 | done | #1–#3, #5–#9 (#4 closed, redundant) | `b8551b3` | every Lumen phase through 08-docs derived done; console and api-edge 200 on stage and prod; sign-in and personal org on stage verified 2026-11-16 |
-| Multi-tenant profile | CRM-4 | planned | | | Lumen v33 ships SOLO_MODE on; off for this product |
-| CRM0 the spec | CRM-1 | in progress | | | |
-| CRM-A public listing | CRM-2 | | | | |
-| M0 import and attribution | CRM-3 | | | | |
-| M1 schema | | not started | | | |
+| Multi-tenant profile | CRM-4 | merged; stage check blocked | #11 | `45adb3e` | SOLO_MODE off everywhere; console builds from source. The stage org check waits on the database (WAITING.md) |
+| CRM0 the spec | CRM-1 | done | #10 | `053be16` | |
+| CRM-A public listing | CRM-2 | in review | #13 | | description, homepage, topics, secret scanning, push protection, private vulnerability reporting and `main` protection (PR + `plan` check) set 2026-11-17 |
+| M0 import and attribution | CRM-3 | merged | #12 | `9be281f` | CI green; see the deploy check below |
+| M1 schema | | blocked (database) | | | |
 | M2 crm-worker and crm-facade | | not started | | | |
 | M3 frontend swap | | not started | | | |
 | M4 files and email | | not started | | | |
@@ -74,6 +75,15 @@ not started.
 - 2026-11-16: `preserveSymlinks` is dropped from the Vite config (it breaks
   pnpm's symlinked layout); `cropperjs` and `shadcn` became direct
   dependencies (npm had hoisted them).
+
+- 2026-11-17: `pnpm-workspace.yaml` declares missing peers (`@types/react`
+  on lucide-react, next and cmdk; `zod` on @hookform/resolvers). The console
+  pins React 19 rc types and zod 3, while crm-web uses stable types and
+  zod 4; without the peers each app type-checked against the other's.
+- 2026-11-17: `main` requires a PR and the `plan` check. The other CI jobs
+  depend on what changed, so they cannot be required.
+- 2026-11-17: an upstream test fixture's real email address became
+  `jane.doe@example.com` (the repo is public).
 
 ## Open risks
 
