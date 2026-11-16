@@ -1,0 +1,18 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-4
+  title: "Multi-tenant profile: SOLO_MODE off"
+spec:
+  goal: The product runs Lumen's full multi-tenant profile, so orgs can be created and have members, invitations, API keys and webhooks.
+  affects:
+    - apps/api-edge/wrangler.template.jsonc
+    - apps/identity-worker/wrangler.template.jsonc
+    - apps/web-console-next/next.config.mjs
+    - apps/web-console-next/**
+    - tests/**
+    - tasks/CRM-4.TaskContract.yaml
+  doneWhen:
+    - SOLO_MODE is "false" for api-edge and identity-worker in every environment, and the console builds with NEXT_PUBLIC_SOLO_MODE=false
+    - on stage, POST /v1/organizations creates an org and GET /v1/organizations/:id/members answers
+  gates: []
