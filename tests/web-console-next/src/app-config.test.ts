@@ -2,6 +2,7 @@ import {
   DEFAULT_APP_CONFIG,
   RUNTIME_KEYS,
   apiEdgeWorkersDevUrl,
+  crmWebWorkersDevUrl,
   consoleTitle,
   environmentFromHost,
   resolveAppConfig,
@@ -52,6 +53,10 @@ describe("derivations follow the runtime config", () => {
   it("builds the product's api-edge URL and title", () => {
     expect(apiEdgeWorkersDevUrl("prod", cfg)).toBe("https://acme-cloud-api-edge-prod.acme-inc.workers.dev");
     expect(consoleTitle(cfg)).toBe("Acme Cloud Console");
+  });
+
+  it("builds the product's CRM web app URL beside api-edge", () => {
+    expect(crmWebWorkersDevUrl("stage", cfg)).toBe("https://acme-cloud-crm-web-stage.acme-inc.workers.dev");
   });
 
   it("offers both targets when no deploy env is set", () => {

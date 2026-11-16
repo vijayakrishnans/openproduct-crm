@@ -14,6 +14,8 @@ export interface NavLink {
   icon: string;
   /** When true the link opens a nested sidebar panel (renderer shows a ›). */
   subPanel?: boolean;
+  /** When true the link leaves the console (another app, e.g. the CRM). */
+  external?: boolean;
 }
 
 export interface NavSection {
@@ -26,6 +28,8 @@ export interface NavSection {
 export interface NavScope {
   orgSlug?: string | null;
   projectSlug?: string | null;
+  /** The CRM web app's URL for this environment; omitted when unknown. */
+  crmUrl?: string | null;
 }
 
 /**
@@ -68,6 +72,9 @@ export function buildNavSections(scope: NavScope, soloMode: boolean = SOLO_MODE)
             { href: `${orgBase}/settings`, label: "Settings", icon: "Settings", subPanel: true },
           ]
         : [
+            ...(scope.crmUrl
+              ? [{ href: scope.crmUrl, label: "CRM", icon: "Contact", external: true }]
+              : []),
             { href: `${orgBase}/projects`, label: "Projects", icon: "FolderKanban" },
             { href: `${orgBase}/usage`, label: "Usage & quota", icon: "Gauge" },
             // Opens the dedicated settings panel — flagged so the renderer shows a ›.

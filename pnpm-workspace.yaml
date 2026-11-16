@@ -3,3 +3,22 @@ packages:
   - "packages/*"
   - "tests/*"
   - "tooling/*"
+
+# The console (React 19 rc types, zod 3) and crm-web (React 19 stable types,
+# zod 4) share this workspace. These packages import @types/react or zod in
+# their typings without declaring them as peers, so pnpm resolves them
+# through the hidden hoist and one app gets the other's version. Declaring
+# the peers gives each app's copy its own.
+packageExtensions:
+  lucide-react:
+    peerDependencies: { "@types/react": "*" }
+    peerDependenciesMeta: { "@types/react": { optional: true } }
+  next:
+    peerDependencies: { "@types/react": "*" }
+    peerDependenciesMeta: { "@types/react": { optional: true } }
+  cmdk:
+    peerDependencies: { "@types/react": "*" }
+    peerDependenciesMeta: { "@types/react": { optional: true } }
+  "@hookform/resolvers":
+    peerDependencies: { "zod": "*" }
+    peerDependenciesMeta: { "zod": { optional: true } }

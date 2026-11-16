@@ -151,6 +151,16 @@ export function consoleTitle(config: AppConfig = appConfig()): string {
   return `${config.productName} Console`;
 }
 
+/**
+ * The CRM web app (apps/crm-web) workers.dev URL for an environment. Its
+ * Worker is named like api-edge's with `crm-web` in place of `api-edge`
+ * (openproduct-crm-crm-web-<env>), on the same account subdomain.
+ */
+export function crmWebWorkersDevUrl(environment: string, config: AppConfig = appConfig()): string {
+  const prefix = config.apiWorkerPrefix.replace(/api-edge$/, "crm-web");
+  return `https://${prefix}-${environment}.${config.workersDevSubdomain}.workers.dev`;
+}
+
 /** api-edge workers.dev URL for a given environment name. */
 export function apiEdgeWorkersDevUrl(environment: string, config: AppConfig = appConfig()): string {
   return `https://${config.apiWorkerPrefix}-${environment}.${config.workersDevSubdomain}.workers.dev`;

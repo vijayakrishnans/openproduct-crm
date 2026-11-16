@@ -1,0 +1,21 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-3
+  title: "M0: Atomic CRM web app as apps/crm-web, demo deployed"
+spec:
+  goal: Atomic CRM's web app runs as apps/crm-web, renamed OpenProduct CRM, and its in-browser demo deploys per environment.
+  affects:
+    - apps/crm-web/**
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - apps/web-console-next/**
+    - tests/web-console-next/**
+    - THIRD_PARTY_NOTICES.md
+    - tasks/CRM-3.TaskContract.yaml
+  doneWhen:
+    - apps/crm-web holds Atomic CRM's src/, demo/ and public/ at aeccb98, built with Vite inside the pnpm/turbo monorepo
+    - its component.yaml uses cloudflare-workers-assets-turbo and the plan derives verify on PRs and deploy on main
+    - the demo answers on openproduct-crm-crm-web-stage with the title OpenProduct CRM and no third-party telemetry
+    - the console's org navigation links to the CRM
+  gates: []
