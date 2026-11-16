@@ -15,7 +15,7 @@
     "CONSOLE_CUSTOM_DOMAIN": "",
     // M0 / Solo profile (OpenProduct CRM ships single-user). Set "false" to restore the
     // full multi-tenant baseline. See specs/profiles/solo-m0.md.
-    "SOLO_MODE": "true"
+    "SOLO_MODE": "false"
   },
   "durable_objects": {
     "bindings": [
@@ -30,7 +30,7 @@
       "vars": {
         "ENVIRONMENT": "dev",
         "CONSOLE_CUSTOM_DOMAIN": "",
-        "SOLO_MODE": "true"
+        "SOLO_MODE": "false"
       },
       "durable_objects": {
         "bindings": [
@@ -45,7 +45,7 @@
       "vars": {
         "ENVIRONMENT": "stage",
         "CONSOLE_CUSTOM_DOMAIN": "stage.openproduct-crm.example.com",
-        "SOLO_MODE": "true"
+        "SOLO_MODE": "false"
       },
       "hyperdrive": [
         {
@@ -114,7 +114,7 @@
       "vars": {
         "ENVIRONMENT": "prod",
         "CONSOLE_CUSTOM_DOMAIN": "prod.openproduct-crm.example.com",
-        "SOLO_MODE": "true"
+        "SOLO_MODE": "false"
       },
       "hyperdrive": [
         {

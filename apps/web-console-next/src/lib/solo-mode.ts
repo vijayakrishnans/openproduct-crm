@@ -7,8 +7,8 @@
  * personal workspace. See specs/profiles/solo-m0.md.
  *
  * Sourced from `NEXT_PUBLIC_SOLO_MODE`, inlined at build time (next.config.mjs
- * defaults it to "true" for this OpenProductCRM instance). Set it to "false" and rebuild
- * to restore the full multi-tenant baseline — nothing here is removed, only
+ * defaults it to "false" for OpenProduct CRM, which runs multi-tenant). Set it
+ * to "true" and rebuild for the single-user profile — nothing here is removed, only
  * gated, so the switch is fully reversible.
  */
 

@@ -27,7 +27,7 @@
     "GOOGLE_OAUTH_CLIENT_ID": "",
     "OAUTH_REDIRECT_BASE_URL": "http://localhost:8787",
     "OAUTH_ALLOWED_CONSOLE_ORIGINS": "http://localhost:3000",
-    "SOLO_MODE": "true"
+    "SOLO_MODE": "false"
   },
   "env": {
     "dev": {
@@ -38,7 +38,7 @@
         "GOOGLE_OAUTH_CLIENT_ID": "",
         "OAUTH_REDIRECT_BASE_URL": "",
         "OAUTH_ALLOWED_CONSOLE_ORIGINS": "https://openproduct-crm-web-console-next-dev.vijayakrishnan12994.workers.dev",
-        "SOLO_MODE": "true"
+        "SOLO_MODE": "false"
       }
     },
     "stage": {
@@ -49,7 +49,7 @@
         "GOOGLE_OAUTH_CLIENT_ID": "441163126775-7fabhvpbl9tsga921rklpdlde7mduq34.apps.googleusercontent.com",
         "OAUTH_REDIRECT_BASE_URL": "https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev",
         "OAUTH_ALLOWED_CONSOLE_ORIGINS": "https://stage.openproduct-crm.example.com,https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev",
-        "SOLO_MODE": "true"
+        "SOLO_MODE": "false"
       },
       "hyperdrive": [
         {
@@ -80,7 +80,7 @@
         "GOOGLE_OAUTH_CLIENT_ID": "441163126775-7fabhvpbl9tsga921rklpdlde7mduq34.apps.googleusercontent.com",
         "OAUTH_REDIRECT_BASE_URL": "https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev",
         "OAUTH_ALLOWED_CONSOLE_ORIGINS": "https://prod.openproduct-crm.example.com,https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev",
-        "SOLO_MODE": "true"
+        "SOLO_MODE": "false"
       },
       "hyperdrive": [
         {
