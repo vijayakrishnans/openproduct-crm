@@ -5,7 +5,10 @@ dist/
 coverage/
 *.tsbuildinfo
 .env
-.env.local
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
 *.log
 plan.json
 
