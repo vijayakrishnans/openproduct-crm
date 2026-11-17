@@ -92,6 +92,22 @@ export class Workspace {
     return (await mate.call("PATCH", `${this.crm}/sales/${me["id"]}`, teammate)) as Sales;
   }
 
+  /** Stores the organization's CRM configuration, as the settings page does. */
+  async setConfiguration(config: Json) {
+    await this.api.call("POST", `/v1/organizations/${this.orgId}/config/settings`, {
+      key: "crm.configuration",
+      value: config,
+    });
+  }
+
+  async createDeal(deal: { name: string; stage: string; company_id?: number; index?: number; amount?: number }) {
+    return this.api.call<{ id: number }>("POST", `${this.crm}/deals`, {
+      sales_id: this.owner.id,
+      contact_ids: [],
+      ...deal,
+    });
+  }
+
   async createCompany({ name, salesId }: { name: string; salesId?: number }) {
     return this.api.call<{ id: number }>("POST", `${this.crm}/companies`, {
       name,
