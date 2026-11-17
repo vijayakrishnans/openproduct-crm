@@ -42,6 +42,12 @@ exercised through `api-edge` (this Worker has no public URL).
   did not answer, which the worker treats as "not a member". Check
   `GET /health` on the worker's checks and the two bound Workers.
 
+- **Deploy fails with `R2 bucket '…-crm-attachments-<env>' not found`
+  (code 10085)**: the attachments bucket does not exist on this account. The
+  deploy token cannot create it (it has no R2 permission). Create it once in
+  the Cloudflare dashboard (R2 → Create bucket) with exactly that name, then
+  re-run the failed lane. This happened on the first deploy, 2026-11-17.
+
 ## Turning inbound email on
 
 Needs a domain on this Cloudflare account with Email Routing enabled (see

@@ -1,3 +1,10 @@
+## crm-web v0.3.0 - 2026-11-17
+
+- Notes take file attachments again (up to 25 MB each). Files are stored by
+  the API for your organization only, and are deleted with their note.
+- A company without a logo gets its website's favicon, and a contact without
+  an avatar the favicon of their email's domain.
+
 ## crm-web v0.2.0 - 2026-11-17
 
 - The CRM now runs on the OpenProduct API: sign in with a code sent to your

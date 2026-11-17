@@ -2,7 +2,12 @@ import { expect, signIn, test, Workspace } from "./fixtures";
 
 // M4: a file attached to a note is stored by the API, comes back intact, is
 // invisible to another organization, and goes away with its note.
-test("a note keeps its attachment, and only its organization can read it", async ({ page, workspace, http }) => {
+test("a note keeps its attachment, and only its organization can read it", async ({
+  page,
+  workspace,
+  http,
+  dismissToast,
+}) => {
   const contact = await workspace.createContact({ first_name: "Jane", last_name: "Smith", title: "CEO" });
   const content = `quote for Jane ${Date.now()}`;
 
@@ -19,6 +24,9 @@ test("a note keeps its attachment, and only its organization can read it", async
     buffer: Buffer.from(content),
   });
   await page.getByRole("button", { name: "Add this note" }).click();
+  // The save (and with it the upload) goes out when the toast is dismissed;
+  // until then the page shows its own copy of the note.
+  await dismissToast("Note added");
 
   // The saved note links to the file, and the link downloads what was sent
   const link = page.getByRole("link", { name: "quote.txt" });

@@ -98,9 +98,10 @@ spec:
     typecheckCommand: pnpm exec turbo run typecheck --filter=@saas/crm-worker
     dryRunCommand: pnpm exec wrangler deploy --dry-run --config wrangler.jsonc --env prod
     deployCommand: pnpm exec wrangler deploy --config wrangler.jsonc --env prod
-    # The R2 bucket for note attachments, one per environment. Creating a
-    # bucket that exists fails, which is fine: the deploy then binds to it.
-    preDeployCommand: "pnpm exec wrangler r2 bucket create openproduct-crm-crm-attachments-${ORUN_ENVIRONMENT} || true"
+    # The R2 buckets for note attachments (openproduct-crm-crm-attachments-stage
+    # and -prod) were created once, by hand: the deploy token has no R2
+    # permission, so no step here can create them. See docs/runbook.md.
+    preDeployCommand: "echo 'No pre-deploy step configured.'"
     migrationCommand: "echo 'No migrations configured.'"
     smokeCommand: "echo 'No smoke test configured.'"
   labels:

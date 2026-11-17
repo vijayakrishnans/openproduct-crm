@@ -30,8 +30,8 @@
           "id": "@@wiring(cloudflare-hyperdrive/stage:hyperdrive_id)@@"
         }
       ],
-      // Note attachments. The bucket is created by the component's pre-deploy
-      // step if it does not exist yet.
+      // Note attachments. The bucket must exist before the deploy (it was
+      // created once, by hand; see docs/runbook.md).
       "r2_buckets": [
         {
           "binding": "ATTACHMENTS",
@@ -60,8 +60,8 @@
           "id": "@@wiring(cloudflare-hyperdrive/prod:hyperdrive_id)@@"
         }
       ],
-      // Note attachments. The bucket is created by the component's pre-deploy
-      // step if it does not exist yet.
+      // Note attachments. The bucket must exist before the deploy (it was
+      // created once, by hand; see docs/runbook.md).
       "r2_buckets": [
         {
           "binding": "ATTACHMENTS",

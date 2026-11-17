@@ -11,7 +11,7 @@ departs from [design.md](design.md).
 | M1 schema | done | #15 |
 | M2 crm-worker and crm-facade | done | #16, #18 |
 | M3 frontend swap | done | #19, #20 |
-| M4 files and email | worker side built; not merged | |
+| M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21 |
 | M5 MCP server | | |
 | M6 product glue | | |
 | M7 prod and docs | | |
@@ -50,6 +50,8 @@ departs from [design.md](design.md).
   `signIn.spec`: an instance is no longer a single team.
 - Inviting a user from the CRM returns a placeholder row until they sign in
   (M3); upstream created the account at once.
+- The attachment buckets are created by hand, not by Terraform or a deploy
+  step (M4): the deploy token has no R2 permission.
 - No signed upload or download URLs (M4): files go through crm-worker with
   the session. No public, unauthenticated file route exists.
 - No Gravatar and no favicon.show (M4): only the domain's own favicon.

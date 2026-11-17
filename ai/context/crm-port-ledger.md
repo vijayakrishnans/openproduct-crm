@@ -8,11 +8,11 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 Phase A, CRM0, the multi-tenant profile (CRM-4), M0, the public listing, M1
 (the `crm` schema), M2 (`crm-worker` and the edge's `crm-facade`) and M3 (the
-web app on the Lumen API, with the ported e2e specs) have landed. M4 (CRM-9)
-is in two parts: the worker side (R2 attachments, favicons, inbound email)
-is built and tested and waits for its pull request; the web app side follows.
-Inbound email cannot go live until the owner provides a domain (WAITING.md).
-M5 onward has not started.
+web app on the Lumen API, with the ported e2e specs) have landed. M4 (CRM-9):
+attachments in R2 and favicons are deployed and verified on stage; the web
+app's attachment UI waits for its pull request; the inbound-email handler is
+deployed but receives nothing until the owner provides a domain
+(WAITING.md). M5 onward has not started.
 
 ## Inputs used
 
@@ -39,8 +39,8 @@ M5 onward has not started.
 | M0 import and attribution | CRM-3, CRM-5 | done | #12, #14 | `9be281f`, `a080b00` | CI green; crm-web answers on stage and prod |
 | M1 schema | CRM-6 | done | #15 | `8feacaa` | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser and on PGlite; the SQL isolation tests pass; the `db-migrate` lanes for stage and prod were green on the merge run (their log tail was not readable; M2's stage check is the proof the tables exist) |
 | M2 crm-worker and crm-facade | CRM-7 | done | #16, #18 | `afe8b8d`, `32da23e` | `tests/crm-worker`: 225 tests on PGlite, including the isolation matrix. On stage through api-edge, 2026-11-17: a member created and read a company, contact and deal, searched and loaded the dashboard; a member of a second org got `404` on seven routes of the first and `422` when referencing its company. Prod answers `401` without a session; nobody can sign in on prod yet (WAITING.md) |
-| M3 frontend swap | CRM-8 | done | #19, #20 | `1c90e81`, `475942e` | Ten ported specs pass in Chromium against the stage API, locally and in CI (`crm-web-e2e`, about 40 minutes there). A new org starts with the default deal stages (no setting stored) |
-| M4 files and email | CRM-9 | worker side built; not merged | | | `tests/crm-worker`: 271 tests, including file isolation across orgs and raw-message inbound email tests |
+| M3 frontend swap | CRM-8 | done | #19, #20 | `1c90e81`, `475942e` | Ten ported specs pass in Chromium against the stage API, locally and in CI (`crm-web-e2e`, about 13 minutes there), and the sign-in and onboarding specs pass against the deployed stage app. A new org starts with the default deal stages (no setting stored) |
+| M4 files and email | CRM-9 | attachments and favicons done; inbound email waits on a domain | #21, web side not merged | `a4e78ca` | On stage through api-edge, 2026-11-17: upload `201`, download returns the same bytes as an attachment, another org gets `404` by either route, no session `401`, the file is gone after its note is deleted, and a new company got `https://cloudflare.com/favicon.ico`. `attachments.spec.ts` passes in Chromium against stage. Inbound email: 16 handler tests; not live (WAITING.md) |
 | M5 MCP server | | not started | | | |
 | M6 product glue | | not started | | | |
 | M7 prod and docs | | not started | | | |
@@ -150,8 +150,12 @@ M5 onward has not started.
 - 2026-11-17: a file's path is relative to its organization, and the worker
   adds the organization prefix. A path cannot name another organization's
   file, so notes need no ownership check on paths.
-- 2026-11-17: the R2 bucket is `openproduct-crm-crm-attachments-<env>`,
-  created by crm-worker's pre-deploy step, not by Terraform.
+- 2026-11-17: the R2 buckets are `openproduct-crm-crm-attachments-stage`
+  and `-prod`. The deploy token has no R2 permission, so the pre-deploy step
+  that was meant to create them failed and the first deploy with them did
+  too (code 10085). With the owner's approval they were created through the
+  Cloudflare connection, and the failed lanes were re-run. A fresh account
+  needs them created by hand before crm-worker's first deploy.
 - 2026-11-17: favicons come from the domain's own `/favicon.ico` only.
   Upstream also asked Gravatar (with a hash of the contact's email) and
   favicon.show; those calls are dropped.

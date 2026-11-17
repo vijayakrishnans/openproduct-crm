@@ -1,6 +1,6 @@
 {
   "name": "@saas/crm-web",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "OpenProduct CRM web app (port of Atomic CRM, MIT): the CRM on the Lumen API, and with ?demo the in-browser demo.",
