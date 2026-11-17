@@ -35,6 +35,9 @@ test("user onboarding", async ({ page, menu, dismissToast }) => {
   await page.getByLabel("Company").click();
   await page.getByPlaceholder("Search").fill("Smith Corp");
   await page.getByText("Create Smith Corp").click();
+  // The company is created on the server before it is selected; against a
+  // remote API that takes a few seconds, and the form must not move on first.
+  await expect(page.getByLabel("Company")).toHaveText(/Smith Corp/);
   await page
     .getByRole("group", { name: "Email addresses" })
     .getByRole("textbox", { name: "Email" })

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node run.mjs",
+    "e2e": "node run.mjs",
     "lint": "eslint src"
   },
   "devDependencies": {

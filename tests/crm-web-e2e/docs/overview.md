@@ -25,10 +25,10 @@ The mobile variants of the specs are not ported.
 ## Running it
 
 ```bash
-pnpm --filter @saas/crm-web-e2e test                      # serves apps/crm-web locally, API = stage
+pnpm --filter @saas/crm-web-e2e e2e                      # serves apps/crm-web locally, API = stage
 PLAYWRIGHT_BASE_URL=https://openproduct-crm-crm-web-stage.<subdomain>.workers.dev \
-  pnpm --filter @saas/crm-web-e2e test                    # a deployed crm-web
-CRM_E2E_API_URL=http://localhost:8787 pnpm --filter @saas/crm-web-e2e test
+  pnpm --filter @saas/crm-web-e2e e2e                    # a deployed crm-web
+CRM_E2E_API_URL=http://localhost:8787 pnpm --filter @saas/crm-web-e2e e2e
 ```
 
 The API must return sign-in codes and invitation tokens inline (identity's
@@ -38,4 +38,4 @@ against prod.
 ## Gates
 
 - `pnpm exec turbo run build --filter=./` — typecheck
-- `pnpm exec turbo run test --filter=./` — the suite itself
+- `pnpm run e2e` — the suite itself. It is not a `test` script, so `pnpm test` at the root never reaches out to stage
