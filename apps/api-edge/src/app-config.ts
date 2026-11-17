@@ -11,6 +11,14 @@ export const WORKERS_DEV_SUBDOMAIN = "vijayakrishnan12994";
 /** Worker name prefix of the console delivery (per-env: `${prefix}-${env}`). */
 export const CONSOLE_WORKER_PREFIX = "openproduct-crm-web-console-next";
 
+/** Worker name prefix of the CRM web app (apps/crm-web). */
+export const CRM_WEB_WORKER_PREFIX = "openproduct-crm-crm-web";
+
+/** workers.dev origin of the CRM web app for a given environment name. */
+export function crmWebWorkersDevOrigin(environment: string): string {
+  return `https://${CRM_WEB_WORKER_PREFIX}-${environment}.${WORKERS_DEV_SUBDOMAIN}.workers.dev`;
+}
+
 /** workers.dev origin of the console for a given environment name. */
 export function consoleWorkersDevOrigin(environment: string): string {
   return `https://${CONSOLE_WORKER_PREFIX}-${environment}.${WORKERS_DEV_SUBDOMAIN}.workers.dev`;

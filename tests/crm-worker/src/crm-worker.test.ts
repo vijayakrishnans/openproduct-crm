@@ -312,6 +312,26 @@ describe("crm-worker", () => {
       expect(none.body.data.total).toBe(0);
     });
 
+    it("filters by array overlap", async () => {
+      const any = await h.call(viewer, "GET", `${BASE}/deals?${filter({ "categories@ov": ["services", "hardware"] })}`);
+      expect(any.body.data.items.map((d: any) => d.name)).toEqual(["Big deal"]);
+      const none = await h.call(viewer, "GET", `${BASE}/deals?${filter({ "categories@ov": ["hardware"] })}`);
+      expect(none.body.data.total).toBe(0);
+      const all = await h.call(viewer, "GET", `${BASE}/deals?${filter({ "categories@cs": ["services", "hardware"] })}`);
+      expect(all.body.data.total).toBe(0);
+    });
+
+    it("searches the small tables by substring", async () => {
+      const sales = await h.call(viewer, "GET", `${BASE}/sales?${filter({ q: "ben build" })}`);
+      expect(sales.body.data.items.map((s: any) => s.first_name)).toEqual(["Ben"]);
+      const byEmail = await h.call(viewer, "GET", `${BASE}/sales?${filter({ q: "OLIVIA@" })}`);
+      expect(byEmail.body.data.total).toBe(1);
+      const literal = await h.call(viewer, "GET", `${BASE}/sales?${filter({ q: "%" })}`);
+      expect(literal.body.data.total).toBe(0);
+      const tags = await h.call(viewer, "GET", `${BASE}/tags?${filter({ q: "vi" })}`);
+      expect(tags.body.data.items.map((t: any) => t.name)).toEqual(["vip"]);
+    });
+
     it.each([
       ["sort=password", "sort"],
       ["sort=email_jsonb", "sort"],

@@ -1,0 +1,27 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-8
+  title: "M3: the web app on the Lumen API"
+spec:
+  goal: crm-web runs on lumenDataProvider and lumenAuthProvider against api-edge, with Supabase removed from the browser, and Atomic's e2e specs (login adapted) pass on stage.
+  affects:
+    - apps/crm-web/**
+    - tests/crm-web-e2e/**
+    - apps/api-edge/src/cors.ts
+    - apps/api-edge/src/app-config.ts
+    - tests/api-edge/src/cors.test.ts
+    - apps/crm-worker/src/query.ts
+    - apps/crm-worker/src/resources.ts
+    - tests/crm-worker/**
+    - pnpm-lock.yaml
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-8.TaskContract.yaml
+  doneWhen:
+    - api-edge accepts browser calls from each environment's crm-web origin, and crm-worker answers the filters the UI sends
+    - crm-web signs in with a Lumen email code, picks or creates an organization, and reads and writes through /v1/organizations/:orgId/crm
+    - no Supabase client, key or URL is left in the web app
+    - Atomic's e2e specs, with the login adapted, pass against stage
+    - a new organization starts with the default deal stages
+  gates: []
