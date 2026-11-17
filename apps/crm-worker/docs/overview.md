@@ -23,6 +23,7 @@ All under `/v1/organizations/:orgId/crm`, forwarded by `api-edge`'s
 | `GET /search?q=&resources=&limit=` | global search |
 | `GET /dashboard` | counts and deal totals for the org |
 | `GET /sales/me` | the caller's CRM profile, created on first use |
+| `POST /mcp` | the organization's MCP server: one JSON-RPC message per request |
 | `POST /attachments?filename=` | upload a file (the raw body, at most 25 MB); answers its `path` |
 | `GET /attachments/:uuid/:name` | download a file, always as an attachment |
 
@@ -33,6 +34,21 @@ Resources: `companies`, `contacts`, `contact_notes`, `deals`, `deal_notes`,
 Filter keys are `field` or `field@operator`, with `eq`, `neq`, `gt`, `gte`,
 `lt`, `lte`, `like`, `ilike`, `in`, `is`/`isnot` (null) and `cs` (array
 contains); `q` is a full-text search of the resource.
+
+## MCP
+
+`POST /v1/organizations/:orgId/crm/mcp` is a Model Context Protocol server
+(Streamable HTTP, stateless, JSON responses; no server-sent stream). An
+assistant connects with a Lumen API key of the organization as its Bearer
+token. The key's role decides what it may do: `viewer` reads, `builder` and
+up also write.
+
+Tools: `search`, `list`, `get`, `dashboard` (read); `create_contact`,
+`update_contact`, `create_company`, `update_company`, `create_deal`,
+`update_deal`, `add_note`, `create_task`, `complete_task` (write). Each has a
+closed JSON Schema, checked before anything runs, and calls the same handler
+as the matching REST route inside the organization's transaction. There is no
+free-form SQL and no tool deletes or merges.
 
 ## Files
 

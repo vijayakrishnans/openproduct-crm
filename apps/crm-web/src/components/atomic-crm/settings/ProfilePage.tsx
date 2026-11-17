@@ -1,3 +1,4 @@
+import { mcpUrl } from "../providers/lumen/client";
 import { useMutation } from "@tanstack/react-query";
 import { Check, CircleX, Copy, Pencil, Save } from "lucide-react";
 import {
@@ -254,7 +255,7 @@ const ProfileForm = ({
           </CardContent>
         </Card>
       )}
-      {import.meta.env.VITE_MCP_URL && (<Card>
+      {mcpUrl() && (<Card>
         <CardContent>
           <div className="space-y-4 justify-between">
             <h2 className="text-xl font-semibold text-muted-foreground">
@@ -265,9 +266,11 @@ const ProfileForm = ({
             <p className="text-sm text-muted-foreground">
               {translate("crm.profile.mcp.description", {
                 _: "Use this URL to connect your AI assistant to your CRM data via the Model Context Protocol (MCP).",
-              })}
+              })}{" "}
+              It signs in with an API key of this organization, sent as a Bearer token: an admin creates one in the
+              console, under the organization's API keys. A key with the viewer role can only read.
             </p>
-            <CopyPaste value={import.meta.env.VITE_MCP_URL} />
+            <CopyPaste value={mcpUrl() ?? ""} />
           </div>
         </CardContent>
       </Card>)}

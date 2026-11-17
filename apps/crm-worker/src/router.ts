@@ -21,6 +21,7 @@ import {
 } from "./handlers.js";
 import { errorResponse, forbidden, methodNotAllowed, notFound, successResponse } from "./http.js";
 import { generateRequestId, parseOrgPublicId, parseRecordId } from "./ids.js";
+import { handleMcp } from "./mcp.js";
 import { RESOURCES, type ResourceDef } from "./resources.js";
 
 const REQUEST_ID_RE = /^[\w-]{1,128}$/;
@@ -39,6 +40,7 @@ type Operation =
   | { kind: "dashboard" }
   | { kind: "merge" }
   | { kind: "upload" }
+  | { kind: "mcp" }
   | { kind: "download"; path: string }
   | { kind: "list"; def: ResourceDef }
   | { kind: "create"; def: ResourceDef }
@@ -72,6 +74,8 @@ function matchOperation(method: string, rest: string): Match {
   if (more.length > 0) return "not_found";
 
   if (!second) {
+    // The MCP endpoint: one JSON-RPC message per POST. No server-sent stream.
+    if (first === "mcp") return method === "POST" ? { op: { kind: "mcp" }, action: READ } : "method_not_allowed";
     if (first === "search") return method === "GET" ? { op: { kind: "search" }, action: READ } : "method_not_allowed";
     if (first === "dashboard") return method === "GET" ? { op: { kind: "dashboard" }, action: READ } : "method_not_allowed";
     const def = RESOURCES.get(first);
@@ -142,6 +146,7 @@ async function run(op: Operation, ctx: Ctx, request: Request, url: URL): Promise
       return handleDashboard(ctx);
     case "merge":
       return handleMergeContacts(ctx, await readBody(request));
+    case "mcp":
     case "upload":
     case "download":
       // Served without a database transaction; see route().
@@ -203,48 +208,61 @@ export async function route(request: Request, env: Env, deps: RouteDeps = {}): P
         : await handleDownload(env.ATTACHMENTS, orgId, match.op.path, requestId);
     }
 
-    const db = deps.createDb ? deps.createDb(env) : env.PLATFORM_DB ? createSqlExecutor(env.PLATFORM_DB) : null;
-    if (!db) return errorResponse("internal_error", "Service unavailable", 503, requestId);
-
-    const afterCommit: (() => Promise<void>)[] = [];
     const fetcher: Fetch | undefined =
       deps.fetcher === null ? undefined : (deps.fetcher ?? ((input, init) => fetch(input, init)));
 
-    try {
-      const response = await withOrg(db, { orgId, subjectId: actor.subjectId }, async (tx) => {
-        const ctx: Ctx = {
-          tx,
-          scope: { orgId, subjectId: actor.subjectId },
-          actor,
-          isAdmin: access.isAdmin,
-          requestId,
-          bucket: env.ATTACHMENTS,
-          fetcher,
-          afterCommit,
-        };
-        const response = await run(match.op, ctx, request, url);
-        if (!response.ok) throw new Rollback(response);
-        return response;
-      });
-      // The records are gone for good; a file that fails to delete is only
-      // an orphan in the bucket, never a reason to fail the request.
-      for (const task of afterCommit) {
-        try {
-          await task();
-        } catch {
-          // eslint-disable-next-line no-console -- surfaced in Workers Logs
-          console.error(JSON.stringify({ level: "error", msg: "crm.attachment_cleanup_failed", requestId }));
+    /** Runs `work` in one transaction for this organization. A response that
+     *  is not a success rolls it back; file deletions wait for the commit. */
+    const transact = async (work: (ctx: Ctx) => Promise<Response>): Promise<Response> => {
+      const db = deps.createDb ? deps.createDb(env) : env.PLATFORM_DB ? createSqlExecutor(env.PLATFORM_DB) : null;
+      if (!db) return errorResponse("internal_error", "Service unavailable", 503, requestId);
+      const afterCommit: (() => Promise<void>)[] = [];
+      try {
+        const response = await withOrg(db, { orgId, subjectId: actor.subjectId }, async (tx) => {
+          const ctx: Ctx = {
+            tx,
+            scope: { orgId, subjectId: actor.subjectId },
+            actor,
+            isAdmin: access.isAdmin,
+            requestId,
+            bucket: env.ATTACHMENTS,
+            fetcher,
+            afterCommit,
+          };
+          const response = await work(ctx);
+          if (!response.ok) throw new Rollback(response);
+          return response;
+        });
+        // The records are gone for good; a file that fails to delete is only
+        // an orphan in the bucket, never a reason to fail the request.
+        for (const task of afterCommit) {
+          try {
+            await task();
+          } catch {
+            // eslint-disable-next-line no-console -- surfaced in Workers Logs
+            console.error(JSON.stringify({ level: "error", msg: "crm.attachment_cleanup_failed", requestId }));
+          }
         }
+        return response;
+      } catch (err) {
+        if (err instanceof Rollback) return err.response;
+        const clientError = clientErrorFor(sqlState(err), requestId);
+        if (clientError) return clientError;
+        throw err;
+      } finally {
+        await db.dispose();
       }
-      return response;
-    } catch (err) {
-      if (err instanceof Rollback) return err.response;
-      const clientError = clientErrorFor(sqlState(err), requestId);
-      if (clientError) return clientError;
-      throw err;
-    } finally {
-      await db.dispose();
+    };
+
+    if (match.op.kind === "mcp") {
+      return await handleMcp(request, {
+        transact,
+        canWrite: async () => (await authorize(env, actor, orgId, WRITE, requestId)).kind === "allowed",
+      });
     }
+
+    const op = match.op;
+    return await transact((ctx) => run(op, ctx, request, url));
   } catch {
     return errorResponse("internal_error", "An unexpected error occurred", 500, requestId);
   }

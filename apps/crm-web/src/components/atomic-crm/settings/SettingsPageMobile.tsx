@@ -1,3 +1,4 @@
+import { mcpUrl } from "../providers/lumen/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/components/admin/use-theme";
 import { ChevronRight, KeyRound } from "lucide-react";
@@ -562,8 +563,9 @@ const InboundEmailSection = () => {
 const McpServerSection = () => {
   const translate = useTranslate();
 
-  // Shown once there is an MCP server to connect to (M5).
-  if (!import.meta.env.VITE_MCP_URL) return null;
+  // Not in the demo: there is no API to connect to.
+  const url = mcpUrl();
+  if (!url) return null;
 
   return (
     <div>
@@ -577,7 +579,7 @@ const McpServerSection = () => {
       </p>
       <SettingsGroup>
         <CopyPasteRow
-          value={import.meta.env.VITE_MCP_URL}
+          value={url}
         />
       </SettingsGroup>
     </div>
