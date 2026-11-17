@@ -46,6 +46,10 @@
         {
           "binding": "POLICY_WORKER",
           "service": "openproduct-crm-policy-worker-stage"
+        },
+        {
+          "binding": "BILLING_WORKER",
+          "service": "openproduct-crm-billing-worker-stage"
         }
       ]
     },
@@ -76,6 +80,10 @@
         {
           "binding": "POLICY_WORKER",
           "service": "openproduct-crm-policy-worker-prod"
+        },
+        {
+          "binding": "BILLING_WORKER",
+          "service": "openproduct-crm-billing-worker-prod"
         }
       ]
     }

@@ -40,6 +40,7 @@ export const METRIC_SUGGESTIONS = [
   "bandwidth_gb",
   "storage_gb",
   "seats",
+  "crm_seats",
 ] as const;
 
 export interface UsageFormValues {

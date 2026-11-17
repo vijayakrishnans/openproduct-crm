@@ -29,6 +29,7 @@ spec:
         - mode: advisory
           when:
             triggerRef: github-pull-request
+    - component: billing-worker
     # Shared workspace packages this component BUNDLES. Declared so a change
     # to one marks this component changed and redeploys it — without the
     # edge, `orun plan --changed` keys on `path:` alone and a worker can run

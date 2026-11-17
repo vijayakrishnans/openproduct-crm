@@ -1,0 +1,25 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-11
+  title: "M6: product glue — events, seats, the plan's contact limit"
+spec:
+  goal: The CRM's activity reaches the audit log and webhooks, its seats reach metering, and the organization's plan limits its contacts.
+  affects:
+    - apps/crm-worker/**
+    - tests/crm-worker/**
+    - apps/billing-worker/src/router.ts
+    - apps/billing-worker/src/plan-catalog.ts
+    - apps/billing-worker/src/handlers/check-entitlement.ts
+    - apps/web-console-next/src/components/audit/audit-log.ts
+    - apps/web-console-next/src/components/usage/usage.ts
+    - WAITING.md
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-11.TaskContract.yaml
+  doneWhen:
+    - creating a contact or a note, and moving or winning a deal, appends an event with an audit entry in the same transaction, with ids only
+    - a person's first use of the CRM records one crm_seats usage record
+    - creating a contact beyond limit.crm_contacts answers 412, and 503 when billing does not answer
+    - on stage, the events show in the organization's audit log and a webhook subscription receives a delivery attempt
+  gates: []

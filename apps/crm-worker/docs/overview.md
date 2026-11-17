@@ -50,6 +50,23 @@ closed JSON Schema, checked before anything runs, and calls the same handler
 as the matching REST route inside the organization's transaction. There is no
 free-form SQL and no tool deletes or merges.
 
+## What the CRM tells the platform, and what the plan tells the CRM
+
+- **Events** → audit log and webhooks. `crm.contact.created`,
+  `crm.note.created`, `crm.deal.stage_changed` and `crm.deal.won` are
+  appended to the shared event log in the same transaction as the write
+  (source `crm-worker`, audit category `crm`). They show in the console's
+  audit page, and webhooks-worker delivers them to subscriptions for the
+  exact type, `crm.deal.*`-style prefixes, or `*`. Payloads carry ids, never
+  names, emails or note text.
+- **Seats** → metering. The first time a person uses an organization's CRM,
+  one `crm_seats` usage record is written (idempotent per person). API keys
+  are not seats.
+- **Contact limit** ← billing. Creating a contact asks billing-worker for
+  `limit.crm_contacts` (free 500, pro 10 000, business 100 000, enterprise
+  unlimited; 500 when an organization has no plan rows). At the limit the
+  answer is `412 precondition_failed`; if billing does not answer, `503`.
+
 ## Files
 
 Note attachments live in R2 (`ATTACHMENTS`). A file's path is relative to its
@@ -80,6 +97,7 @@ nothing until Email Routing sends a domain's mail to this Worker.
 
 - **membership-worker** — Cloudflare Worker for the Membership org runtime
 - **policy-worker** — Cloudflare Worker for policy authorization decisions
+- **billing-worker** — Cloudflare Worker for the Billing API surface (private, service-binding only)
 
 ## Depended on by
 

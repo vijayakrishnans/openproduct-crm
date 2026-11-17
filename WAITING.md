@@ -45,7 +45,9 @@ checks for before it carries on.
 
 ## Coming up (not needed yet)
 
-- **M6 billing:** a Polar connection for plan gating.
+- **Paid plans:** a Polar connection, to sell plans. Not needed for the CRM's
+  plan limit (M6): entitlement checks read the plan catalog in the database,
+  and every organization starts on the free tier.
 
 ## Done
 
