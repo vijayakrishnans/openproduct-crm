@@ -231,14 +231,19 @@ describe("crm-worker", () => {
     });
 
     it("keeps notes and tasks with their parents, and touches last_seen", async () => {
+      const file = await h.upload(owner, `${BASE}/attachments?filename=quote.pdf`, "%PDF-1.7 quote", "application/pdf");
+      expect(file.status).toBe(201);
       const note = await h.call(owner, "POST", `${BASE}/contact_notes`, {
         contact_id: ids["thomas"],
         text: "Called about the renewal",
         date: "2026-06-01T10:00:00.000Z",
-        attachments: [{ title: "quote.pdf", path: "x/quote.pdf" }],
+        attachments: [{ ...file.body.data, src: "blob:http://localhost/123", rawFile: {} }],
       });
       expect(note.status).toBe(201);
-      expect(note.body.data.attachments).toEqual([{ title: "quote.pdf", path: "x/quote.pdf" }]);
+      // Only what describes the file is kept; what the browser added is not
+      expect(note.body.data.attachments).toEqual([
+        { path: file.body.data.path, title: "quote.pdf", type: "application/pdf", size: 14 },
+      ]);
       ids["note"] = note.body.data.id;
 
       const contact = await h.call(owner, "GET", `${BASE}/contacts/${ids["thomas"]}`);

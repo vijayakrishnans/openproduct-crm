@@ -18,6 +18,20 @@ checks for before it carries on.
 - **Unblock signal:** the domain is listed as verified for sending in the
   Cloudflare account, and the owner has named the address.
 
+### A domain for inbound email (blocks M4's inbound-email check on stage and prod)
+
+- **Why:** crm-worker turns an email sent to an organization's inbound address
+  into notes (M4). The code is deployed and tested, but mail only reaches it
+  through Cloudflare Email Routing, which needs a domain on this Cloudflare
+  account. It can be the same domain as the sending domain above.
+- **Steps:** add the domain to the Cloudflare account, enable Email Routing
+  on it (Email → Email Routing), and say which subdomains to use for stage and
+  prod. The routing rule itself is three clicks, in
+  `apps/crm-worker/docs/runbook.md`; say if the agent should set
+  `VITE_INBOUND_EMAIL` so the profile page shows each organization's address.
+- **Unblock signal:** the domain shows Email Routing as enabled in the
+  Cloudflare account, and the owner has named the subdomains.
+
 ### Move the repository to the OpenProduct GitHub org (optional)
 
 - **Why:** the brief named `openproduct/openproduct-crm`; the build's GitHub
@@ -31,8 +45,6 @@ checks for before it carries on.
 
 ## Coming up (not needed yet)
 
-- **M4 inbound email:** a domain on Cloudflare with Email Routing enabled, to
-  give each org an inbound address.
 - **M6 billing:** a Polar connection for plan gating.
 
 ## Done

@@ -29,6 +29,8 @@ function allRoutes(): RouteCase[] {
     { method: "GET", path: "/search?q=secret" },
     { method: "GET", path: "/dashboard" },
     { method: "POST", path: "/contacts/merge", body: { loserId: ":contacts2", winnerId: ":contacts" } },
+    { method: "POST", path: "/attachments?filename=intruder.txt", body: { any: "bytes" } },
+    { method: "GET", path: "/attachments/:file" },
   ];
   for (const def of RESOURCES.values()) {
     routes.push({ method: "GET", path: `/${def.name}` });
@@ -48,6 +50,8 @@ describe("cross-org isolation matrix", () => {
   /** A real id of org A per resource (base table name). */
   const idsA: Record<string, number> = {};
   let snapshotA = "";
+  /** The path of a file org A uploaded and attached to a note. */
+  let fileA = "";
 
   async function snapshot(): Promise<string> {
     const res = await h.pg.query<{ doc: unknown }>(
@@ -69,7 +73,7 @@ describe("cross-org isolation matrix", () => {
   function resolvePath(c: RouteCase): { path: string; body?: Record<string, unknown> } {
     const resource = c.path.split("/")[1]!.split("?")[0]!;
     const base = resource.replace(/_summary$/, "");
-    const path = c.path.replace(":id", String(idsA[base]));
+    const path = c.path.replace(":id", String(idsA[base])).replace(":file", fileA);
     const body = c.body
       ? Object.fromEntries(
           Object.entries(c.body).map(([k, v]) => [
@@ -106,7 +110,14 @@ describe("cross-org isolation matrix", () => {
       company_id: idsA["companies"],
       contact_ids: [idsA["contacts"]],
     });
-    idsA["contact_notes"] = await post("/contact_notes", { contact_id: idsA["contacts"], text: "secret note" });
+    const upload = await h.upload(alice, `${A}/attachments?filename=secret-plan.txt`, "secret contents", "text/plain");
+    expect(upload.status).toBe(201);
+    fileA = upload.body.data.path;
+    idsA["contact_notes"] = await post("/contact_notes", {
+      contact_id: idsA["contacts"],
+      text: "secret note",
+      attachments: [upload.body.data],
+    });
     idsA["deal_notes"] = await post("/deal_notes", { deal_id: idsA["deals"], text: "secret deal note" });
     idsA["tasks"] = await post("/tasks", { contact_id: idsA["contacts"], text: "secret task" });
 
@@ -144,7 +155,7 @@ describe("cross-org isolation matrix", () => {
   describe("org B's member, on org B's routes, using org A's ids", () => {
     it.each(
       routes
-        .filter((r) => r.path.includes(":id") || r.path === "/contacts/merge")
+        .filter((r) => r.path.includes(":id") || r.path.includes(":file") || r.path === "/contacts/merge")
         .map((r) => [`${r.method} ${r.path}`, r] as const),
     )("%s → 404", async (_name, c) => {
       const { path, body } = resolvePath(c);
@@ -153,7 +164,7 @@ describe("cross-org isolation matrix", () => {
       expect(JSON.stringify(res.body)).not.toMatch(/secret|agent@a\.test/i);
     });
 
-    it.each(routes.filter((r) => r.method === "GET" && !r.path.includes(":id")).map((r) => [r.path, r] as const))(
+    it.each(routes.filter((r) => r.method === "GET" && !r.path.includes(":id") && !r.path.includes(":file")).map((r) => [r.path, r] as const))(
       "GET %s shows nothing of org A",
       async (_name, c) => {
         const res = await h.call(bob, "GET", `${B}${c.path}`);
@@ -189,6 +200,7 @@ describe("cross-org isolation matrix", () => {
 
   it("left org A's records exactly as they were", async () => {
     expect(await snapshot()).toBe(snapshotA);
+    expect([...h.bucket.objects.keys()].filter((key) => key.startsWith(ORG_A))).toEqual([`${ORG_A}/${fileA}`]);
   });
 
   it("answers 404 for an org id that is not one", async () => {

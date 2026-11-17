@@ -1,8 +1,10 @@
 import { createSqlExecutor } from "@saas/db/hyperdrive";
 import type { Uuid } from "@saas/db/ids";
+import { handleDownload, handleUpload } from "./attachments.js";
 import { authorize, type Actor, type CrmAction } from "./authz.js";
 import { sqlState, withOrg, type Db } from "./db.js";
 import type { Env } from "./env.js";
+import type { Fetch } from "./favicons.js";
 import {
   clientErrorFor,
   handleCreate,
@@ -27,6 +29,8 @@ const CRM_RE = /^\/v1\/organizations\/([^/]+)\/crm(?:\/(.*))?$/;
 export interface RouteDeps {
   /** Tests hand in a database; production opens one per request from Hyperdrive. */
   createDb?: (env: Env) => Db | null;
+  /** Outbound fetch for favicons; tests hand in a fake, or null for none. */
+  fetcher?: Fetch | null;
 }
 
 type Operation =
@@ -34,6 +38,8 @@ type Operation =
   | { kind: "search" }
   | { kind: "dashboard" }
   | { kind: "merge" }
+  | { kind: "upload" }
+  | { kind: "download"; path: string }
   | { kind: "list"; def: ResourceDef }
   | { kind: "create"; def: ResourceDef }
   | { kind: "get"; def: ResourceDef; id: string }
@@ -48,7 +54,22 @@ const WRITE: CrmAction = "organization.crm.write";
 function matchOperation(method: string, rest: string): Match {
   const segments = rest.split("/").filter((s) => s.length > 0);
   const [first, second, ...more] = segments;
-  if (!first || more.length > 0) return "not_found";
+  if (!first) return "not_found";
+
+  // /attachments (upload) and /attachments/<uuid>/<file name> (download)
+  if (first === "attachments") {
+    if (!second) return method === "POST" ? { op: { kind: "upload" }, action: WRITE } : "method_not_allowed";
+    if (more.length !== 1) return "not_found";
+    let name: string;
+    try {
+      name = decodeURIComponent(more[0]!);
+    } catch {
+      return "not_found";
+    }
+    return method === "GET" ? { op: { kind: "download", path: `${second}/${name}` }, action: READ } : "method_not_allowed";
+  }
+
+  if (more.length > 0) return "not_found";
 
   if (!second) {
     if (first === "search") return method === "GET" ? { op: { kind: "search" }, action: READ } : "method_not_allowed";
@@ -102,6 +123,7 @@ function health(env: Env, requestId: string): Response {
       timestamp: new Date().toISOString(),
       checks: {
         database: { configured: !!env.PLATFORM_DB },
+        attachments: { configured: !!env.ATTACHMENTS },
         membership: { configured: !!env.MEMBERSHIP_WORKER },
         policy: { configured: !!env.POLICY_WORKER },
       },
@@ -120,6 +142,10 @@ async function run(op: Operation, ctx: Ctx, request: Request, url: URL): Promise
       return handleDashboard(ctx);
     case "merge":
       return handleMergeContacts(ctx, await readBody(request));
+    case "upload":
+    case "download":
+      // Served without a database transaction; see route().
+      return notFound(ctx.requestId);
     case "list":
       return handleList(ctx, op.def, url.searchParams);
     case "create":
@@ -168,16 +194,49 @@ export async function route(request: Request, env: Env, deps: RouteDeps = {}): P
     if (match === "method_not_allowed") return methodNotAllowed(requestId);
     if (access.kind === "denied") return forbidden(requestId);
 
+    // Files go straight to and from R2; the path a client gives is always
+    // read under its own organization's prefix.
+    if (match.op.kind === "upload" || match.op.kind === "download") {
+      if (!env.ATTACHMENTS) return errorResponse("internal_error", "Service unavailable", 503, requestId);
+      return match.op.kind === "upload"
+        ? await handleUpload(request, env.ATTACHMENTS, orgId, requestId)
+        : await handleDownload(env.ATTACHMENTS, orgId, match.op.path, requestId);
+    }
+
     const db = deps.createDb ? deps.createDb(env) : env.PLATFORM_DB ? createSqlExecutor(env.PLATFORM_DB) : null;
     if (!db) return errorResponse("internal_error", "Service unavailable", 503, requestId);
 
+    const afterCommit: (() => Promise<void>)[] = [];
+    const fetcher: Fetch | undefined =
+      deps.fetcher === null ? undefined : (deps.fetcher ?? ((input, init) => fetch(input, init)));
+
     try {
-      return await withOrg(db, { orgId, subjectId: actor.subjectId }, async (tx) => {
-        const ctx: Ctx = { tx, scope: { orgId, subjectId: actor.subjectId }, actor, isAdmin: access.isAdmin, requestId };
+      const response = await withOrg(db, { orgId, subjectId: actor.subjectId }, async (tx) => {
+        const ctx: Ctx = {
+          tx,
+          scope: { orgId, subjectId: actor.subjectId },
+          actor,
+          isAdmin: access.isAdmin,
+          requestId,
+          bucket: env.ATTACHMENTS,
+          fetcher,
+          afterCommit,
+        };
         const response = await run(match.op, ctx, request, url);
         if (!response.ok) throw new Rollback(response);
         return response;
       });
+      // The records are gone for good; a file that fails to delete is only
+      // an orphan in the bucket, never a reason to fail the request.
+      for (const task of afterCommit) {
+        try {
+          await task();
+        } catch {
+          // eslint-disable-next-line no-console -- surfaced in Workers Logs
+          console.error(JSON.stringify({ level: "error", msg: "crm.attachment_cleanup_failed", requestId }));
+        }
+      }
+      return response;
     } catch (err) {
       if (err instanceof Rollback) return err.response;
       const clientError = clientErrorFor(sqlState(err), requestId);
