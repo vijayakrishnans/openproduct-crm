@@ -11,8 +11,8 @@ departs from [design.md](design.md).
 | M1 schema | done | #15 |
 | M2 crm-worker and crm-facade | done | #16, #18 |
 | M3 frontend swap | done | #19, #20 |
-| M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21 |
-| M5 MCP server | | |
+| M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21, #23 |
+| M5 MCP server | built; not merged | |
 | M6 product glue | | |
 | M7 prod and docs | | |
 
@@ -59,3 +59,5 @@ departs from [design.md](design.md).
   provider's webhook secret instead.
 - No notification emails yet (M4): upstream sends none besides auth mail,
   which identity-worker already owns.
+- MCP is served by crm-worker at `/crm/mcp`, not by a separate Worker (M5),
+  and has thirteen task-shaped tools rather than one per table operation.

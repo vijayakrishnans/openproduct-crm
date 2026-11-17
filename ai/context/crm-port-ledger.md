@@ -7,12 +7,12 @@ product. Read it first on every resume, then `gh pr list --state all` and
 ## Summary (2026-11-17)
 
 Phase A, CRM0, the multi-tenant profile (CRM-4), M0, the public listing, M1
-(the `crm` schema), M2 (`crm-worker` and the edge's `crm-facade`) and M3 (the
-web app on the Lumen API, with the ported e2e specs) have landed. M4 (CRM-9):
-attachments in R2 and favicons are deployed and verified on stage; the web
-app's attachment UI waits for its pull request; the inbound-email handler is
-deployed but receives nothing until the owner provides a domain
-(WAITING.md). M5 onward has not started.
+(the `crm` schema), M2 (`crm-worker` and the edge's `crm-facade`), M3 (the
+web app on the Lumen API, with the ported e2e specs) and M4's attachments
+and favicons have landed and are verified on stage. M4's inbound-email
+handler is deployed but receives nothing until the owner provides a domain
+(WAITING.md). M5 (CRM-10, the MCP server) is built and tested and waits for
+its pull request. M6 and M7 have not landed.
 
 ## Inputs used
 
@@ -40,8 +40,8 @@ deployed but receives nothing until the owner provides a domain
 | M1 schema | CRM-6 | done | #15 | `8feacaa` | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser and on PGlite; the SQL isolation tests pass; the `db-migrate` lanes for stage and prod were green on the merge run (their log tail was not readable; M2's stage check is the proof the tables exist) |
 | M2 crm-worker and crm-facade | CRM-7 | done | #16, #18 | `afe8b8d`, `32da23e` | `tests/crm-worker`: 225 tests on PGlite, including the isolation matrix. On stage through api-edge, 2026-11-17: a member created and read a company, contact and deal, searched and loaded the dashboard; a member of a second org got `404` on seven routes of the first and `422` when referencing its company. Prod answers `401` without a session; nobody can sign in on prod yet (WAITING.md) |
 | M3 frontend swap | CRM-8 | done | #19, #20 | `1c90e81`, `475942e` | Ten ported specs pass in Chromium against the stage API, locally and in CI (`crm-web-e2e`, about 13 minutes there), and the sign-in and onboarding specs pass against the deployed stage app. A new org starts with the default deal stages (no setting stored) |
-| M4 files and email | CRM-9 | attachments and favicons done; inbound email waits on a domain | #21, web side not merged | `a4e78ca` | On stage through api-edge, 2026-11-17: upload `201`, download returns the same bytes as an attachment, another org gets `404` by either route, no session `401`, the file is gone after its note is deleted, and a new company got `https://cloudflare.com/favicon.ico`. `attachments.spec.ts` passes in Chromium against stage. Inbound email: 16 handler tests; not live (WAITING.md) |
-| M5 MCP server | | not started | | | |
+| M4 files and email | CRM-9 | attachments and favicons done; inbound email waits on a domain | #21, #23 | `a4e78ca`, `4e2c51c` | On stage through api-edge, 2026-11-17: upload `201`, download returns the same bytes as an attachment, another org gets `404` by either route, no session `401`, the file is gone after its note is deleted, and a new company got `https://cloudflare.com/favicon.ico`. `attachments.spec.ts` passes in Chromium against stage. Inbound email: 16 handler tests; not live (WAITING.md) |
+| M5 MCP server | CRM-10 | built; not merged | | | `tests/crm-worker` `mcp.test.ts`: 14 tests (protocol, every tool, schema refusals, a read-only key, another organization's key). On stage, API keys already work on the CRM REST routes: own org `200`, another org `404` |
 | M6 product glue | | not started | | | |
 | M7 prod and docs | | not started | | | |
 
@@ -163,6 +163,15 @@ deployed but receives nothing until the owner provides a domain
   (`org_…@<inbound domain>`), so no address table is needed. The id is not a
   secret: a message is accepted only with a DMARC pass and a From address
   that is an active member's.
+
+- 2026-11-17: the MCP server is hand-written JSON-RPC over one POST route
+  (no SDK, no session, no server-sent stream), so it runs inside crm-worker
+  and each tool call is one organization transaction.
+- 2026-11-17: MCP has no delete or merge tool and no free-form SQL. An
+  assistant can read, create and update; removing records stays a human act.
+- 2026-11-17: an MCP client signs in with a Lumen API key. Its role decides:
+  `viewer` reads, `builder` and up write. A key of another organization gets
+  `404` from the endpoint.
 
 ## Open risks
 
