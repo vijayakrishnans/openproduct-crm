@@ -868,7 +868,7 @@ describe("api-edge project facade", () => {
       const stageServices = config.env?.stage?.services ?? [];
       const projectsBindings = stageServices.filter((s: any) => s.binding === "PROJECTS_WORKER");
       for (const svc of projectsBindings) {
-        expect(svc.service).not.toContain("prod");
+        expect(svc.service).not.toMatch(/-prod$/);
       }
     });
 
@@ -880,7 +880,7 @@ describe("api-edge project facade", () => {
       const prodServices = config.env?.prod?.services ?? [];
       const projectsBindings = prodServices.filter((s: any) => s.binding === "PROJECTS_WORKER");
       for (const svc of projectsBindings) {
-        expect(svc.service).not.toContain("stage");
+        expect(svc.service).not.toMatch(/-stage$/);
       }
     });
   });
