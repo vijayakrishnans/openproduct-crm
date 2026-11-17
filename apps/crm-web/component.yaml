@@ -35,8 +35,9 @@ spec:
     turboFilter: "@saas/crm-web"
     wranglerConfig: wrangler.jsonc
 
-    # M0 ships the in-browser demo build (fakerest provider, fake data). The
-    # Worker only hands requests to the ASSETS binding; M3 adds sessions.
+    # One build: the CRM on the Lumen API, and with ?demo the in-browser demo
+    # (fakerest provider, fake data). The Worker only hands requests to the
+    # ASSETS binding; the browser calls api-edge directly.
     workerEntrypoint: worker/index.js
     assetsDir: dist
 

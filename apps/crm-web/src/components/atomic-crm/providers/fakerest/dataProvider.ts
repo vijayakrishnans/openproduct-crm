@@ -199,7 +199,10 @@ export const createDataProvider = ({
         );
         const { page, perPage } = pagination;
         const start = (page - 1) * perPage;
-        return { data: all.slice(start, start + perPage), total: all.length };
+        return {
+          data: all.slice(start, start + perPage) as any[],
+          total: all.length,
+        };
       }
       return baseDataProvider.getList(resource, params);
     },

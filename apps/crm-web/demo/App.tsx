@@ -3,6 +3,7 @@ import {
   authProvider,
   dataProvider,
 } from "@/components/atomic-crm/providers/fakerest";
+import { StartPage } from "@/components/atomic-crm/login/StartPage";
 import { memoryStore } from "ra-core";
 
 // The public demo: the whole CRM in the browser on generated, fake data.
@@ -13,6 +14,7 @@ const App = () => (
     dataProvider={dataProvider}
     authProvider={authProvider}
     store={memoryStore()}
+    loginPage={StartPage}
     disableTelemetry
   />
 );

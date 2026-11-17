@@ -1,0 +1,144 @@
+// The HTTP client for the Lumen API (api-edge). The browser talks to nothing
+// else: no database, no storage, no third party.
+import { HttpError } from "ra-core";
+
+const SESSION_KEY = "openproduct-crm.session";
+
+export type Session = {
+  token: string;
+  expiresAt: string;
+  email: string;
+  /** Public id (org_…) of the organization the CRM is showing. */
+  orgId?: string;
+  orgSlug?: string;
+  orgName?: string;
+};
+
+export type Organization = { id: string; name: string; slug: string };
+
+/**
+ * Where api-edge lives. On a deployed crm-web the Worker is named like
+ * api-edge's with `crm-web` in its place, on the same workers.dev subdomain,
+ * so the URL follows from the page's own host. VITE_API_URL overrides it
+ * (local development, a custom domain).
+ */
+export function apiBaseUrl(): string {
+  const explicit = import.meta.env.VITE_API_URL as string | undefined;
+  if (explicit) return explicit.replace(/\/+$/, "");
+  const { protocol, hostname } = window.location;
+  if (hostname.includes("-crm-web-")) {
+    return `${protocol}//${hostname.replace("-crm-web-", "-api-edge-")}`;
+  }
+  return "http://localhost:8787";
+}
+
+function storage(): Storage | null {
+  try {
+    return typeof window !== "undefined" ? window.localStorage : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getSession(): Session | null {
+  const raw = storage()?.getItem(SESSION_KEY);
+  if (!raw) return null;
+  try {
+    const session = JSON.parse(raw) as Session;
+    if (!session.token || new Date(session.expiresAt).getTime() <= Date.now()) {
+      clearSession();
+      return null;
+    }
+    return session;
+  } catch {
+    clearSession();
+    return null;
+  }
+}
+
+export function setSession(session: Session): void {
+  storage()?.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+export function clearSession(): void {
+  storage()?.removeItem(SESSION_KEY);
+}
+
+type ApiOptions = {
+  body?: unknown;
+  query?: Record<string, string | number | undefined>;
+  /** Send no session even if there is one (the sign-in calls). */
+  anonymous?: boolean;
+  signal?: AbortSignal;
+};
+
+const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/** Calls api-edge and unwraps its `{ data, meta }` envelope. Failures throw
+ *  an HttpError carrying the status, so authProvider.checkError can end an
+ *  expired session. */
+export async function api<T = any>(
+  method: string,
+  path: string,
+  options: ApiOptions = {},
+): Promise<T> {
+  const url = new URL(apiBaseUrl() + path);
+  for (const [key, value] of Object.entries(options.query ?? {})) {
+    if (value !== undefined) url.searchParams.set(key, String(value));
+  }
+
+  const headers: Record<string, string> = {};
+  const session = options.anonymous ? null : getSession();
+  if (session) headers["authorization"] = `Bearer ${session.token}`;
+  if (options.body !== undefined) headers["content-type"] = "application/json";
+  if (WRITE_METHODS.has(method)) headers["idempotency-key"] = crypto.randomUUID();
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method,
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: options.signal,
+    });
+  } catch (error) {
+    if ((error as Error)?.name === "AbortError") throw error;
+    throw new HttpError("Could not reach the server", 0);
+  }
+
+  let payload: any = null;
+  try {
+    payload = await response.json();
+  } catch {
+    // An empty or non-JSON body; the status decides below.
+  }
+
+  if (!response.ok) {
+    const error = payload?.error ?? {};
+    const fields = error.details?.fields as Record<string, string[]> | undefined;
+    const fieldMessage = fields
+      ? Object.entries(fields)
+          .map(([field, messages]) => (field === "_" ? messages.join(", ") : `${field} ${messages.join(", ")}`))
+          .join("; ")
+      : "";
+    const message = [error.message ?? response.statusText ?? "Request failed", fieldMessage]
+      .filter(Boolean)
+      .join(": ");
+    throw new HttpError(message, response.status, payload);
+  }
+
+  return (payload?.data ?? payload) as T;
+}
+
+/** The base path of the current org's CRM routes. */
+export function crmPath(): string {
+  const orgId = getSession()?.orgId;
+  if (!orgId) throw new HttpError("No organization selected", 401);
+  return `/v1/organizations/${orgId}/crm`;
+}
+
+export function orgPath(): string {
+  const orgId = getSession()?.orgId;
+  if (!orgId) throw new HttpError("No organization selected", 401);
+  return `/v1/organizations/${orgId}`;
+}

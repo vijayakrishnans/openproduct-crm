@@ -1,22 +1,18 @@
-import { StrictMode } from "react";
+import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.tsx";
 
-// After a new deploy, the service worker may replace its pre-cache while
-// the page still holds old chunk references. A reload picks up the new
-// HTML + new SW cache. A sessionStorage guard prevents infinite loops.
-// See https://vite.dev/guide/build.html#load-error-handling
-window.addEventListener("vite:preloadError", () => {
-  const key = "chunk-reload";
-  if (!sessionStorage.getItem(key)) {
-    sessionStorage.setItem(key, "1");
-    window.location.reload();
-  }
-});
+// One build, two apps. `/?demo` runs the whole CRM in the browser on
+// generated, fake data (no account, no backend); anything else is the real
+// CRM on the Lumen API. Each is loaded on demand, so neither pays for the
+// other.
+const isDemo = new URLSearchParams(window.location.search).has("demo");
+const App = lazy(() => (isDemo ? import("../demo/App.tsx") : import("./App.tsx")));
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <Suspense fallback={null}>
+      <App />
+    </Suspense>
   </StrictMode>,
 );

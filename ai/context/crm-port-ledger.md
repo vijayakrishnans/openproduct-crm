@@ -7,9 +7,11 @@ product. Read it first on every resume, then `gh pr list --state all` and
 ## Summary (2026-11-17)
 
 Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3, CRM-5), the
-public listing (CRM-2) and M1 (CRM-6, the `crm` schema) have landed. M2
-(CRM-7, `crm-worker` and the edge's `crm-facade`) is built and tested
-locally and waits for its pull request to merge; M3 onward has not started.
+public listing (CRM-2), M1 (CRM-6, the `crm` schema) and M2 (CRM-7,
+`crm-worker` and the edge's `crm-facade`) have landed and are verified on
+stage. M3 (CRM-8) is in two parts: the server side is merged; the web app on
+the Lumen API, with the ported e2e specs, waits for its pull request to
+merge. M4 onward has not started.
 
 ## Inputs used
 
@@ -35,8 +37,8 @@ locally and waits for its pull request to merge; M3 onward has not started.
 | CRM-A public listing | CRM-2 | done | #13 | `e6760bb` | description, homepage, topics, secret scanning, push protection, private vulnerability reporting and `main` protection (PR + `plan` check) set 2026-11-17 |
 | M0 import and attribution | CRM-3, CRM-5 | done | #12, #14 | `9be281f`, `a080b00` | CI green; crm-web answers on stage and prod |
 | M1 schema | CRM-6 | done | #15 | `8feacaa` | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser and on PGlite; the SQL isolation tests pass; the `db-migrate` lanes for stage and prod were green on the merge run (their log tail was not readable; M2's stage check is the proof the tables exist) |
-| M2 crm-worker and crm-facade | CRM-7 | built; not merged | | | `tests/crm-worker`: 220 tests on PGlite, including the isolation matrix (`404` for another org on every route, nothing changed); `tests/api-edge` crm-facade tests pass |
-| M3 frontend swap | | not started | | | |
+| M2 crm-worker and crm-facade | CRM-7 | done | #16, #18 | `afe8b8d`, `32da23e` | `tests/crm-worker`: 225 tests on PGlite, including the isolation matrix. On stage through api-edge, 2026-11-17: a member created and read a company, contact and deal, searched and loaded the dashboard; a member of a second org got `404` on seven routes of the first and `422` when referencing its company. Prod answers `401` without a session; nobody can sign in on prod yet (WAITING.md) |
+| M3 frontend swap | CRM-8 | server side merged (#19, `1c90e81`); web app built, not merged | | | The ported specs run in Chromium against the stage API, serving the app locally |
 | M4 files and email | | not started | | | |
 | M5 MCP server | | not started | | | |
 | M6 product glue | | not started | | | |
@@ -116,6 +118,29 @@ locally and waits for its pull request to merge; M3 onward has not started.
 - 2026-11-17: `tests/crm-worker` subscribes with the `verify` profile so its
   tests run in CI. Every other test component uses `quick-check`, which runs
   no tests, including `tests/db` and its M1 isolation tests (run locally).
+
+- 2026-11-17: crm-worker binds text parameters only and casts in SQL. The
+  driver on Workers (postgres.js) re-encodes a parameter by its inferred
+  type, which broke creates on stage; PGlite does not, so the harness now
+  rejects non-text parameters.
+- 2026-11-17: the browser calls api-edge directly, from each environment's
+  crm-web origin (CORS), finding the API from its own host name. The crm-web
+  Worker proxies nothing.
+- 2026-11-17: sign-in is Lumen's email code; there are no passwords, so
+  upstream's sign-up, password reset and OAuth consent pages are removed.
+  After the code, a user with one organization goes straight in; otherwise
+  they choose or create one.
+- 2026-11-17: one build serves the CRM and, with `?demo`, the in-browser
+  demo.
+- 2026-11-17: the CRM configuration (stages, categories, logos, title) is
+  one org setting in config-worker, key `crm.configuration`. A new org has
+  none and gets the app's defaults, including the default deal stages.
+- 2026-11-17: adding a user from the CRM sends a Lumen invitation; their
+  profile appears when they first sign in.
+- 2026-11-17: until M4, note attachments are refused, and avatars and logos
+  are stored inline as data URLs.
+- 2026-11-17: the e2e specs give each test its own user and organization
+  through the public API instead of resetting a shared database.
 
 ## Open risks
 
