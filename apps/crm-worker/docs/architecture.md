@@ -7,8 +7,8 @@ from `apps/crm-worker`, deployed per environment by its CI lane.
 
 - **Service bindings** → `membership-worker`, `policy-worker` —
   in-process RPC to sibling Workers; no public hops between contexts.
-- **R2** `ATTACHMENTS` → `openproduct-crm-crm-attachments-<env>`, created by the
-  component's pre-deploy step when missing. Keys are
+- **R2** `ATTACHMENTS` → `openproduct-crm-crm-attachments-<env>`, created once by
+  hand (the deploy token has no R2 permission). Keys are
   `<org uuid>/<file uuid>/<file name>`.
 - **Hyperdrive** `PLATFORM_DB` → the Supabase Postgres, schema `crm`
   (migration `200_crm_core`).

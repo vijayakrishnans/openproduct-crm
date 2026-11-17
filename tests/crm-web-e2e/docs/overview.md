@@ -15,6 +15,7 @@ A verify-only component. Nothing deploys from here.
 | `globalSearch.spec.ts` | same name | an old contact is found despite many newer notes mentioning it |
 | `bulkContactTags.spec.ts` | same name | one tag added to several contacts |
 | `createContactFromDeal.spec.ts` | same name | a contact created from inside the deal form |
+| `attachments.spec.ts` | new (M4) | a file attached to a note downloads intact, another organization gets `404` for it, and it is deleted with the note |
 | `adminAccountManagerFilter.spec.ts` | same name | an admin filters contacts by teammate; a non-admin gets no such list |
 
 Upstream reset one shared database before every test, through Supabase's

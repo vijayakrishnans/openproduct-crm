@@ -29,6 +29,7 @@ import type {
   SignUpData,
 } from "../../types";
 import type { ConfigurationContextValue } from "../../root/ConfigurationContext";
+import { ATTACHMENT_SCHEME, isStoredAttachment, uploadAttachment } from "./attachments";
 import { api, crmPath, orgPath } from "./client";
 import { translateFilter } from "./filters";
 
@@ -48,12 +49,13 @@ const toSale = (row: any): any => (row ? { ...row, user_id: row.subject_id } : r
 
 const fromServer = (resource: string, row: any): any => {
   if (resource === "sales") return toSale(row);
+  if (resource === "contact_notes" || resource === "deal_notes") return withAttachmentSources(row);
   if (resource === "activity_log") {
     // Rename snake_case view columns to camelCase to match the Activity type
     return {
       ...row,
-      contactNote: row.contact_note ?? undefined,
-      dealNote: row.deal_note ?? undefined,
+      contactNote: row.contact_note ? withAttachmentSources(row.contact_note) : undefined,
+      dealNote: row.deal_note ? withAttachmentSources(row.deal_note) : undefined,
       contact_note: undefined,
       deal_note: undefined,
     };
@@ -97,12 +99,34 @@ async function inlineImage<T extends { rawFile?: File; src?: string; title?: str
   return image;
 }
 
-function rejectNewAttachments(note: ContactNote | DealNote) {
-  const attachments = (note.attachments ?? []) as RAFile[];
-  if (attachments.some((file) => file?.rawFile instanceof File)) {
-    throw new Error("File attachments are not available yet");
-  }
-  return note;
+/** Uploads the files a note form just picked, and stores for every
+ *  attachment only what describes it; the API serves the file itself. */
+async function storeAttachments<T extends ContactNote | DealNote>(note: T): Promise<T> {
+  if (!Array.isArray(note.attachments)) return note;
+  const attachments = await Promise.all(
+    (note.attachments as RAFile[]).map(async (file) => {
+      if (file?.rawFile instanceof File) return uploadAttachment(file.rawFile);
+      return {
+        path: file.path ?? (isStoredAttachment(file.src) ? file.src.slice(ATTACHMENT_SCHEME.length) : undefined),
+        title: file.title,
+        type: file.type,
+        size: (file as { size?: number }).size,
+      };
+    }),
+  );
+  return { ...note, attachments };
+}
+
+/** A stored attachment has no URL of its own; its `src` names the file for
+ *  AttachmentAnchor, which loads it with the session. */
+function withAttachmentSources(row: any): any {
+  if (!Array.isArray(row?.attachments)) return row;
+  return {
+    ...row,
+    attachments: row.attachments.map((file: any) =>
+      file?.path ? { ...file, src: `${ATTACHMENT_SCHEME}${file.path}` } : file,
+    ),
+  };
 }
 
 const baseDataProvider = {
@@ -322,11 +346,11 @@ export type CrmDataProvider = DataProvider &
 const lifeCycleCallbacks: ResourceCallbacks[] = [
   {
     resource: "contact_notes",
-    beforeSave: async (data: ContactNote) => rejectNewAttachments(data) as ContactNote,
+    beforeSave: async (data: ContactNote) => storeAttachments(data),
   },
   {
     resource: "deal_notes",
-    beforeSave: async (data: DealNote) => rejectNewAttachments(data) as DealNote,
+    beforeSave: async (data: DealNote) => storeAttachments(data),
   },
   {
     resource: "companies",
