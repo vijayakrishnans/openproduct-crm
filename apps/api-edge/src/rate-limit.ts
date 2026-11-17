@@ -57,7 +57,8 @@ export type RouteFamily =
   | "billing"
   | "audit"
   | "notifications"
-  | "integrations";
+  | "integrations"
+  | "crm";
 
 interface BucketLimits {
   /** Bucket capacity (max tokens). */
@@ -119,6 +120,11 @@ const LIMITS: Record<RouteFamily, FamilyConfig> = {
   integrations: {
     identity: { limit: 60, windowSec: 60 },
     org: { limit: 300, windowSec: 60 },
+  },  // The CRM is a single-page app: one screen issues a dozen list and
+  // reference reads, and an import issues many writes.
+  crm: {
+    identity: { limit: 600, windowSec: 60 },
+    org: { limit: 3000, windowSec: 60 },
   },
 };
 

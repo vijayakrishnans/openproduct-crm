@@ -1,0 +1,24 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-7
+  title: "M2: crm-worker and the edge's crm-facade"
+spec:
+  goal: The CRM's data is reachable through api-edge under /v1/organizations/:orgId/crm, served by a new crm-worker that scopes every request to the caller's org.
+  affects:
+    - apps/crm-worker/**
+    - tests/crm-worker/**
+    - apps/api-edge/**
+    - tests/api-edge/src/crm-facade.test.ts
+    - packages/policy-engine/src/index.ts
+    - tests/policy-engine/**
+    - tests/config-worker/src/deployment-config.test.ts
+    - pnpm-lock.yaml
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-7.TaskContract.yaml
+  doneWhen:
+    - CRUD, lists, filters, sorts, pagination, tags, tasks, notes, merge, search, activity and dashboard pass tests against a real Postgres
+    - the isolation matrix shows 404 for org B on every route, with org A's records unchanged
+    - after the merge, on stage, a member creates and reads CRM records through api-edge and a member of another org gets 404
+  gates: []
