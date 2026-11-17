@@ -1,3 +1,11 @@
+## crm-web v0.3.1 - 2026-11-17
+
+- Settings opens again. It showed "Not Found" on the real CRM (the demo was
+  unaffected), so branding, deal stages, categories and task types could not
+  be changed.
+- Save on the settings page waits until the deals it checks stages against
+  have loaded, instead of refusing with "The form is not valid".
+
 ## crm-web v0.3.0 - 2026-11-17
 
 - Notes take file attachments again (up to 25 MB each). Files are stored by

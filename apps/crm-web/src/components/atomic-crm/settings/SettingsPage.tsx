@@ -496,7 +496,8 @@ const SettingsFormFields = () => {
               >
                 {translate("ra.action.cancel")}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              {/* Stages and categories are checked against the deals: wait for them. */}
+              <Button type="submit" disabled={isSubmitting || !deals}>
                 <Save className="h-4 w-4 mr-1" />
                 {isSubmitting
                   ? translate("crm.settings.saving")
