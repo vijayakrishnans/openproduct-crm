@@ -1,0 +1,20 @@
+{
+  "name": "@saas/crm-web-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "node run.mjs",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@saas/crm-web": "workspace:*",
+    "@saas/eslint-config": "workspace:*",
+    "@saas/tsconfig": "workspace:*",
+    "@types/node": "^20.17.0",
+    "typescript": "^5.8.3"
+  }
+}

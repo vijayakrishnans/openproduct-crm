@@ -37,3 +37,7 @@ apps/admin-worker/wrangler.jsonc
 apps/crm-worker/wrangler.jsonc
 apps/integrations-worker/wrangler.jsonc
 apps/webhooks-worker/wrangler.jsonc
+
+# Playwright output (tests/crm-web-e2e)
+test-results/
+playwright-report/

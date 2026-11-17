@@ -9,8 +9,8 @@ departs from [design.md](design.md).
 | CRM-A public listing | done | #13 |
 | M0 import and attribution | done | #12, #14 (and #11, the multi-tenant profile) |
 | M1 schema | done | #15 |
-| M2 crm-worker and crm-facade | built; not merged | |
-| M3 frontend swap | | |
+| M2 crm-worker and crm-facade | done | #16, #18 |
+| M3 frontend swap | server side merged (#19); web app not merged | |
 | M4 files and email | | |
 | M5 MCP server | | |
 | M6 product glue | | |
@@ -40,3 +40,13 @@ departs from [design.md](design.md).
   what they need.
 - No route yet for `favicons_excluded_domains` (M2); it lands with favicon
   fetch in M4.
+- The browser calls api-edge directly rather than through routes on the
+  crm-web Worker (M3); `crm-web` stays a static-assets Worker.
+- The `ra-supabase-language-*` message packages remain as dependencies (M3):
+  the shared UI kit reads a few of their translation keys. No Supabase client,
+  key or URL is left.
+- The e2e specs run desktop only, and against a stage API from a locally
+  served app or a deployed one (M3). Upstream's `signup.spec` is replaced by
+  `signIn.spec`: an instance is no longer a single team.
+- Inviting a user from the CRM returns a placeholder row until they sign in
+  (M3); upstream created the account at once.

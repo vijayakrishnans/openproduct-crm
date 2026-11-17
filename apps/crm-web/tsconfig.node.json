@@ -23,5 +23,5 @@
 
     "types": ["node"]
   },
-  "include": ["vite.demo.config.ts"]
+  "include": ["vite.config.ts"]
 }

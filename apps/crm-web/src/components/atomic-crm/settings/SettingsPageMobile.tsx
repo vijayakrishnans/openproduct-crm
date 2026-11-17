@@ -562,6 +562,9 @@ const InboundEmailSection = () => {
 const McpServerSection = () => {
   const translate = useTranslate();
 
+  // Shown once there is an MCP server to connect to (M5).
+  if (!import.meta.env.VITE_MCP_URL) return null;
+
   return (
     <div>
       <SectionLabel>
@@ -574,7 +577,7 @@ const McpServerSection = () => {
       </p>
       <SettingsGroup>
         <CopyPasteRow
-          value={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mcp`}
+          value={import.meta.env.VITE_MCP_URL}
         />
       </SettingsGroup>
     </div>
