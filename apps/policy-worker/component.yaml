@@ -70,3 +70,4 @@ spec:
     runtime: cloudflare
 # ci: trigger full-component verification (orun v2.12.0 upgrade — PR #183)
 # orun: redeploy 04-workers 20261116T145728Z
+# orun: redeploy for the policy-engine CRM actions (CRM-7) 20261117T044800Z
