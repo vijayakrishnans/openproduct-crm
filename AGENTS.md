@@ -22,8 +22,14 @@ is what deploys it.
 
 ## Layout
 
-- `apps/api-edge` is public; the twelve `apps/*-worker` are reached only
+- `apps/api-edge` is public; the thirteen `apps/*-worker` are reached only
   through it, over service bindings.
+- `apps/crm-worker` is the CRM: the `crm` schema's only reader and writer,
+  with files in R2, the inbound-email handler and the MCP server. Its
+  tenancy rules are in `apps/crm-worker/docs/architecture.md`; a change
+  there must keep `tests/crm-worker`'s isolation matrix green.
+- `apps/crm-web` — the CRM web app (Vite + React) on Workers + Static
+  Assets.
 - `apps/web-console-next` — Next.js on Workers + Static Assets.
 - `packages/*` — contracts, SDK, CLI, database harness, policy engine.
 - `infra/terraform/*` — Supabase, Hyperdrive, KV; `infra/db-migrate` — the

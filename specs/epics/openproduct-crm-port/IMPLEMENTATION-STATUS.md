@@ -13,8 +13,8 @@ departs from [design.md](design.md).
 | M3 frontend swap | done | #19, #20 |
 | M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21, #23 |
 | M5 MCP server | done | #24 |
-| M6 product glue | built; not merged | |
-| M7 prod and docs | | |
+| M6 product glue | done | #25 |
+| M7 prod and docs | docs and smoke done; the prod smoke waits on a sending domain | |
 
 ## Departures from design.md
 
@@ -67,3 +67,5 @@ departs from [design.md](design.md).
   gate. Seats are metered, not limited: `limit.members` already limits them.
 - Contacts created by inbound email are not counted against the limit and
   emit no event (M6).
+- The prod smoke has not run (M7): nobody can sign in on prod until a sending
+  domain is verified. The same script passes on stage.
