@@ -1,0 +1,22 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-9
+  title: "M4: files and email"
+spec:
+  goal: Notes carry file attachments stored in R2, companies and contacts get favicons, and an email to an organization's inbound address becomes notes.
+  affects:
+    - apps/crm-worker/**
+    - tests/crm-worker/**
+    - apps/crm-web/**
+    - tests/crm-web-e2e/**
+    - pnpm-lock.yaml
+    - WAITING.md
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-9.TaskContract.yaml
+  doneWhen:
+    - upload, download and delete of a note attachment work end to end on stage, and another organization cannot read the file
+    - a company without a logo gets its website's favicon
+    - an inbound message from a member becomes a note on its contacts, and one from anyone else is refused (tested against the handler; live on stage once a domain exists, see WAITING.md)
+  gates: []

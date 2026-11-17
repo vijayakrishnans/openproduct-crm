@@ -11,9 +11,6 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { Admin } from "@/components/admin/admin";
-import { ForgotPasswordPage } from "@/components/supabase/forgot-password-page";
-import { SetPasswordPage } from "@/components/supabase/set-password-page";
-import { OAuthConsentPage } from "@/components/supabase/oauth-consent-page";
 
 import companies from "../companies";
 import contacts from "../contacts";
@@ -22,14 +19,13 @@ import { MobileDashboard } from "../dashboard/MobileDashboard";
 import deals from "../deals";
 import { Layout } from "../layout/Layout";
 import { MobileLayout } from "../layout/MobileLayout";
-import { SignupPage } from "../login/SignupPage";
-import { ConfirmationRequired } from "../login/ConfirmationRequired";
 import { ImportPage } from "../misc/ImportPage";
 import { ChangelogPage } from "../misc/ChangelogPage";
 import {
   getAuthProvider as defaultAuthProviderBuilder,
   getDataProvider as defaultDataProviderBuilder,
-} from "../providers/supabase";
+} from "../providers/lumen";
+import { LumenLoginPage } from "../login/LumenLoginPage";
 import sales from "../sales";
 import { SettingsPageMobile } from "../settings/SettingsPageMobile";
 import { ProfilePage } from "../settings/ProfilePage";
@@ -52,7 +48,6 @@ import {
   defaultTitle,
 } from "./defaultConfiguration";
 import { i18nProvider as defaulti18nProvider } from "../providers/commons/i18nProvider";
-import { StartPage } from "../login/StartPage.tsx";
 import { useIsMobile } from "@/hooks/use-mobile.ts";
 import { MobileTasksList } from "../tasks/MobileTasksList.tsx";
 import { ContactListMobile } from "../contacts/ContactList.tsx";
@@ -68,6 +63,7 @@ export type CRMProps = {
   i18nProvider?: CoreAdminProps["i18nProvider"];
   disableTelemetry?: boolean;
   store?: CoreAdminProps["store"];
+  loginPage?: CoreAdminProps["loginPage"];
   dashboard?: DashboardComponent;
   layout?: LayoutComponent;
 } & Partial<ConfigurationContextValue>;
@@ -129,6 +125,7 @@ export const CRM = ({
   authProvider = defaultAuthProviderBuilder(),
   i18nProvider = defaulti18nProvider,
   store = defaultStore,
+  loginPage = LumenLoginPage,
   disableTelemetry,
   ...rest
 }: CRMProps) => {
@@ -211,7 +208,7 @@ export const CRM = ({
       authProvider={wrappedAuthProvider}
       i18nProvider={i18nProvider}
       store={store}
-      loginPage={StartPage}
+      loginPage={loginPage}
       requireAuth
       disableTelemetry
       {...rest}
@@ -231,19 +228,6 @@ const DesktopAdmin = (
       dashboard={props.dashboard ?? Dashboard}
       {...props}
     >
-      <CustomRoutes noLayout>
-        <Route path={SignupPage.path} element={<SignupPage />} />
-        <Route
-          path={ConfirmationRequired.path}
-          element={<ConfirmationRequired />}
-        />
-        <Route path={SetPasswordPage.path} element={<SetPasswordPage />} />
-        <Route
-          path={ForgotPasswordPage.path}
-          element={<ForgotPasswordPage />}
-        />
-        <Route path={OAuthConsentPage.path} element={<OAuthConsentPage />} />
-      </CustomRoutes>
 
       <CustomRoutes>
         <Route path={ProfilePage.path} element={<ProfilePage />} />
@@ -306,19 +290,6 @@ const MobileAdmin = (
         dashboard={props.dashboard ?? MobileDashboard}
         {...props}
       >
-        <CustomRoutes noLayout>
-          <Route path={SignupPage.path} element={<SignupPage />} />
-          <Route
-            path={ConfirmationRequired.path}
-            element={<ConfirmationRequired />}
-          />
-          <Route path={SetPasswordPage.path} element={<SetPasswordPage />} />
-          <Route
-            path={ForgotPasswordPage.path}
-            element={<ForgotPasswordPage />}
-          />
-          <Route path={OAuthConsentPage.path} element={<OAuthConsentPage />} />
-        </CustomRoutes>
         <CustomRoutes>
           <Route
             path={SettingsPageMobile.path}

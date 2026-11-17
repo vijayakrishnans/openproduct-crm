@@ -99,6 +99,10 @@
         {
           "binding": "INTEGRATIONS_WORKER",
           "service": "openproduct-crm-integrations-worker-stage"
+        },
+        {
+          "binding": "CRM_WORKER",
+          "service": "openproduct-crm-crm-worker-stage"
         }
       ],
       "durable_objects": {
@@ -168,6 +172,10 @@
         {
           "binding": "INTEGRATIONS_WORKER",
           "service": "openproduct-crm-integrations-worker-prod"
+        },
+        {
+          "binding": "CRM_WORKER",
+          "service": "openproduct-crm-crm-worker-prod"
         }
       ],
       "durable_objects": {

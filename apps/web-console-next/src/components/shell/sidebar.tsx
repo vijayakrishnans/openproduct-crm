@@ -126,7 +126,10 @@ function ProductNav({
   mobile: boolean;
 }) {
   const deployEnv = appConfig().deployEnv;
-  const crmUrl = deployEnv ? crmWebWorkersDevUrl(deployEnv) : null;
+  // The CRM opens on the organization the console is showing.
+  const crmUrl = deployEnv
+    ? `${crmWebWorkersDevUrl(deployEnv)}/${orgSlug ? `?org=${encodeURIComponent(orgSlug)}` : ""}`
+    : null;
   const sections = buildNavSections({ orgSlug, projectSlug, crmUrl });
   return (
     <nav className={cn("px-2 pb-4 pt-3", mobile ? "space-y-5" : "space-y-6")}>

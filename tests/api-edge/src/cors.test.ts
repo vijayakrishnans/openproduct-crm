@@ -311,3 +311,34 @@ describe("api-edge cors", () => {
     });
   });
 });
+
+describe("api-edge cors — the CRM web app (apps/crm-web)", () => {
+  const stage = "https://openproduct-crm-crm-web-stage.vijayakrishnan12994.workers.dev";
+  const prod = "https://openproduct-crm-crm-web-prod.vijayakrishnan12994.workers.dev";
+
+  it("allows each environment's own crm-web origin and not the other's", () => {
+    expect(isAllowedOrigin(stage, stageEnv)).toBe(true);
+    expect(isAllowedOrigin(prod, stageEnv)).toBe(false);
+    expect(isAllowedOrigin(prod, prodEnv)).toBe(true);
+    expect(isAllowedOrigin(stage, prodEnv)).toBe(false);
+  });
+
+  it("rejects look-alike origins", () => {
+    expect(isAllowedOrigin(stage.replace("https://", "http://"), stageEnv)).toBe(false);
+    expect(isAllowedOrigin(`${stage}.evil.example`, stageEnv)).toBe(false);
+    expect(isAllowedOrigin(stage.replace("vijayakrishnan12994", "someone-else"), stageEnv)).toBe(false);
+  });
+
+  it("answers the preflight for a CRM write", () => {
+    const res = handlePreflight(
+      new Request("https://api.example.com/v1/organizations/org_a/crm/contacts", {
+        method: "OPTIONS",
+        headers: { origin: stage, "access-control-request-method": "PATCH" },
+      }),
+      stageEnv,
+    );
+    expect(res?.headers.get("access-control-allow-origin")).toBe(stage);
+    expect(res?.headers.get("access-control-allow-methods")).toContain("PATCH");
+    expect(res?.headers.get("access-control-allow-headers")).toContain("idempotency-key");
+  });
+});

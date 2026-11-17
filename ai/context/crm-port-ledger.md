@@ -6,11 +6,13 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 ## Summary (2026-11-17)
 
-Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3, CRM-5) and the
-public listing (CRM-2) have landed. The Supabase outage of 2026-11-17 is
-over: the owner resumed the paused projects and api-edge is healthy on stage
-and prod. M1 (CRM-6, the `crm` schema) is built and tested locally and waits
-for its pull request to merge; M2 onward has not started.
+Phase A, CRM0, the multi-tenant profile (CRM-4), M0, the public listing, M1
+(the `crm` schema), M2 (`crm-worker` and the edge's `crm-facade`) and M3 (the
+web app on the Lumen API, with the ported e2e specs) have landed. M4 (CRM-9)
+is in two parts: the worker side (R2 attachments, favicons, inbound email)
+is built and tested and waits for its pull request; the web app side follows.
+Inbound email cannot go live until the owner provides a domain (WAITING.md).
+M5 onward has not started.
 
 ## Inputs used
 
@@ -35,10 +37,10 @@ for its pull request to merge; M2 onward has not started.
 | CRM0 the spec | CRM-1 | done | #10 | `053be16` | |
 | CRM-A public listing | CRM-2 | done | #13 | `e6760bb` | description, homepage, topics, secret scanning, push protection, private vulnerability reporting and `main` protection (PR + `plan` check) set 2026-11-17 |
 | M0 import and attribution | CRM-3, CRM-5 | done | #12, #14 | `9be281f`, `a080b00` | CI green; crm-web answers on stage and prod |
-| M1 schema | CRM-6 | built; not merged | | | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser, and on PGlite in `tests/db`; the isolation tests pass (org B reads, writes and references nothing of org A). Applying on stage and prod happens on merge |
-| M2 crm-worker and crm-facade | | not started | | | |
-| M3 frontend swap | | not started | | | |
-| M4 files and email | | not started | | | |
+| M1 schema | CRM-6 | done | #15 | `8feacaa` | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser and on PGlite; the SQL isolation tests pass; the `db-migrate` lanes for stage and prod were green on the merge run (their log tail was not readable; M2's stage check is the proof the tables exist) |
+| M2 crm-worker and crm-facade | CRM-7 | done | #16, #18 | `afe8b8d`, `32da23e` | `tests/crm-worker`: 225 tests on PGlite, including the isolation matrix. On stage through api-edge, 2026-11-17: a member created and read a company, contact and deal, searched and loaded the dashboard; a member of a second org got `404` on seven routes of the first and `422` when referencing its company. Prod answers `401` without a session; nobody can sign in on prod yet (WAITING.md) |
+| M3 frontend swap | CRM-8 | done | #19, #20 | `1c90e81`, `475942e` | Ten ported specs pass in Chromium against the stage API, locally and in CI (`crm-web-e2e`, about 40 minutes there). A new org starts with the default deal stages (no setting stored) |
+| M4 files and email | CRM-9 | worker side built; not merged | | | `tests/crm-worker`: 271 tests, including file isolation across orgs and raw-message inbound email tests |
 | M5 MCP server | | not started | | | |
 | M6 product glue | | not started | | | |
 | M7 prod and docs | | not started | | | |
@@ -103,6 +105,60 @@ for its pull request to merge; M2 onward has not started.
   search indexes lead with `org_id`.
 - 2026-11-17: the SQL-level tests run on PGlite (Postgres as WebAssembly)
   in `tests/db`, so CI needs no database service.
+
+- 2026-11-17: three policy actions, `organization.crm.read` (viewer and
+  up), `.write` (builder and up) and `.manage` (owner, admin). Someone with
+  no role in the org gets `404` on every CRM path; a member whose role lacks
+  the action gets `403`.
+- 2026-11-17: the CRM's edge rate limit is 600 requests a minute per
+  identity and 3000 per org (other families: 60 and 300). One screen of the
+  web app issues a dozen reads.
+- 2026-11-17: `crm.sales` rows are created by the worker on a member's first
+  write or `GET /crm/sales/me`, from the actor the edge resolved. Clients
+  cannot create or delete them.
+- 2026-11-17: `tests/crm-worker` subscribes with the `verify` profile so its
+  tests run in CI. Every other test component uses `quick-check`, which runs
+  no tests, including `tests/db` and its M1 isolation tests (run locally).
+
+- 2026-11-17: crm-worker binds text parameters only and casts in SQL. The
+  driver on Workers (postgres.js) re-encodes a parameter by its inferred
+  type, which broke creates on stage; PGlite does not, so the harness now
+  rejects non-text parameters.
+- 2026-11-17: the browser calls api-edge directly, from each environment's
+  crm-web origin (CORS), finding the API from its own host name. The crm-web
+  Worker proxies nothing.
+- 2026-11-17: sign-in is Lumen's email code; there are no passwords, so
+  upstream's sign-up, password reset and OAuth consent pages are removed.
+  After the code, a user with one organization goes straight in; otherwise
+  they choose or create one.
+- 2026-11-17: one build serves the CRM and, with `?demo`, the in-browser
+  demo.
+- 2026-11-17: the CRM configuration (stages, categories, logos, title) is
+  one org setting in config-worker, key `crm.configuration`. A new org has
+  none and gets the app's defaults, including the default deal stages.
+- 2026-11-17: adding a user from the CRM sends a Lumen invitation; their
+  profile appears when they first sign in.
+- 2026-11-17: until M4, note attachments are refused, and avatars and logos
+  are stored inline as data URLs.
+- 2026-11-17: the e2e specs give each test its own user and organization
+  through the public API instead of resetting a shared database.
+
+- 2026-11-17: files are uploaded and downloaded through crm-worker with the
+  session, not with signed URLs: signing needs a secret set with
+  `orun secrets set`, and an authenticated route needs none. The browser
+  fetches a file with its session and shows it from memory.
+- 2026-11-17: a file's path is relative to its organization, and the worker
+  adds the organization prefix. A path cannot name another organization's
+  file, so notes need no ownership check on paths.
+- 2026-11-17: the R2 bucket is `openproduct-crm-crm-attachments-<env>`,
+  created by crm-worker's pre-deploy step, not by Terraform.
+- 2026-11-17: favicons come from the domain's own `/favicon.ico` only.
+  Upstream also asked Gravatar (with a hash of the contact's email) and
+  favicon.show; those calls are dropped.
+- 2026-11-17: an organization's inbound address is its public id
+  (`org_…@<inbound domain>`), so no address table is needed. The id is not a
+  secret: a message is accepted only with a DMARC pass and a From address
+  that is an active member's.
 
 ## Open risks
 

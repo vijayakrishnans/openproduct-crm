@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Form, required, useLogin, useNotify, useTranslate } from "ra-core";
 import type { SubmitHandler, FieldValues } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/admin/text-input";
 import { Notification } from "@/components/admin/notification";
 import { useConfigurationContext } from "@/components/atomic-crm/root/ConfigurationContext.tsx";
-import { SSOAuthButton } from "./SSOAuthButton";
-import {
-  disableEmailPasswordAuthentication,
-  googleWorkplaceDomain,
-} from "./authConfig";
+import { disableEmailPasswordAuthentication } from "./authConfig";
 
 /**
  * Login page displayed when authentication is enabled and the user is not authenticated.
@@ -129,23 +125,6 @@ export const LoginPage = (props: { redirectTo?: string }) => {
                   </Button>
                 </div>
               </Form>
-            )}
-            {googleWorkplaceDomain ? (
-              <SSOAuthButton className="w-full" domain={googleWorkplaceDomain}>
-                {translate("crm.auth.sign_in_google_workspace", {
-                  _: "Sign in with Google Workplace",
-                })}
-              </SSOAuthButton>
-            ) : null}
-            {disableEmailPasswordAuthentication ? null : (
-              <Link
-                to={"/forgot-password"}
-                className="block text-sm text-center hover:underline"
-              >
-                {translate("ra-supabase.auth.forgot_password", {
-                  _: "Forgot password?",
-                })}
-              </Link>
             )}
           </div>
         </div>
