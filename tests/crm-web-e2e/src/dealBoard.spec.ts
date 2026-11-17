@@ -24,7 +24,10 @@ test.describe("deal board", () => {
       await page.keyboard.press("Space");
       for (const key of keys) await page.keyboard.press(key);
       await page.keyboard.press("Space");
+      // once saved, the board reloads: wait for that before the next move
+      const reloaded = page.waitForResponse((r) => r.request().method() === "GET" && decodeURIComponent(r.url()).includes('/crm/deals?') && decodeURIComponent(r.url()).includes('"archived_at@is":null'));
       expect((await saved).status()).toBe(200);
+      await reloaded;
       await page.waitForLoadState("networkidle");
     };
 
@@ -34,6 +37,23 @@ test.describe("deal board", () => {
     await move("Beta", "ArrowLeft");
     await move("Alpha", "ArrowRight", "ArrowRight");
 
+    // two moves of the same deal without waiting for the first to be saved:
+    // the second must start from where the first left it
+    const drag = async (name: string, key: string) => {
+      await card(name).focus();
+      await page.keyboard.press("Space");
+      await page.keyboard.press(key);
+      await page.keyboard.press("Space");
+    };
+    const settled = page.waitForResponse(
+      (r) => r.request().method() === "GET" && decodeURIComponent(r.url()).includes('"archived_at@is":null'),
+      { timeout: 90_000 },
+    );
+    await drag("Orphan", "ArrowRight");
+    await drag("Orphan", "ArrowRight");
+    await settled;
+    await page.waitForLoadState("networkidle");
+
     await expect(page.getByText("Something went wrong")).toHaveCount(0);
 
     await page.reload();
@@ -41,6 +61,6 @@ test.describe("deal board", () => {
     const column = (title: string) => page.getByRole("heading", { name: title, exact: true }).locator("xpath=../..");
     await expect(column("In Negotiation").getByRole("button", { name: /- Alpha/ })).toBeVisible();
     await expect(column("Opportunity").getByRole("button", { name: /- Beta/ })).toBeVisible();
-    await expect(column("Opportunity").getByRole("button", { name: /- Orphan/ })).toBeVisible();
+    await expect(column("In Negotiation").getByRole("button", { name: /- Orphan/ })).toBeVisible();
   });
 });
