@@ -686,7 +686,7 @@ describe("listEffectivePermissions", () => {
     expect(result.derivedScope.orgId).toBe("org_1");
 
     const allowed = result.permissions.filter((p) => p.allow);
-    expect(allowed.length).toBe(31);
+    expect(allowed.length).toBe(34);
   });
 
   it("returns limited permissions for viewer", () => {
@@ -699,6 +699,7 @@ describe("listEffectivePermissions", () => {
     const allowed = result.permissions.filter((p) => p.allow);
     expect(allowed.map((p) => p.action).sort()).toEqual([
       "organization.config.read",
+      "organization.crm.read",
       "organization.integration.read",
       "organization.metering.read",
       "organization.read",
@@ -1014,5 +1015,37 @@ describe("project.repo_link.write (saas-integrations IG3)", () => {
         authReq("project.repo_link.write", ORG, [projectFact("project_builder", ORG, "p1")], "p1"),
       ).allow,
     ).toBe(false);
+  });
+});
+
+describe("CRM actions (openproduct-crm-port M2)", () => {
+  const ORG = "org-1";
+  const READ = "organization.crm.read";
+  const WRITE = "organization.crm.write";
+  const MANAGE = "organization.crm.manage";
+
+  it.each([
+    ["owner", [READ, WRITE, MANAGE]],
+    ["admin", [READ, WRITE, MANAGE]],
+    ["builder", [READ, WRITE]],
+    ["viewer", [READ]],
+    ["billing_admin", []],
+  ])("%s is allowed exactly %j", (role, allowed) => {
+    for (const action of [READ, WRITE, MANAGE]) {
+      expect(authorize(authReq(action, ORG, [orgFact(role, ORG)])).allow).toBe(allowed.includes(action));
+    }
+  });
+
+  it("a role in another org grants nothing", () => {
+    for (const action of [READ, WRITE, MANAGE]) {
+      const result = authorize(authReq(action, ORG, [orgFact("owner", "org-2")]));
+      expect(result.allow).toBe(false);
+      expect(result.reason).toBe("no_matching_role");
+    }
+  });
+
+  it("a project role grants nothing", () => {
+    const fact = { kind: "role_assignment", role: "project_admin", scope: { kind: "project", orgId: ORG, projectId: "prj-1" } };
+    expect(authorize(authReq(READ, ORG, [fact as never])).allow).toBe(false);
   });
 });

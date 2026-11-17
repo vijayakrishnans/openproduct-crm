@@ -78,6 +78,7 @@ const HYPERDRIVE_WORKER_TEMPLATES = [
   "apps/admin-worker/wrangler.template.jsonc",
   "apps/billing-worker/wrangler.template.jsonc",
   "apps/config-worker/wrangler.template.jsonc",
+  "apps/crm-worker/wrangler.template.jsonc",
   "apps/events-worker/wrangler.template.jsonc",
   "apps/identity-worker/wrangler.template.jsonc",
   "apps/integrations-worker/wrangler.template.jsonc",

@@ -6,11 +6,10 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 ## Summary (2026-11-17)
 
-Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3, CRM-5) and the
-public listing (CRM-2) have landed. The Supabase outage of 2026-11-17 is
-over: the owner resumed the paused projects and api-edge is healthy on stage
-and prod. M1 (CRM-6, the `crm` schema) is built and tested locally and waits
-for its pull request to merge; M2 onward has not started.
+Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3, CRM-5), the
+public listing (CRM-2) and M1 (CRM-6, the `crm` schema) have landed. M2
+(CRM-7, `crm-worker` and the edge's `crm-facade`) is built and tested
+locally and waits for its pull request to merge; M3 onward has not started.
 
 ## Inputs used
 
@@ -35,8 +34,8 @@ for its pull request to merge; M2 onward has not started.
 | CRM0 the spec | CRM-1 | done | #10 | `053be16` | |
 | CRM-A public listing | CRM-2 | done | #13 | `e6760bb` | description, homepage, topics, secret scanning, push protection, private vulnerability reporting and `main` protection (PR + `plan` check) set 2026-11-17 |
 | M0 import and attribution | CRM-3, CRM-5 | done | #12, #14 | `9be281f`, `a080b00` | CI green; crm-web answers on stage and prod |
-| M1 schema | CRM-6 | built; not merged | | | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser, and on PGlite in `tests/db`; the isolation tests pass (org B reads, writes and references nothing of org A). Applying on stage and prod happens on merge |
-| M2 crm-worker and crm-facade | | not started | | | |
+| M1 schema | CRM-6 | done | #15 | `8feacaa` | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser and on PGlite; the SQL isolation tests pass; the `db-migrate` lanes for stage and prod were green on the merge run (their log tail was not readable; M2's stage check is the proof the tables exist) |
+| M2 crm-worker and crm-facade | CRM-7 | built; not merged | | | `tests/crm-worker`: 220 tests on PGlite, including the isolation matrix (`404` for another org on every route, nothing changed); `tests/api-edge` crm-facade tests pass |
 | M3 frontend swap | | not started | | | |
 | M4 files and email | | not started | | | |
 | M5 MCP server | | not started | | | |
@@ -103,6 +102,20 @@ for its pull request to merge; M2 onward has not started.
   search indexes lead with `org_id`.
 - 2026-11-17: the SQL-level tests run on PGlite (Postgres as WebAssembly)
   in `tests/db`, so CI needs no database service.
+
+- 2026-11-17: three policy actions, `organization.crm.read` (viewer and
+  up), `.write` (builder and up) and `.manage` (owner, admin). Someone with
+  no role in the org gets `404` on every CRM path; a member whose role lacks
+  the action gets `403`.
+- 2026-11-17: the CRM's edge rate limit is 600 requests a minute per
+  identity and 3000 per org (other families: 60 and 300). One screen of the
+  web app issues a dozen reads.
+- 2026-11-17: `crm.sales` rows are created by the worker on a member's first
+  write or `GET /crm/sales/me`, from the actor the edge resolved. Clients
+  cannot create or delete them.
+- 2026-11-17: `tests/crm-worker` subscribes with the `verify` profile so its
+  tests run in CI. Every other test component uses `quick-check`, which runs
+  no tests, including `tests/db` and its M1 isolation tests (run locally).
 
 ## Open risks
 

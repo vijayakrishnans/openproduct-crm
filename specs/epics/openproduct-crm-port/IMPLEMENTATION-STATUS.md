@@ -8,8 +8,8 @@ departs from [design.md](design.md).
 | CRM0 the spec | done | #10 |
 | CRM-A public listing | done | #13 |
 | M0 import and attribution | done | #12, #14 (and #11, the multi-tenant profile) |
-| M1 schema | built; not merged | |
-| M2 crm-worker and crm-facade | | |
+| M1 schema | done | #15 |
+| M2 crm-worker and crm-facade | built; not merged | |
 | M3 frontend swap | | |
 | M4 files and email | | |
 | M5 MCP server | | |
@@ -32,3 +32,11 @@ departs from [design.md](design.md).
   `deals.contact_ids` may only hold ids of the row's own org, and deleting a
   contact removes it from its deals.
 - `crm.sales.email` is `text`, not `citext` (M1).
+- One generic route set serves every resource (M2): `/crm/:resource` and
+  `/crm/:resource/:id`, driven by the table in
+  `apps/crm-worker/src/resources.ts`, instead of a handler per resource.
+- The dashboard route returns counts and deal totals per stage (M2); the
+  charts upstream draws from full lists stay client-side until M3 decides
+  what they need.
+- No route yet for `favicons_excluded_domains` (M2); it lands with favicon
+  fetch in M4.

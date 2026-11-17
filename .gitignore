@@ -34,5 +34,6 @@ apps/billing-worker/wrangler.jsonc
 apps/metering-worker/wrangler.jsonc
 apps/notifications-worker/wrangler.jsonc
 apps/admin-worker/wrangler.jsonc
+apps/crm-worker/wrangler.jsonc
 apps/integrations-worker/wrangler.jsonc
 apps/webhooks-worker/wrangler.jsonc
