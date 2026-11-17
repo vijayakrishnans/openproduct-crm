@@ -20,7 +20,7 @@ inbound email, MCP tools and background jobs.**
 | Changes | adds the `crm` bounded context; no change to other contexts' tables |
 | Decisions locked | see [design.md](design.md) §1 |
 | Gate | CI green on every PR; the cross-org isolation matrix from M2 on |
-| Shipped as | pull requests #10–#25 and the M7 pull request; see the ledger |
+| Shipped as | pull requests #10–#26; fixes and the relicensing after M7 in #27–#31; see the ledger |
 
 ## Read order
 
