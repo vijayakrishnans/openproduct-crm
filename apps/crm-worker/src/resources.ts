@@ -23,6 +23,8 @@ export interface ResourceDef {
   table?: string;
   /** Table whose fts column answers the `q` filter. */
   searchTable?: string;
+  /** Without a search index: columns the `q` filter matches by substring. */
+  searchColumns?: readonly string[];
   columns: Record<string, ColumnType>;
   /** Columns a client may set. */
   writable: readonly string[];
@@ -246,6 +248,7 @@ const DEFS: ResourceDef[] = [
     relation: "crm.tags",
     table: "crm.tags",
     columns: { id: "bigint", name: "text", color: "text" },
+    searchColumns: ["name"],
     writable: ["name", "color"],
     required: ["name", "color"],
     idType: "bigint",
@@ -269,6 +272,7 @@ const DEFS: ResourceDef[] = [
       disabled: "boolean",
       secondary_emails: "json",
     },
+    searchColumns: ["first_name", "last_name", "email"],
     writable: ["first_name", "last_name", "avatar", "secondary_emails", "disabled"],
     required: [],
     idType: "bigint",

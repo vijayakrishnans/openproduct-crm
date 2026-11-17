@@ -101,9 +101,18 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
     if (key === "q") {
       if (typeof value !== "string") {
         fail("must be a string");
-      } else if (!def.searchTable) {
+      } else if (!def.searchTable && !def.searchColumns) {
         fail("this resource cannot be searched");
-      } else if (value.trim() !== "") {
+      } else if (value.trim() === "") {
+        // a blank search matches everything
+      } else if (def.searchColumns) {
+        // Small tables without a search index: every word must appear in one
+        // of the columns.
+        for (const word of value.trim().split(/\s+/).slice(0, 8)) {
+          const p = bind(`%${word.replace(/[\\%_]/g, "\\$&")}%`);
+          clauses.push(`(${def.searchColumns.map((c) => `t."${c}" ILIKE ${p}::text`).join(" OR ")})`);
+        }
+      } else {
         const p = bind(value);
         clauses.push(
           `t.id IN (SELECT s.id FROM ${def.searchTable} s WHERE s.org_id = $1::text::uuid AND s.fts @@ crm.search_query(${p}::text))`,
@@ -132,7 +141,7 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
       continue;
     }
 
-    if (operator === "cs") {
+    if (operator === "cs" || operator === "ov") {
       const element = ARRAY_ELEMENT_CAST[type];
       if (!element) {
         fail("is not an array field");
@@ -141,7 +150,7 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
       } else {
         const p = bind(JSON.stringify(value));
         clauses.push(
-          `${col} @> ARRAY(SELECT e::${element} FROM jsonb_array_elements_text(${p}::text::jsonb) e)`,
+          `${col} ${operator === "cs" ? "@>" : "&&"} ARRAY(SELECT e::${element} FROM jsonb_array_elements_text(${p}::text::jsonb) e)`,
         );
       }
       continue;
