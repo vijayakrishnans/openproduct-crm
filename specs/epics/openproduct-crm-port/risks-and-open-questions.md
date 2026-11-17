@@ -10,8 +10,9 @@ installed there; links in the README and Welcome card change with it.
 
 ## CRM-B — Lumen ships no licence (RISK)
 
-Lumen (`sourceplane/lumen`) has no LICENSE file. This repository is MIT as the
-brief requires; the Lumen owners are the same people who asked for it. Confirm
+Lumen (`sourceplane/lumen`) has no LICENSE file. This repository was MIT as the
+brief required and is Apache-2.0 since 2026-11-17, at the owner's request
+(credit kept through `NOTICE`); the Lumen owners are the same people who asked for it. Confirm
 before the first outside contribution.
 
 ## CRM-C — Upstream drift (ACCEPTED)

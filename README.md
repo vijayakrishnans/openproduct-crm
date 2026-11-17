@@ -61,7 +61,8 @@ provisions the databases and deploys stage, then prod. The full runbook is in
 - The platform (identity, organizations, billing, webhooks and the rest) is
   built on the [Lumen baseline](https://github.com/sourceplane/lumen).
 
-Licensed under the [MIT License](LICENSE). Security reports:
+Licensed under the [Apache License 2.0](LICENSE): use it, change it and
+ship it, and keep the credit in [NOTICE](NOTICE) with it. Security reports:
 [SECURITY.md](SECURITY.md). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Architecture

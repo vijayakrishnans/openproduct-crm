@@ -3,5 +3,5 @@
   "version": "0.0.0",
   "private": true,
   "files": ["*.json"],
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
