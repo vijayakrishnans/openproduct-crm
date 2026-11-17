@@ -6,10 +6,11 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 ## Summary (2026-11-17)
 
-Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3) and the public
-listing (CRM-2) have landed. M1 onward is **blocked**: every Supabase
-database on the account stopped resolving on 2026-11-17 (see WAITING.md),
-so migrations cannot run and api-edge reports `degraded` on stage and prod.
+Phase A, CRM0, the multi-tenant profile (CRM-4), M0 (CRM-3, CRM-5) and the
+public listing (CRM-2) have landed. The Supabase outage of 2026-11-17 is
+over: the owner resumed the paused projects and api-edge is healthy on stage
+and prod. M1 (CRM-6, the `crm` schema) is built and tested locally and waits
+for its pull request to merge; M2 onward has not started.
 
 ## Inputs used
 
@@ -30,11 +31,11 @@ so migrations cannot run and api-edge reports `degraded` on stage and prod.
 | Milestone | Task | State | PR | Merge | Verification |
 |---|---|---|---|---|---|
 | Phase A bootstrap | BASE-1..8 | done | #1–#3, #5–#9 (#4 closed, redundant) | `b8551b3` | every Lumen phase through 08-docs derived done; console and api-edge 200 on stage and prod; sign-in and personal org on stage verified 2026-11-16 |
-| Multi-tenant profile | CRM-4 | merged; stage check blocked | #11 | `45adb3e` | SOLO_MODE off everywhere; console builds from source. The stage org check waits on the database (WAITING.md) |
+| Multi-tenant profile | CRM-4 | done | #11 | `45adb3e` | SOLO_MODE off everywhere; console builds from source. On stage, `POST /v1/organizations` created an org (201) and `GET /v1/organizations/:id/members` listed its owner (200), 2026-11-17 |
 | CRM0 the spec | CRM-1 | done | #10 | `053be16` | |
-| CRM-A public listing | CRM-2 | in review | #13 | | description, homepage, topics, secret scanning, push protection, private vulnerability reporting and `main` protection (PR + `plan` check) set 2026-11-17 |
-| M0 import and attribution | CRM-3 | merged | #12 | `9be281f` | CI green; see the deploy check below |
-| M1 schema | | blocked (database) | | | |
+| CRM-A public listing | CRM-2 | done | #13 | `e6760bb` | description, homepage, topics, secret scanning, push protection, private vulnerability reporting and `main` protection (PR + `plan` check) set 2026-11-17 |
+| M0 import and attribution | CRM-3, CRM-5 | done | #12, #14 | `9be281f`, `a080b00` | CI green; crm-web answers on stage and prod |
+| M1 schema | CRM-6 | built; not merged | | | `200_crm_core` applies twice without error on Postgres 16 as a non-superuser, and on PGlite in `tests/db`; the isolation tests pass (org B reads, writes and references nothing of org A). Applying on stage and prod happens on merge |
 | M2 crm-worker and crm-facade | | not started | | | |
 | M3 frontend swap | | not started | | | |
 | M4 files and email | | not started | | | |
@@ -84,6 +85,24 @@ so migrations cannot run and api-edge reports `degraded` on stage and prod.
   depend on what changed, so they cannot be required.
 - 2026-11-17: an upstream test fixture's real email address became
   `jane.doe@example.com` (the repo is public).
+
+- 2026-11-17: CRM ids stay `bigint` identities, as upstream, so the web app,
+  CSV import and the ported SQL keep their shapes. Tenancy does not rest on
+  ids being unguessable: every foreign key is composite on `(org_id, id)`.
+- 2026-11-17: row-level security needs a role without `BYPASSRLS`, and
+  Supabase's `postgres` has it. The migration creates `crm_app` (no login);
+  crm-worker runs each request as `SET LOCAL ROLE crm_app` with
+  `app.org_id` and `app.subject_id` set for the transaction.
+- 2026-11-17: `crm.sales` is keyed by `(org_id, subject_id)`, the Lumen
+  actor id (`usr_…`), which is what the edge hands a worker.
+- 2026-11-17: `merge_contacts` and `global_search` take the org as an
+  argument and filter on it, so the explicit filter and the policy are two
+  independent checks.
+- 2026-11-17: `citext` is not used (plain `text`, with `lower()` indexes
+  where case matters); `unaccent` and `btree_gin` are, the latter so the
+  search indexes lead with `org_id`.
+- 2026-11-17: the SQL-level tests run on PGlite (Postgres as WebAssembly)
+  in `tests/db`, so CI needs no database service.
 
 ## Open risks
 

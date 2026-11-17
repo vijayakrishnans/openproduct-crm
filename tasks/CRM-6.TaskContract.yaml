@@ -1,0 +1,22 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-6
+  title: "M1: the crm schema, org-scoped, under row-level security"
+spec:
+  goal: The crm schema exists on stage and prod with org_id on every row, composite org foreign keys and row-level security, and a SQL-level test proves org B cannot see org A's rows.
+  affects:
+    - packages/db/src/migrations/200_crm_core/up.sql
+    - packages/db/src/manifest.ts
+    - packages/db/src/types.ts
+    - tests/db/**
+    - pnpm-lock.yaml
+    - WAITING.md
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-6.TaskContract.yaml
+  doneWhen:
+    - 200_crm_core is in the manifest under the crm context and applies twice without error
+    - tests/db runs the migration on Postgres (PGlite) and shows org B reads, changes and references nothing of org A, through tables, views, search and merge
+    - after the merge, db-migrate applies 200_crm_core on stage and prod
+  gates: []
