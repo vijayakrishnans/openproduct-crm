@@ -1,6 +1,14 @@
 import type { SqlExecutor } from "@saas/db/hyperdrive";
+import {
+  attachmentPathsUnder,
+  attachmentsError,
+  deleteObjects,
+  isNoteResource,
+  pathsOf,
+} from "./attachments.js";
 import type { Actor } from "./authz.js";
 import { DOC, documents, type OrgScope } from "./db.js";
+import { companyLogo, contactAvatar, type Fetch } from "./favicons.js";
 import { errorResponse, forbidden, notFound, successResponse, validationError } from "./http.js";
 import { parseListQuery } from "./query.js";
 import { SEARCH_RESOURCES, type ResourceDef } from "./resources.js";
@@ -11,6 +19,13 @@ export interface Ctx {
   actor: Actor;
   isAdmin: boolean;
   requestId: string;
+  /** Where note attachments live; absent where no bucket is bound. */
+  bucket: R2Bucket | undefined;
+  /** Outbound fetch for favicons; absent turns the lookup off. */
+  fetcher: Fetch | undefined;
+  /** Work to do once the transaction has committed (R2 deletes): a
+   *  rolled-back request must not have removed any file. */
+  afterCommit: (() => Promise<void>)[];
 }
 
 type Body = Record<string, unknown>;
@@ -100,7 +115,6 @@ export async function handleGet(ctx: Ctx, def: ResourceDef, id: string): Promise
 export async function handleCreate(ctx: Ctx, def: ResourceDef, body: Body | null): Promise<Response> {
   if (!body) return validationError(ctx.requestId, { body: ["must be a JSON object"] });
 
-  const columns = def.writable.filter((c) => body[c] !== undefined);
   const missing = def.required.filter((c) => body[c] === undefined || body[c] === null || body[c] === "");
   if (missing.length > 0) {
     return validationError(ctx.requestId, Object.fromEntries(missing.map((c) => [c, ["is required"]])));
@@ -108,7 +122,11 @@ export async function handleCreate(ctx: Ctx, def: ResourceDef, body: Body | null
 
   await ensureSalesProfile(ctx);
 
-  const values = Object.fromEntries(columns.map((c) => [c, body[c]]));
+  const values: Body = Object.fromEntries(def.writable.filter((c) => body[c] !== undefined).map((c) => [c, body[c]]));
+  const invalid = await prepareValues(ctx, def, values, null);
+  if (invalid) return invalid;
+  const columns = Object.keys(values);
+
   const result = await ctx.tx.execute(
     `INSERT INTO ${def.table} AS t (org_id${columns.length ? ", " + quoted(columns) : ""})
      SELECT $1::text::uuid${columns.length ? ", " + quoted(columns, "r.") : ""}
@@ -143,11 +161,20 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
 
   await ensureSalesProfile(ctx);
 
-  const assignments = columns.map((c) => `"${c}" = r."${c}"`);
+  const values: Body = Object.fromEntries(columns.map((c) => [c, body[c]]));
+  const invalid = await prepareValues(ctx, def, values, id);
+  if (invalid) return invalid;
+
+  const assignments = Object.keys(values).map((c) => `"${c}" = r."${c}"`);
   if (def.touchOnUpdate) assignments.push(`"${def.touchOnUpdate}" = now()`);
   if (assignments.length === 0) return handleGet(ctx, def, id);
 
-  const values = Object.fromEntries(columns.map((c) => [c, body[c]]));
+  // Files a note no longer lists are removed once the update has committed.
+  const replaced =
+    isNoteResource(def.name) && values["attachments"] !== undefined
+      ? await attachmentPathsUnder(ctx.tx, ctx.scope.orgId, def.name, id)
+      : [];
+
   const result = await ctx.tx.execute(
     `UPDATE ${def.table} AS t SET ${assignments.join(", ")}
      FROM jsonb_populate_record(NULL::${def.table}, $3::text::jsonb) r
@@ -157,16 +184,72 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
   );
   const [doc] = documents(result.rows);
   if (!doc) return notFound(ctx.requestId);
+  if (replaced.length > 0) {
+    const kept = new Set(pathsOf(values["attachments"]));
+    removeFilesAfterCommit(ctx, replaced.filter((path) => !kept.has(path)));
+  }
   return successResponse(doc, ctx.requestId);
 }
 
+function removeFilesAfterCommit(ctx: Ctx, paths: string[]): void {
+  if (paths.length === 0) return;
+  ctx.afterCommit.push(() => deleteObjects(ctx.bucket, ctx.scope.orgId, paths));
+}
+
+/** Validates and completes the values of a create (id null) or an update:
+ *  note attachments must be uploads of this organization, a company without
+ *  a logo gets its website's favicon, a contact without an avatar its email
+ *  domain's. Returns a response when the values are refused. */
+async function prepareValues(ctx: Ctx, def: ResourceDef, values: Body, id: string | null): Promise<Response | null> {
+  if (isNoteResource(def.name) && values["attachments"] !== undefined) {
+    const problem = attachmentsError(values["attachments"]);
+    if (problem) return validationError(ctx.requestId, { attachments: [problem] });
+    // Keep what describes the file; drop what a browser added (blob URLs…).
+    values["attachments"] = ((values["attachments"] as Body[] | null) ?? []).map((a) => ({
+      path: a["path"],
+      title: typeof a["title"] === "string" ? a["title"].slice(0, 200) : null,
+      type: typeof a["type"] === "string" ? a["type"].slice(0, 200) : null,
+      size: typeof a["size"] === "number" ? a["size"] : null,
+    }));
+  }
+
+  const favicons = { tx: ctx.tx, orgId: ctx.scope.orgId, fetcher: ctx.fetcher };
+
+  if (def.name === "companies" && values["logo"] == null && values["website"] != null) {
+    if (id === null || (await isEmpty(ctx, def, id, "logo"))) {
+      const logo = await companyLogo(favicons, values["website"]);
+      if (logo) values["logo"] = logo;
+    }
+  }
+
+  if (def.name === "contacts" && values["avatar"] == null && values["email_jsonb"] != null) {
+    if (id === null || (await isEmpty(ctx, def, id, "avatar"))) {
+      const avatar = await contactAvatar(favicons, values["email_jsonb"]);
+      if (avatar) values["avatar"] = avatar;
+    }
+  }
+
+  return null;
+}
+
+async function isEmpty(ctx: Ctx, def: ResourceDef, id: string, column: "logo" | "avatar"): Promise<boolean> {
+  const result = await ctx.tx.execute<{ empty: boolean }>(
+    `SELECT t."${column}" IS NULL AS empty FROM ${def.table} t WHERE t.org_id = $1::text::uuid AND t.id = $2::text::bigint`,
+    [ctx.scope.orgId, id],
+  );
+  return result.rows[0]?.empty === true;
+}
+
 export async function handleDelete(ctx: Ctx, def: ResourceDef, id: string): Promise<Response> {
+  // The files of this record, or of the notes that go with it, go too.
+  const files = await attachmentPathsUnder(ctx.tx, ctx.scope.orgId, def.name, id);
   const result = await ctx.tx.execute(
     `DELETE FROM ${def.table} AS t WHERE t.org_id = $1::text::uuid AND t.id = $2::text::bigint RETURNING ${DOC}`,
     [ctx.scope.orgId, id],
   );
   const [doc] = documents(result.rows);
   if (!doc) return notFound(ctx.requestId);
+  removeFilesAfterCommit(ctx, files);
   return successResponse(doc, ctx.requestId);
 }
 

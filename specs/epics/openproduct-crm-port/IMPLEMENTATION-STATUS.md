@@ -10,8 +10,8 @@ departs from [design.md](design.md).
 | M0 import and attribution | done | #12, #14 (and #11, the multi-tenant profile) |
 | M1 schema | done | #15 |
 | M2 crm-worker and crm-facade | done | #16, #18 |
-| M3 frontend swap | server side merged (#19); web app not merged | |
-| M4 files and email | | |
+| M3 frontend swap | done | #19, #20 |
+| M4 files and email | worker side built; not merged | |
 | M5 MCP server | | |
 | M6 product glue | | |
 | M7 prod and docs | | |
@@ -50,3 +50,10 @@ departs from [design.md](design.md).
   `signIn.spec`: an instance is no longer a single team.
 - Inviting a user from the CRM returns a placeholder row until they sign in
   (M3); upstream created the account at once.
+- No signed upload or download URLs (M4): files go through crm-worker with
+  the session. No public, unauthenticated file route exists.
+- No Gravatar and no favicon.show (M4): only the domain's own favicon.
+- Inbound email requires a DMARC pass (M4); upstream trusted its mail
+  provider's webhook secret instead.
+- No notification emails yet (M4): upstream sends none besides auth mail,
+  which identity-worker already owns.

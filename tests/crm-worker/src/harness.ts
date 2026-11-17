@@ -76,8 +76,38 @@ export function executorFor(pg: PGlite): Db {
   };
 }
 
+/** An in-memory stand-in for the R2 bucket binding. */
+export class FakeBucket {
+  readonly objects = new Map<string, { body: Uint8Array; contentType: string | undefined }>();
+
+  async put(key: string, value: ArrayBuffer, options?: { httpMetadata?: { contentType?: string } }) {
+    this.objects.set(key, { body: new Uint8Array(value), contentType: options?.httpMetadata?.contentType });
+  }
+
+  async get(key: string) {
+    const object = this.objects.get(key);
+    if (!object) return null;
+    return {
+      body: new Blob([object.body]).stream(),
+      size: object.body.byteLength,
+      httpMetadata: { contentType: object.contentType },
+    };
+  }
+
+  async delete(keys: string | string[]) {
+    for (const key of Array.isArray(keys) ? keys : [keys]) this.objects.delete(key);
+  }
+}
+
 export interface Harness {
   pg: PGlite;
+  bucket: FakeBucket;
+  /** Hosts whose /favicon.ico answers with an image; every fetch is recorded. */
+  favicons: { hosts: Set<string>; requests: string[] };
+  /** Sends raw bytes, as a file upload does. */
+  upload(member: Member | null, path: string, bytes: Uint8Array | string, contentType?: string): Promise<{ status: number; body: any }>;
+  /** Fetches a file; `bytes` is set on success, `body` on an error. */
+  download(member: Member | null, path: string): Promise<{ status: number; headers: Headers; bytes?: Uint8Array; body?: any }>;
   /** Calls the worker as `member` would through the edge. */
   call(member: Member | null, method: string, path: string, body?: unknown): Promise<{ status: number; body: any }>;
   close(): Promise<void>;
@@ -116,25 +146,61 @@ export async function createHarness(members: Member[]): Promise<Harness> {
     },
   } as unknown as Fetcher;
 
-  const env: Env = { ENVIRONMENT: "test", MEMBERSHIP_WORKER: membership, POLICY_WORKER: policy };
+  const bucket = new FakeBucket();
+  const favicons = { hosts: new Set<string>(), requests: [] as string[] };
+  const fetcher = async (input: string) => {
+    favicons.requests.push(input);
+    const host = new URL(input).host;
+    return favicons.hosts.has(host)
+      ? new Response("icon", { status: 200, headers: { "content-type": "image/x-icon" } })
+      : new Response("nope", { status: 404, headers: { "content-type": "text/html" } });
+  };
+
+  const env: Env = {
+    ENVIRONMENT: "test",
+    MEMBERSHIP_WORKER: membership,
+    POLICY_WORKER: policy,
+    ATTACHMENTS: bucket as unknown as R2Bucket,
+  };
+
+  const actorHeaders = (member: Member | null) => {
+    const headers = new Headers({ "x-request-id": "req_test" });
+    if (member) {
+      headers.set("x-actor-subject-id", member.subjectId);
+      headers.set("x-actor-subject-type", "user");
+      headers.set("x-actor-email", member.email);
+    }
+    return headers;
+  };
+  const dispatch = (request: Request) =>
+    route(request, env, {
+      createDb: () =>
+        REAL_DATABASE_URL ? createSqlExecutor({ connectionString: REAL_DATABASE_URL }) : executorFor(pg),
+      fetcher,
+    });
 
   return {
     pg,
+    bucket,
+    favicons,
+    async upload(member, path, bytes, contentType = "application/octet-stream") {
+      const headers = actorHeaders(member);
+      headers.set("content-type", contentType);
+      const response = await dispatch(new Request(`https://crm.internal${path}`, { method: "POST", headers, body: bytes }));
+      return { status: response.status, body: await response.json() };
+    },
+    async download(member, path) {
+      const response = await dispatch(new Request(`https://crm.internal${path}`, { method: "GET", headers: actorHeaders(member) }));
+      if (response.status !== 200) return { status: response.status, headers: response.headers, body: await response.json() };
+      return { status: 200, headers: response.headers, bytes: new Uint8Array(await response.arrayBuffer()) };
+    },
     async call(member, method, path, body) {
-      const headers = new Headers({ "x-request-id": "req_test" });
-      if (member) {
-        headers.set("x-actor-subject-id", member.subjectId);
-        headers.set("x-actor-subject-type", "user");
-        headers.set("x-actor-email", member.email);
-      }
+      const headers = actorHeaders(member);
       if (body !== undefined) headers.set("content-type", "application/json");
       const init: RequestInit = { method, headers };
       if (body !== undefined) init.body = JSON.stringify(body);
       const request = new Request(`https://crm.internal${path}`, init);
-      const response = await route(request, env, {
-        createDb: () =>
-          REAL_DATABASE_URL ? createSqlExecutor({ connectionString: REAL_DATABASE_URL }) : executorFor(pg),
-      });
+      const response = await dispatch(request);
       return { status: response.status, body: await response.json() };
     },
     close: () => pg.close(),

@@ -42,8 +42,26 @@ exercised through `api-edge` (this Worker has no public URL).
   did not answer, which the worker treats as "not a member". Check
   `GET /health` on the worker's checks and the two bound Workers.
 
+## Turning inbound email on
+
+Needs a domain on this Cloudflare account with Email Routing enabled (see
+`WAITING.md`). Then, per environment:
+
+1. In the dashboard: the domain → Email → Email Routing → Routing rules →
+   Catch-all address → action "Send to a Worker" →
+   `openproduct-crm-crm-worker-<env>`. Use a subdomain per environment (for
+   example `in.<domain>` for prod and `in-stage.<domain>` for stage).
+2. An organization's address is then `<org public id>@<that subdomain>`, where
+   the public id is the `org_…` in its CRM URL. A readable prefix is allowed:
+   `sales+org_…@…`.
+3. Send a message from a member's address with that address in Cc and a
+   contact in To: the contact gets a note. A rejected message bounces with the
+   reason (unknown address, DMARC, sender not a member, no contact).
+
 ## Tests
 
 `tests/crm-worker` runs every route against a real Postgres (PGlite) with the
 migration applied, including the cross-org isolation matrix: a member of
-another org gets `404` on every route and changes nothing.
+another org gets `404` on every route and changes nothing. `files.test.ts`
+covers attachments and favicons against an in-memory bucket and a fake
+fetch; `inbound-email.test.ts` feeds raw RFC 822 messages to the handler.

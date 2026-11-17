@@ -30,6 +30,14 @@
           "id": "@@wiring(cloudflare-hyperdrive/stage:hyperdrive_id)@@"
         }
       ],
+      // Note attachments. The bucket is created by the component's pre-deploy
+      // step if it does not exist yet.
+      "r2_buckets": [
+        {
+          "binding": "ATTACHMENTS",
+          "bucket_name": "openproduct-crm-crm-attachments-stage"
+        }
+      ],
       "services": [
         {
           "binding": "MEMBERSHIP_WORKER",
@@ -50,6 +58,14 @@
         {
           "binding": "PLATFORM_DB",
           "id": "@@wiring(cloudflare-hyperdrive/prod:hyperdrive_id)@@"
+        }
+      ],
+      // Note attachments. The bucket is created by the component's pre-deploy
+      // step if it does not exist yet.
+      "r2_buckets": [
+        {
+          "binding": "ATTACHMENTS",
+          "bucket_name": "openproduct-crm-crm-attachments-prod"
         }
       ],
       "services": [
