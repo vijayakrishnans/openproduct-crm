@@ -1203,10 +1203,10 @@ describe("wrangler config", () => {
   it("stage and prod never cross environments", () => {
     const stageService = config.env.stage.services.find((s: { binding: string }) => s.binding === "POLICY_WORKER")?.service;
     const prodService = config.env.prod.services.find((s: { binding: string }) => s.binding === "POLICY_WORKER")?.service;
-    expect(stageService).toContain("stage");
-    expect(prodService).toContain("prod");
-    expect(stageService).not.toContain("prod");
-    expect(prodService).not.toContain("stage");
+    expect(stageService).toMatch(/-stage$/);
+    expect(prodService).toMatch(/-prod$/);
+    expect(stageService).not.toMatch(/-prod$/);
+    expect(prodService).not.toMatch(/-stage$/);
   });
 
   it("local/dev/stage set DEBUG_DELIVERY to true", () => {

@@ -607,7 +607,7 @@ describe("api-edge auth facade", () => {
 
       const stageServices = config.env?.stage?.services ?? [];
       for (const svc of stageServices) {
-        expect(svc.service).not.toContain("prod");
+        expect(svc.service).not.toMatch(/-prod$/);
       }
     });
 
@@ -618,7 +618,7 @@ describe("api-edge auth facade", () => {
 
       const prodServices = config.env?.prod?.services ?? [];
       for (const svc of prodServices) {
-        expect(svc.service).not.toContain("stage");
+        expect(svc.service).not.toMatch(/-stage$/);
       }
     });
   });

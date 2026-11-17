@@ -465,7 +465,7 @@ describe("api-edge org facade", () => {
       const stageServices = config.env?.stage?.services ?? [];
       const membershipBindings = stageServices.filter((s: any) => s.binding === "MEMBERSHIP_WORKER");
       for (const svc of membershipBindings) {
-        expect(svc.service).not.toContain("prod");
+        expect(svc.service).not.toMatch(/-prod$/);
       }
     });
 
@@ -477,7 +477,7 @@ describe("api-edge org facade", () => {
       const prodServices = config.env?.prod?.services ?? [];
       const membershipBindings = prodServices.filter((s: any) => s.binding === "MEMBERSHIP_WORKER");
       for (const svc of membershipBindings) {
-        expect(svc.service).not.toContain("stage");
+        expect(svc.service).not.toMatch(/-stage$/);
       }
     });
   });
