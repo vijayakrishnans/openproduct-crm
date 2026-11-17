@@ -183,5 +183,14 @@ export const manifest: MigrationManifest = {
       description:
         "Connection pointer on the inbound-delivery inbox (nullable connection_id + partial index) — lets the per-connection delivery log scope precisely; attributed by the IG2 cron drain",
     },
+    {
+      id: "200_crm_core",
+      context: "crm",
+      path: "200_crm_core/up.sql",
+      checksum:
+        "40cdcad3b3d1ea2c302e6757a9b7ac33750ae934f2162d1a29db598bbf234a50",
+      description:
+        "CRM persistence foundation — the org-scoped port of Atomic CRM's schema: companies, contacts, deals, notes, tasks, tags and sales profiles with org_id on every row, composite org foreign keys, row-level security on app.org_id for the crm_app role, and the ported views, merge and global search",
+    },
   ],
 };

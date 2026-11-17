@@ -26,10 +26,11 @@ describe("Integrations Migration Verification", () => {
     );
   });
 
-  it("orders the integrations migrations at the manifest tail", () => {
+  it("orders the integrations migrations after every Lumen context, adjacent", () => {
     const ids = manifest.migrations.map((m) => m.id);
-    expect(ids.indexOf("180_integrations_foundation")).toBe(ids.length - 2);
-    expect(ids.indexOf("190_integrations_delivery_attribution")).toBe(ids.length - 1);
+    const foundation = ids.indexOf("180_integrations_foundation");
+    expect(ids.indexOf("170_membership_org_parent")).toBe(foundation - 1);
+    expect(ids.indexOf("190_integrations_delivery_attribution")).toBe(foundation + 1);
   });
 
   it("manifest checksums match the on-disk up.sql files", () => {

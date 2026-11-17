@@ -10,6 +10,7 @@
     "lint": "eslint src"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.16",
     "@saas/eslint-config": "workspace:*",
     "@saas/tsconfig": "workspace:*",
     "@types/jest": "^29.5.14",
