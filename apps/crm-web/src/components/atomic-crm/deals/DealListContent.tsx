@@ -6,7 +6,7 @@ import {
   useNotify,
   type DataProvider,
 } from "ra-core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
@@ -24,7 +24,22 @@ export const DealListContent = () => {
     getDealsByStage([], dealStages),
   );
 
+  // While a card is being dragged the columns must not change under it: the
+  // drag library cancels the drag (or loses track of the card). Fresh data
+  // that lands mid-drag waits here until the drag is over.
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const pendingSaves = useRef(0);
+  const dragging = useRef(false);
+  const arrivedWhileDragging = useRef(false);
+
   useEffect(() => {
+    if (dragging.current) {
+      arrivedWhileDragging.current = true;
+      return;
+    }
+    // Moves still being saved: the server is behind the screen. The reload
+    // that follows the last save brings the truth.
+    if (pendingSaves.current > 0) return;
     if (unorderedDeals) {
       const newDealsByStage = getDealsByStage(unorderedDeals, dealStages);
       if (!isEqual(newDealsByStage, dealsByStage)) {
@@ -38,10 +53,25 @@ export const DealListContent = () => {
 
   if (isPending) return null;
 
+  const onDragStart = () => {
+    dragging.current = true;
+  };
+
+  /** The drag changed nothing: show what arrived while it lasted, if anything. */
+  const settle = () => {
+    if (!arrivedWhileDragging.current) return;
+    arrivedWhileDragging.current = false;
+    if (unorderedDeals) {
+      setDealsByStage(getDealsByStage(unorderedDeals, dealStages));
+    }
+  };
+
   const onDragEnd: OnDragEndResponder = (result) => {
     const { destination, source } = result;
+    dragging.current = false;
 
     if (!destination) {
+      settle();
       return;
     }
 
@@ -49,8 +79,11 @@ export const DealListContent = () => {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
+      settle();
       return;
     }
+    // a move reloads the board once it is saved (below)
+    arrivedWhileDragging.current = false;
 
     const sourceStage = source.droppableId;
     const destinationStage = destination.droppableId;
@@ -66,10 +99,8 @@ export const DealListContent = () => {
     // its stale stage to the deals dropped next to it.
     const destinationDeal = {
       stage: destinationStage,
-      // undefined if dropped after the last item
-      index: dealsByStage[destinationStage][destination.index]?.index as
-        | number
-        | undefined,
+      // the card whose place is taken; undefined if dropped after the last one
+      targetId: dealsByStage[destinationStage][destination.index]?.id,
     };
 
     // compute local state change synchronously
@@ -82,8 +113,12 @@ export const DealListContent = () => {
       ),
     );
 
-    // persist the changes
-    updateDealStage(sourceDeal, destinationDeal, dataProvider)
+    // Persist the changes. Moves are saved one after the other, each against
+    // what the server holds by then: the cards on screen can be a move or two
+    // ahead of it, so their own stage and index are not to be trusted.
+    pendingSaves.current += 1;
+    saveQueue.current = saveQueue.current
+      .then(() => updateDealStage(sourceDeal.id, destinationDeal, dataProvider))
       .catch(() => {
         notify("crm.deals.move_error", {
           type: "error",
@@ -91,13 +126,15 @@ export const DealListContent = () => {
         });
       })
       .finally(() => {
-        // on failure this puts the card back where the server has it
-        refetch();
+        pendingSaves.current -= 1;
+        // Reload once everything is saved; on failure this puts the card back
+        // where the server has it.
+        if (pendingSaves.current === 0) refetch();
       });
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <div className="flex gap-4">
         {dealStages.map((stage) => (
           <DealColumn
@@ -148,13 +185,26 @@ const updateDealStageLocal = (
 };
 
 const updateDealStage = async (
-  source: Deal,
-  destination: {
+  sourceId: Deal["id"],
+  target: {
     stage: string;
-    index?: number; // undefined if dropped after the last item
+    targetId?: Deal["id"]; // undefined if dropped after the last item
   },
   dataProvider: DataProvider,
 ) => {
+  // the deal as the server has it now
+  const { data: source } = await dataProvider.getOne<Deal>("deals", {
+    id: sourceId,
+  });
+  const targetIndex = async () => {
+    if (target.targetId == null) return undefined;
+    const { data } = await dataProvider.getOne<Deal>("deals", {
+      id: target.targetId,
+    });
+    // a target that has left the column since counts as "after the last one"
+    return data.stage === target.stage ? data.index : undefined;
+  };
+  const destination = { stage: target.stage, index: await targetIndex() };
   if (source.stage === destination.stage) {
     // moving deal inside the same column
     // Fetch all the deals in this stage (because the list may be filtered, but we need to update even non-filtered deals)

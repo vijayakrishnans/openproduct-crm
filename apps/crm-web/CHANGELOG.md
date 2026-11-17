@@ -1,3 +1,10 @@
+## crm-web v0.3.3 - 2026-11-17
+
+- Moving a deal again before its previous move was saved now works. The
+  second move used the deal's old stage and position, so it was saved in the
+  wrong place and the card jumped back.
+- A drag is no longer cancelled when the board reloads in the middle of it.
+
 ## crm-web v0.3.2 - 2026-11-17
 
 - The deal board is harder to break while dragging: it no longer depends on
