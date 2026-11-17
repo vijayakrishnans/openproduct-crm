@@ -6,13 +6,16 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 ## Summary (2026-11-17)
 
-Phase A, CRM0, the multi-tenant profile (CRM-4), M0, the public listing, M1
-(the `crm` schema), M2 (`crm-worker` and the edge's `crm-facade`), M3 (the
-web app on the Lumen API, with the ported e2e specs), M4's attachments and
-favicons, and M5 (the MCP server) have landed. M4's inbound-email handler is
-deployed but receives nothing until the owner provides a domain
-(WAITING.md). M6 (CRM-11: events, seats, the contact limit) is built and
-tested and waits for its pull request. M7 has not landed.
+Every milestone's code has landed or is in its pull request: Phase A, CRM0,
+the multi-tenant profile, M0, the public listing, M1 (the `crm` schema), M2
+(`crm-worker`, `crm-facade`), M3 (the web app on the Lumen API), M4
+(attachments, favicons, the inbound-email handler), M5 (MCP), M6 (events,
+seats, the contact limit) and M7 (the smoke and the docs).
+
+What is not done, and why: the **prod smoke** and **prod sign-in** need a
+verified sending domain, and **inbound email** needs a domain with Email
+Routing. Both are the owner's to provide (WAITING.md). Stage runs the whole
+flow.
 
 ## Inputs used
 
@@ -41,9 +44,9 @@ tested and waits for its pull request. M7 has not landed.
 | M2 crm-worker and crm-facade | CRM-7 | done | #16, #18 | `afe8b8d`, `32da23e` | `tests/crm-worker`: 225 tests on PGlite, including the isolation matrix. On stage through api-edge, 2026-11-17: a member created and read a company, contact and deal, searched and loaded the dashboard; a member of a second org got `404` on seven routes of the first and `422` when referencing its company. Prod answers `401` without a session; nobody can sign in on prod yet (WAITING.md) |
 | M3 frontend swap | CRM-8 | done | #19, #20 | `1c90e81`, `475942e` | Ten ported specs pass in Chromium against the stage API, locally and in CI (`crm-web-e2e`, about 13 minutes there), and the sign-in and onboarding specs pass against the deployed stage app. A new org starts with the default deal stages (no setting stored) |
 | M4 files and email | CRM-9 | attachments and favicons done; inbound email waits on a domain | #21, #23 | `a4e78ca`, `4e2c51c` | On stage through api-edge, 2026-11-17: upload `201`, download returns the same bytes as an attachment, another org gets `404` by either route, no session `401`, the file is gone after its note is deleted, and a new company got `https://cloudflare.com/favicon.ico`. `attachments.spec.ts` passes in Chromium against stage. Inbound email: 16 handler tests; not live (WAITING.md) |
-| M5 MCP server | CRM-10 | merged | #24 | `bfa4051` | `tests/crm-worker` `mcp.test.ts`: 14 tests (protocol, every tool, schema refusals, a read-only key, another organization's key). On stage, API keys already work on the CRM REST routes: own org `200`, another org `404` |
-| M6 product glue | CRM-11 | built; not merged | | | `tests/crm-worker` `platform.test.ts`: events with ids only, per organization, none for a failed request; one seat per person; the contact limit at 412 and fail-closed at 503. The behaviour suite through postgres.js on Postgres 16 wrote the events and seat records |
-| M7 prod and docs | | not started | | | |
+| M5 MCP server | CRM-10 | done | #24 | `bfa4051` | `mcp.test.ts`: 14 tests. On stage through api-edge with real API keys, 2026-11-17: `initialize` and `tools/list` (13 tools); a builder key created a contact, found it by search and added a note; a viewer key read it and was refused a write; a malformed id was refused; another organization's key got `404` from the endpoint and `not_found` for the record through its own; no key `401` |
+| M6 product glue | CRM-11 | done; webhook delivery and the seat total not observable on stage | #25 | `fbfd85c` | On stage, 2026-11-17, for a new organization: creating a contact, moving a deal to `won` and adding a note produced `crm.contact.created`, `crm.deal.stage_changed`, `crm.deal.won` and `crm.note.created` in `GET /audit` (source `crm-worker`, category `crm`, no note text); subscriptions to `crm.deal.*` and `crm.contact.created` were accepted; the contact was created, so billing-worker answered the limit check. Not observable on stage: webhook deliveries and the `crm_seats` total, because the webhooks dispatcher and the metering rollup run on cron and crons are declared for prod only (free-plan limit of 5 triggers per account). Both are covered by `platform.test.ts` and by the real-driver run, which wrote the seat records |
+| M7 prod and docs | CRM-12 | docs and smoke built; prod smoke blocked | | | `tooling/smoke/crm-smoke.mjs` passes on stage, 2026-11-17 (15 steps: sign up, organization, contact, deal, note with attachment, search, another account's `404`s, cleanup). On prod it stops at sign-up: prod emails sign-in codes and has no sending domain (WAITING.md). Prod's api-edge is healthy, crm-web answers `200`, and the CRM and MCP routes answer `401` without a credential |
 
 ## Live URLs
 
@@ -192,6 +195,11 @@ tested and waits for its pull request. M7 has not landed.
 - 2026-11-17: "onboarding" in M6 is what M3 already built: sign in, name an
   organization, and the first-run checklist on an empty dashboard. Nothing
   was added for it.
+
+- 2026-11-17: on stage, webhooks are never delivered and usage summaries
+  never roll up: both run on cron, and crons are declared for prod only
+  (free plan: 5 triggers per account). This is the baseline's choice, not the
+  CRM's; it means those two effects can only be watched on prod.
 
 ## Open risks
 

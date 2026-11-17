@@ -13,14 +13,14 @@ inbound email, MCP tools and background jobs.**
 
 | | |
 |---|---|
-| State | Draft |
+| State | Shipped on stage; prod deployed, its sign-in and inbound email wait on a domain |
 | Cluster | `CRM`, milestones CRM0, CRM-A, M0–M7 (epic `EP-7`, slug `openproduct-crm-port`) |
-| Owning components | `apps/crm-web`, `apps/crm-worker` (M2), `apps/api-edge` (crm-facade), `packages/db` (`200_crm_core`) |
+| Owning components | `apps/crm-web`, `apps/crm-worker`, `apps/api-edge` (crm-facade), `packages/db` (`200_crm_core`), `tests/crm-worker`, `tests/crm-web-e2e` |
 | Builds on | `lumen baseline-v33`; Atomic CRM `aeccb98` (MIT) |
 | Changes | adds the `crm` bounded context; no change to other contexts' tables |
 | Decisions locked | see [design.md](design.md) §1 |
 | Gate | CI green on every PR; the cross-org isolation matrix from M2 on |
-| Shipped as | |
+| Shipped as | pull requests #10–#25 and the M7 pull request; see the ledger |
 
 ## Read order
 

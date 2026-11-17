@@ -4,12 +4,12 @@ An open-source, multi-tenant CRM that runs on Cloudflare's edge. Track
 contacts, companies and deals on a kanban board; keep notes, tasks and tags;
 search everything; import and export CSV. It is built for many
 organizations at once: each one's data is kept apart, teams sign in with
-their own accounts, and AI agents will work with the CRM through an MCP
-server.
+their own accounts, and AI agents work with the CRM through an MCP server.
 
-**[Try the demo →](https://openproduct-crm-crm-web-prod.vijayakrishnan12994.workers.dev)**
+**[Try the demo →](https://openproduct-crm-crm-web-prod.vijayakrishnan12994.workers.dev/?demo)**
 The demo runs entirely in your browser on fake data; nothing you type leaves
-the page.
+the page. Without `?demo`, the same address is the real CRM: sign in with a
+code sent to your email.
 
 ![The deals board](docs/screenshots/deals.png)
 
@@ -23,9 +23,25 @@ webhooks, audit log and billing. It runs on Cloudflare Workers with Postgres
 
 ## Status
 
-The demo web app is live. The CRM's own API, storage and sign-in are being
-built in milestones: see the
-[plan](specs/epics/openproduct-crm-port/implementation-plan.md) and the
+The CRM is deployed on stage and prod:
+
+- **Web app** — contacts, companies, deals, notes with file attachments,
+  tasks, tags, search, import and export, per organization.
+- **API** — `/v1/organizations/:orgId/crm/…` behind the one public edge;
+  another organization's record answers `404`.
+- **MCP** — `/v1/organizations/:orgId/crm/mcp`, signed in with an
+  organization API key; thirteen typed tools, no free-form SQL.
+- **Platform** — CRM events in the audit log and as webhooks, seats in
+  metering, a contact limit per plan.
+
+Two things wait on a domain (see [WAITING.md](WAITING.md)): signing in on prod
+(sign-in codes are emailed, and prod has no verified sending domain yet) and
+inbound email to notes. Until then stage is where the full flow runs; it hands
+out sign-in codes on screen and holds only fake data.
+
+How it was built, and what departs from the design:
+[plan](specs/epics/openproduct-crm-port/implementation-plan.md),
+[as-built status](specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md),
 [progress ledger](ai/context/crm-port-ledger.md).
 
 ## Self-hosting
@@ -78,13 +94,14 @@ what not to touch.
 | Path | What it is |
 |---|---|
 | `apps/api-edge` | The one public HTTP entry point; reaches the workers over service bindings |
-| `apps/*-worker` | Twelve bounded-context Workers — identity, membership, projects, policy, events, config, metering, billing, notifications, webhooks, integrations, admin. Never public |
+| `apps/*-worker` | Thirteen bounded-context Workers — identity, membership, projects, policy, events, config, metering, billing, notifications, webhooks, integrations, admin, and `crm-worker` (the CRM's data, files, inbound email and MCP server). Never public |
 | `apps/web-console-next` | The console: Next.js on Workers + Static Assets, configured against the edge |
-| `apps/crm-web` | The CRM web app (Vite + React, from Atomic CRM) on Workers + Static Assets |
+| `apps/crm-web` | The CRM web app (Vite + React, from Atomic CRM) on Workers + Static Assets; calls the edge from the browser |
 | `packages/*` | Shared libraries: contracts, SDK, CLI, the database harness, the policy engine, the notifications client, the webhook verifier |
 | `infra/terraform/*` | The data plane: Supabase projects, Hyperdrive, the edge's idempotency KV, and the custom-domain component (parked until a domain is set) |
 | `infra/db-migrate` | Database migrations — planned on pull requests, applied on merge |
-| `tests/*` | Per-component contract and verifier suites |
+| `tests/*` | Per-component contract and verifier suites; `tests/crm-worker` runs the CRM against a real Postgres, `tests/crm-web-e2e` drives it in a browser |
+| `tooling/smoke/crm-smoke.mjs` | The CRM's end-to-end smoke for one environment |
 | `intent.yaml` | The environments, the pinned composition catalog, and the Orun workspace this repository deploys into |
 
 `stage` and `prod` are provisioned and deployed; `dev` is verify-only.

@@ -5,7 +5,7 @@ checks for before it carries on.
 
 ## Open
 
-### A sending domain for prod sign-in emails (blocks prod sign-in)
+### A sending domain for prod sign-in emails (blocks prod sign-in and the M7 prod smoke)
 
 - **Why:** prod sends magic-link codes through Cloudflare Email Service from
   `no-reply@mail.openproduct-crm.example.com`, a placeholder. Until a real,
@@ -17,6 +17,10 @@ checks for before it carries on.
   `apps/notifications-worker/wrangler.template.jsonc` in a PR.
 - **Unblock signal:** the domain is listed as verified for sending in the
   Cloudflare account, and the owner has named the address.
+- **Also blocked by this:** M7's prod smoke. `tooling/smoke/crm-smoke.mjs`
+  passes on stage and stops on prod at sign-up, because prod emails its
+  codes and has nowhere to send them from. Once someone can sign in on
+  prod, run it with `CRM_SMOKE_TOKEN` and `CRM_SMOKE_ORG`.
 
 ### A domain for inbound email (blocks M4's inbound-email check on stage and prod)
 

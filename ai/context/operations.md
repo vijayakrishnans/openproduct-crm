@@ -189,6 +189,52 @@ To set it, in one PR:
    convergence is green and DNS resolves, so `deployment.md` records the
    domain.
 
+## The CRM
+
+The CRM is three components: `apps/crm-web` (the web app), `apps/crm-worker`
+(data, files, inbound email, MCP) and the `crm-facade` in `apps/api-edge`.
+Its data is the `crm` schema (migration `200_crm_core`), in the same Supabase
+Postgres as the rest.
+
+| surface | where |
+|---|---|
+| web app | `https://openproduct-crm-crm-web-<env>.<subdomain>.workers.dev` (`?demo` for the in-browser demo) |
+| API | `https://openproduct-crm-api-edge-<env>.<subdomain>.workers.dev/v1/organizations/<org_…>/crm/…` |
+| MCP | the API's `/crm/mcp`, with an organization API key as Bearer token |
+
+**Verify it** with the smoke, which signs up, creates an organization, a
+contact, a deal and a note with an attachment, searches, checks that a second
+account sees none of it, and cleans up:
+
+```bash
+node tooling/smoke/crm-smoke.mjs --api https://openproduct-crm-api-edge-stage.<subdomain>.workers.dev
+```
+
+On an environment that emails sign-in codes (prod), give it a credential of
+an existing organization instead: `CRM_SMOKE_TOKEN` (a session token or an API
+key with the builder role) and `CRM_SMOKE_ORG` (`org_…`).
+
+Things that are not in the desired state and must exist before `crm-worker`
+deploys or works:
+
+- **R2 buckets** `openproduct-crm-crm-attachments-stage` and `-prod`. The
+  deploy token has no R2 permission, so nothing in the pipeline creates them;
+  create them once in the Cloudflare dashboard. Without them the deploy fails
+  with code 10085.
+- **A verified sending domain**, for anyone to sign in on prod.
+- **A domain with Email Routing**, for inbound email to notes.
+
+The last two are tracked in `WAITING.md`. Runbooks: `apps/crm-worker/docs/`.
+
+Two facts worth knowing before changing the CRM:
+
+- `tests/crm-worker` is the only test component that runs its tests in CI
+  (profile `verify`); it runs the real migration on PGlite. A change to a
+  shared package does not redeploy the workers that bundle it: add an
+  `# orun: redeploy …` line to their `component.yaml`.
+- The Postgres driver on Workers re-encodes parameters by inferred type.
+  `crm-worker` binds text only and casts in SQL; its tests enforce that.
+
 ## Evolution
 
 Structural changes (new workers, infra components, packages) follow the

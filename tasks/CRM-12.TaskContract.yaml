@@ -1,0 +1,22 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-12
+  title: "M7: the smoke and the docs"
+spec:
+  goal: One command proves the CRM end to end on an environment, and the README and operations doc describe the CRM as it is.
+  affects:
+    - tooling/smoke/crm-smoke.mjs
+    - README.md
+    - AGENTS.md
+    - WAITING.md
+    - ai/context/operations.md
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/README.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-12.TaskContract.yaml
+  doneWhen:
+    - the smoke (sign up, organization, contact, deal, note with attachment, search) passes on stage
+    - ai/context/operations.md and the README describe the CRM
+    - the smoke passes on prod (blocked on a verified sending domain, see WAITING.md)
+  gates: []
