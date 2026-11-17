@@ -6,16 +6,25 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 ## Summary (2026-11-17)
 
-Every milestone's code has landed or is in its pull request: Phase A, CRM0,
-the multi-tenant profile, M0, the public listing, M1 (the `crm` schema), M2
-(`crm-worker`, `crm-facade`), M3 (the web app on the Lumen API), M4
-(attachments, favicons, the inbound-email handler), M5 (MCP), M6 (events,
-seats, the contact limit) and M7 (the smoke and the docs).
+Every milestone is merged: Phase A, CRM0, the multi-tenant profile, M0, the
+public listing, M1 (the `crm` schema), M2 (`crm-worker`, `crm-facade`), M3
+(the web app on the Lumen API), M4 (attachments, favicons, the inbound-email
+handler), M5 (MCP), M6 (events, seats, the contact limit) and M7 (the smoke
+and the docs). After M7 came fixes from the owner's own use of stage (the
+settings page, the deal board), the relicensing to Apache-2.0, and the
+listing on openproduct.live; see "After M7" below.
 
-What is not done, and why: the **prod smoke** and **prod sign-in** need a
-verified sending domain, and **inbound email** needs a domain with Email
-Routing. Both are the owner's to provide (WAITING.md). Stage runs the whole
-flow.
+What is not done, and why:
+
+- The **prod smoke** and **prod sign-in** need a verified sending domain, and
+  **inbound email** needs a domain with Email Routing. Both are the owner's
+  to provide (WAITING.md). Stage runs the whole flow.
+- The owner saw "Something went wrong" on the deal board while dragging a
+  deal. It was **not reproduced**; the board was hardened and two real drag
+  defects were fixed, but nothing shows that screen is gone (WAITING.md).
+- The openproduct.live listing shows no licence, language or last commit yet,
+  and is not indexed by search engines. Both are on openproduct.live's side
+  (WAITING.md).
 
 ## Inputs used
 
@@ -46,7 +55,20 @@ flow.
 | M4 files and email | CRM-9 | attachments and favicons done; inbound email waits on a domain | #21, #23 | `a4e78ca`, `4e2c51c` | On stage through api-edge, 2026-11-17: upload `201`, download returns the same bytes as an attachment, another org gets `404` by either route, no session `401`, the file is gone after its note is deleted, and a new company got `https://cloudflare.com/favicon.ico`. `attachments.spec.ts` passes in Chromium against stage. Inbound email: 16 handler tests; not live (WAITING.md) |
 | M5 MCP server | CRM-10 | done | #24 | `bfa4051` | `mcp.test.ts`: 14 tests. On stage through api-edge with real API keys, 2026-11-17: `initialize` and `tools/list` (13 tools); a builder key created a contact, found it by search and added a note; a viewer key read it and was refused a write; a malformed id was refused; another organization's key got `404` from the endpoint and `not_found` for the record through its own; no key `401` |
 | M6 product glue | CRM-11 | done; webhook delivery and the seat total not observable on stage | #25 | `fbfd85c` | On stage, 2026-11-17, for a new organization: creating a contact, moving a deal to `won` and adding a note produced `crm.contact.created`, `crm.deal.stage_changed`, `crm.deal.won` and `crm.note.created` in `GET /audit` (source `crm-worker`, category `crm`, no note text); subscriptions to `crm.deal.*` and `crm.contact.created` were accepted; the contact was created, so billing-worker answered the limit check. Not observable on stage: webhook deliveries and the `crm_seats` total, because the webhooks dispatcher and the metering rollup run on cron and crons are declared for prod only (free-plan limit of 5 triggers per account). Both are covered by `platform.test.ts` and by the real-driver run, which wrote the seat records |
-| M7 prod and docs | CRM-12 | docs and smoke built; prod smoke blocked | | | `tooling/smoke/crm-smoke.mjs` passes on stage, 2026-11-17 (15 steps: sign up, organization, contact, deal, note with attachment, search, another account's `404`s, cleanup). On prod it stops at sign-up: prod emails sign-in codes and has no sending domain (WAITING.md). Prod's api-edge is healthy, crm-web answers `200`, and the CRM and MCP routes answer `401` without a credential |
+| M7 prod and docs | CRM-12 | docs and smoke done; prod smoke blocked | #26 | `374612b` | `tooling/smoke/crm-smoke.mjs` passes on stage, 2026-11-17 (15 steps: sign up, organization, contact, deal, note with attachment, search, another account's `404`s, cleanup). On prod it stops at sign-up: prod emails sign-in codes and has no sending domain (WAITING.md). Prod's api-edge is healthy, crm-web answers `200`, and the CRM and MCP routes answer `401` without a credential |
+
+## After M7
+
+Work that followed the milestones, each its own pull request into `main`.
+
+| What | PR | Merge | Verification |
+|---|---|---|---|
+| Settings page opens and saves | #27 | `242a227` | The page showed "Not Found": only the demo's provider served the `configuration/1` record the form edits. The Lumen provider now reads and writes the organization's `crm.configuration` setting for it. `settings.spec.ts` (open from the user menu, change the app title, save, reload) passes against the deployed stage app, 2026-11-17 |
+| Deal board hardening, first drag test | #28 | `45df07f` | Board state follows late-arriving stages; a drop the state cannot place is ignored; a deal dropped beside one with a removed stage takes the column's stage; a failed move is reported; `DealEdit` no longer requests a deal called `create`. Every menu page was opened signed in on stage: all render |
+| Deal moves saved in order | #29 | `14524b3` | A deal moved twice before the first move was saved had its second move stored in the old column (seen in a request timeline against stage: the second `PATCH` carried no `stage`). Moves are queued; each reads the deal and its drop target from the server; the board reloads once, after the last save, and never mid-drag. `dealBoard.spec.ts` failed 2 runs in 3 against deployed stage before, and passed 3 in 3 after, 2026-11-17 |
+| `LICENSE` is plain MIT text | #30 | `b044515` | GitHub reported "Other"; a sentence after the MIT text kept it from matching. Superseded the same day by #31 |
+| Relicensed to Apache-2.0 | #31 | `88f7ab5` | `LICENSE` is the unmodified Apache text; `NOTICE` reads `Copyright 2026 vijayakrishnans and Orunbase`. GitHub's API reports `Apache-2.0` for the repository, 2026-11-17 |
+| Listed on openproduct.live | (no PR: done by the owner on Orunbase) | | https://openproduct.live/atomic-crm, slug `atomic-crm`, published 2026-11-17T08:02Z, on the home feed and the Products page. `GET https://api.openproduct.live/v1/products/atomic-crm` answers `200`. Its licence, language and last commit are still empty and `indexable` is `false` (WAITING.md) |
 
 ## Live URLs
 
@@ -201,6 +223,23 @@ flow.
   (free plan: 5 triggers per account). This is the baseline's choice, not the
   CRM's; it means those two effects can only be watched on prod.
 
+- 2026-11-17: the licence is **Apache-2.0**, chosen by the owner from AGPL,
+  Apache 2.0 and BSD ("we just need the credit"). Apache was proposed because
+  it is the one of the three whose terms carry the credit: redistributors
+  must keep `NOTICE`. AGPL was offered as the alternative that also forces
+  hosted modifications to be published; the owner confirmed Apache. Atomic
+  CRM's code stays MIT (`THIRD_PARTY_NOTICES.md`). The credit names
+  `vijayakrishnans`, the GitHub account, by the owner's choice, and Orunbase.
+
+- 2026-11-17: the product keeps the slug **`atomic-crm`** on openproduct.live,
+  by the owner's choice, though the repository and product are named
+  OpenProduct CRM.
+
+- 2026-11-17: deal moves are saved one at a time against the server's state
+  (two extra reads per move) rather than from the cards on screen. Stage
+  takes about five seconds per save, so the screen is routinely ahead of the
+  server; trusting it stored moves in the wrong column.
+
 ## Open risks
 
 See `specs/epics/openproduct-crm-port/risks-and-open-questions.md`.
@@ -210,6 +249,9 @@ See `specs/epics/openproduct-crm-port/risks-and-open-questions.md`.
 - Prod sign-in: needs a verified sending domain (WAITING.md).
 
 - The OpenProduct GitHub org transfer (needs org membership; see WAITING.md).
+
+- The deal-board crash the owner saw: needs the browser's console error to
+  go further (WAITING.md).
 
 ## Build notes
 

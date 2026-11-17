@@ -14,7 +14,11 @@ departs from [design.md](design.md).
 | M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21, #23 |
 | M5 MCP server | done | #24 |
 | M6 product glue | done | #25 |
-| M7 prod and docs | docs and smoke done; the prod smoke waits on a sending domain | |
+| M7 prod and docs | docs and smoke done; the prod smoke waits on a sending domain | #26 |
+| After M7: settings page fix | done | #27 |
+| After M7: deal board fixes and drag test | done; the crash the owner saw was not reproduced | #28, #29 |
+| After M7: licence | Apache-2.0 with a `NOTICE` | #30, #31 |
+| After M7: openproduct.live listing | published as `atomic-crm`; not indexed, repo facts not read yet | |
 
 ## Departures from design.md
 
@@ -69,3 +73,10 @@ departs from [design.md](design.md).
   emit no event (M6).
 - The prod smoke has not run (M7): nobody can sign in on prod until a sending
   domain is verified. The same script passes on stage.
+- The settings page never worked on the real CRM until #27: the upstream form
+  edits a `configuration` record that only the demo's provider had.
+- The deal board saves a move from the server's state, not the screen's
+  (#29). Upstream reads the dragged card's own stage and index, which is
+  wrong whenever a second move starts before the first is saved.
+- The licence is Apache-2.0, not MIT as the brief said (#31, the owner's
+  decision). Atomic CRM's code keeps its MIT notice.
