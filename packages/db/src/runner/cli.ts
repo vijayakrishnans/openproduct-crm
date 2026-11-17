@@ -68,7 +68,6 @@ function parseArgs(argv: string[]): ParsedArgs {
 
 async function resolveAdapter(
   mode: RunMode,
-  env: string,
 ): Promise<MigrationAdapter | null> {
   if (mode === "plan") {
     return null;
@@ -89,7 +88,7 @@ async function main(): Promise<void> {
 
   process.stderr.write(`db-migrate: mode=${mode} env=${env}\n`);
 
-  const adapter = await resolveAdapter(mode, env);
+  const adapter = await resolveAdapter(mode);
 
   const result = await runMigrations(manifest, {
     mode,
