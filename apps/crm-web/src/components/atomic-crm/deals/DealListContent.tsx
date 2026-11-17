@@ -1,6 +1,11 @@
 import { DragDropContext, type OnDragEndResponder } from "@hello-pangea/dnd";
 import isEqual from "lodash/isEqual";
-import { useDataProvider, useListContext, type DataProvider } from "ra-core";
+import {
+  useDataProvider,
+  useListContext,
+  useNotify,
+  type DataProvider,
+} from "ra-core";
 import { useEffect, useState } from "react";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
@@ -13,6 +18,7 @@ export const DealListContent = () => {
   const { dealStages } = useConfigurationContext();
   const { data: unorderedDeals, isPending, refetch } = useListContext<Deal>();
   const dataProvider = useDataProvider();
+  const notify = useNotify();
 
   const [dealsByStage, setDealsByStage] = useState<DealsByStage>(
     getDealsByStage([], dealStages),
@@ -25,8 +31,10 @@ export const DealListContent = () => {
         setDealsByStage(newDealsByStage);
       }
     }
+    // The stages are a dependency too: the organization's configuration can
+    // arrive after the deals, and a column without an entry here cannot render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unorderedDeals]);
+  }, [unorderedDeals, dealStages]);
 
   if (isPending) return null;
 
@@ -46,12 +54,22 @@ export const DealListContent = () => {
 
     const sourceStage = source.droppableId;
     const destinationStage = destination.droppableId;
-    const sourceDeal = dealsByStage[sourceStage][source.index]!;
-    const destinationDeal = dealsByStage[destinationStage][
-      destination.index
-    ] ?? {
+    const sourceDeal = dealsByStage[sourceStage]?.[source.index];
+    // The board and its state can disagree for a moment (a reload landing
+    // mid-drag). Dropping nothing is better than putting a hole in a column.
+    if (!sourceDeal || !dealsByStage[destinationStage]) {
+      refetch();
+      return;
+    }
+    // The stage is the column's, not the neighbouring card's: a deal whose
+    // stage no longer exists is shown in the first column and must not hand
+    // its stale stage to the deals dropped next to it.
+    const destinationDeal = {
       stage: destinationStage,
-      index: undefined, // undefined if dropped after the last item
+      // undefined if dropped after the last item
+      index: dealsByStage[destinationStage][destination.index]?.index as
+        | number
+        | undefined,
     };
 
     // compute local state change synchronously
@@ -65,9 +83,17 @@ export const DealListContent = () => {
     );
 
     // persist the changes
-    updateDealStage(sourceDeal, destinationDeal, dataProvider).then(() => {
-      refetch();
-    });
+    updateDealStage(sourceDeal, destinationDeal, dataProvider)
+      .catch(() => {
+        notify("crm.deals.move_error", {
+          type: "error",
+          messageArgs: { _: "The deal could not be moved. Please try again." },
+        });
+      })
+      .finally(() => {
+        // on failure this puts the card back where the server has it
+        refetch();
+      });
   };
 
   return (
@@ -76,7 +102,7 @@ export const DealListContent = () => {
         {dealStages.map((stage) => (
           <DealColumn
             stage={stage.value}
-            deals={dealsByStage[stage.value]}
+            deals={dealsByStage[stage.value] ?? []}
             key={stage.value}
           />
         ))}

@@ -12,7 +12,10 @@ export const DealColumn = ({
   stage: string;
   deals: Deal[];
 }) => {
-  const totalAmount = deals.reduce((sum, deal) => sum + deal.amount, 0);
+  const totalAmount = deals.reduce(
+    (sum, deal) => sum + (Number(deal?.amount) || 0),
+    0,
+  );
   const { dealStages, currency } = useConfigurationContext();
   return (
     <div className="flex-1 pb-8">
@@ -40,7 +43,7 @@ export const DealColumn = ({
             }`}
           >
             {deals.map((deal, index) => (
-              <DealCard key={deal.id} deal={deal} index={index} />
+              <DealCard key={deal?.id ?? `empty-${index}`} deal={deal} index={index} />
             ))}
             {droppableProvided.placeholder}
           </div>

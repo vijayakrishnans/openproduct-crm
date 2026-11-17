@@ -118,7 +118,10 @@ const DealLayout = () => {
       <DealListContent />
       <DealArchivedList />
       <DealCreate open={!!matchCreate} />
-      <DealEdit open={!!matchEdit && !matchCreate} id={matchEdit?.params.id} />
+      <DealEdit
+        open={!!matchEdit && !matchCreate}
+        id={matchCreate ? undefined : matchEdit?.params.id}
+      />
       <DealShow open={!!matchShow} id={matchShow?.params.id} />
     </div>
   );

@@ -1,3 +1,14 @@
+## crm-web v0.3.2 - 2026-11-17
+
+- The deal board is harder to break while dragging: it no longer depends on
+  the stages and the deals arriving in a particular order, and a drop it
+  cannot place is ignored instead of leaving a hole in a column.
+- A deal dropped next to one whose stage was removed takes the column's
+  stage, not the removed one.
+- A move that cannot be saved says so and puts the card back.
+- Opening "New Deal" from a deal's edit form no longer shows an "Element does
+  not exist" error.
+
 ## crm-web v0.3.1 - 2026-11-17
 
 - Settings opens again. It showed "Not Found" on the real CRM (the demo was
