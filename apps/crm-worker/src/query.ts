@@ -62,7 +62,7 @@ function positiveInt(raw: string | null, fallback: number): number | null {
 export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId: string): ParseResult {
   const fields: Record<string, string[]> = {};
   const params: unknown[] = [orgId];
-  const clauses: string[] = ["t.org_id = $1::uuid"];
+  const clauses: string[] = ["t.org_id = $1::text::uuid"];
   const bind = (value: unknown): string => {
     params.push(value);
     return `$${params.length}`;
@@ -106,7 +106,7 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
       } else if (value.trim() !== "") {
         const p = bind(value);
         clauses.push(
-          `t.id IN (SELECT s.id FROM ${def.searchTable} s WHERE s.org_id = $1::uuid AND s.fts @@ crm.search_query(${p}::text))`,
+          `t.id IN (SELECT s.id FROM ${def.searchTable} s WHERE s.org_id = $1::text::uuid AND s.fts @@ crm.search_query(${p}::text))`,
         );
       }
       continue;
@@ -141,7 +141,7 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
       } else {
         const p = bind(JSON.stringify(value));
         clauses.push(
-          `${col} @> ARRAY(SELECT e::${element} FROM jsonb_array_elements_text(${p}::jsonb) e)`,
+          `${col} @> ARRAY(SELECT e::${element} FROM jsonb_array_elements_text(${p}::text::jsonb) e)`,
         );
       }
       continue;
@@ -158,7 +158,7 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
         continue;
       }
       const p = bind(JSON.stringify(value));
-      clauses.push(`${col} IN (SELECT e::${cast} FROM jsonb_array_elements_text(${p}::jsonb) e)`);
+      clauses.push(`${col} IN (SELECT e::${cast} FROM jsonb_array_elements_text(${p}::text::jsonb) e)`);
       continue;
     }
 
@@ -186,7 +186,7 @@ export function parseListQuery(def: ResourceDef, search: URLSearchParams, orgId:
       continue;
     }
     const p = bind(String(value));
-    clauses.push(`${col} ${comparison} ${p}::${cast}`);
+    clauses.push(`${col} ${comparison} ${p}::text::${cast}`);
   }
 
   if (Object.keys(fields).length > 0) return { ok: false, fields };

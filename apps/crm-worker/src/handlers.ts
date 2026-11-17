@@ -40,7 +40,7 @@ export async function ensureSalesProfile(ctx: Ctx): Promise<void> {
   const firstName = ctx.actor.email ? email.split("@")[0]! : "API";
   await ctx.tx.execute(
     `INSERT INTO crm.sales (org_id, subject_id, email, first_name, last_name, administrator)
-     VALUES ($1::uuid, $2::text, $3::text, $4::text, '', $5::boolean)
+     VALUES ($1::text::uuid, $2::text, $3::text, $4::text, '', $5::text::boolean)
      ON CONFLICT DO NOTHING`,
     [ctx.scope.orgId, ctx.actor.subjectId, email, firstName, String(ctx.isAdmin)],
   );
@@ -50,8 +50,8 @@ export async function handleMe(ctx: Ctx): Promise<Response> {
   await ensureSalesProfile(ctx);
   // The administrator flag mirrors the member's role; refresh it here.
   const result = await ctx.tx.execute(
-    `UPDATE crm.sales AS t SET administrator = $3::boolean
-     WHERE t.org_id = $1::uuid AND t.subject_id = $2::text
+    `UPDATE crm.sales AS t SET administrator = $3::text::boolean
+     WHERE t.org_id = $1::text::uuid AND t.subject_id = $2::text
      RETURNING ${DOC}`,
     [ctx.scope.orgId, ctx.actor.subjectId, String(ctx.isAdmin)],
   );
@@ -68,7 +68,7 @@ export async function handleList(ctx: Ctx, def: ResourceDef, search: URLSearchPa
   const n = q.params.length;
   const rows = await ctx.tx.execute(
     `SELECT ${DOC} FROM ${def.relation} t WHERE ${q.where}
-     ORDER BY ${q.orderBy} LIMIT $${n + 1}::integer OFFSET $${n + 2}::integer`,
+     ORDER BY ${q.orderBy} LIMIT $${n + 1}::text::integer OFFSET $${n + 2}::text::integer`,
     [...q.params, String(q.limit), String(q.offset)],
   );
   const count = await ctx.tx.execute<{ total: number }>(
@@ -89,7 +89,7 @@ export async function handleList(ctx: Ctx, def: ResourceDef, search: URLSearchPa
 
 export async function handleGet(ctx: Ctx, def: ResourceDef, id: string): Promise<Response> {
   const result = await ctx.tx.execute(
-    `SELECT ${DOC} FROM ${def.relation} t WHERE t.org_id = $1::uuid AND t.id = $2::${idCast(def)}`,
+    `SELECT ${DOC} FROM ${def.relation} t WHERE t.org_id = $1::text::uuid AND t.id = $2::text::${idCast(def)}`,
     [ctx.scope.orgId, id],
   );
   const [doc] = documents(result.rows);
@@ -111,8 +111,8 @@ export async function handleCreate(ctx: Ctx, def: ResourceDef, body: Body | null
   const values = Object.fromEntries(columns.map((c) => [c, body[c]]));
   const result = await ctx.tx.execute(
     `INSERT INTO ${def.table} AS t (org_id${columns.length ? ", " + quoted(columns) : ""})
-     SELECT $1::uuid${columns.length ? ", " + quoted(columns, "r.") : ""}
-     FROM jsonb_populate_record(NULL::${def.table}, $2::jsonb) r
+     SELECT $1::text::uuid${columns.length ? ", " + quoted(columns, "r.") : ""}
+     FROM jsonb_populate_record(NULL::${def.table}, $2::text::jsonb) r
      RETURNING ${DOC}`,
     [ctx.scope.orgId, JSON.stringify(values)],
   );
@@ -132,7 +132,7 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
   if (def.name === "sales" && !ctx.isAdmin) {
     // A member edits their own profile only, and cannot disable anyone.
     const own = await ctx.tx.execute<{ subject_id: string }>(
-      "SELECT t.subject_id FROM crm.sales t WHERE t.org_id = $1::uuid AND t.id = $2::bigint",
+      "SELECT t.subject_id FROM crm.sales t WHERE t.org_id = $1::text::uuid AND t.id = $2::text::bigint",
       [ctx.scope.orgId, id],
     );
     if (own.rows.length === 0) return notFound(ctx.requestId);
@@ -150,8 +150,8 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
   const values = Object.fromEntries(columns.map((c) => [c, body[c]]));
   const result = await ctx.tx.execute(
     `UPDATE ${def.table} AS t SET ${assignments.join(", ")}
-     FROM jsonb_populate_record(NULL::${def.table}, $3::jsonb) r
-     WHERE t.org_id = $1::uuid AND t.id = $2::bigint
+     FROM jsonb_populate_record(NULL::${def.table}, $3::text::jsonb) r
+     WHERE t.org_id = $1::text::uuid AND t.id = $2::text::bigint
      RETURNING ${DOC}`,
     [ctx.scope.orgId, id, JSON.stringify(values)],
   );
@@ -162,7 +162,7 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
 
 export async function handleDelete(ctx: Ctx, def: ResourceDef, id: string): Promise<Response> {
   const result = await ctx.tx.execute(
-    `DELETE FROM ${def.table} AS t WHERE t.org_id = $1::uuid AND t.id = $2::bigint RETURNING ${DOC}`,
+    `DELETE FROM ${def.table} AS t WHERE t.org_id = $1::text::uuid AND t.id = $2::text::bigint RETURNING ${DOC}`,
     [ctx.scope.orgId, id],
   );
   const [doc] = documents(result.rows);
@@ -189,13 +189,13 @@ export async function handleMergeContacts(ctx: Ctx, body: Body | null): Promise<
 
   // Both contacts must belong to this org; otherwise the function raises
   // no_data_found, which the router answers with 404.
-  await ctx.tx.execute("SELECT crm.merge_contacts($1::uuid, $2::bigint, $3::bigint)", [
+  await ctx.tx.execute("SELECT crm.merge_contacts($1::text::uuid, $2::text::bigint, $3::text::bigint)", [
     ctx.scope.orgId,
     loserId,
     winnerId,
   ]);
   const result = await ctx.tx.execute(
-    `SELECT ${DOC} FROM crm.contacts t WHERE t.org_id = $1::uuid AND t.id = $2::bigint`,
+    `SELECT ${DOC} FROM crm.contacts t WHERE t.org_id = $1::text::uuid AND t.id = $2::text::bigint`,
     [ctx.scope.orgId, winnerId],
   );
   const [doc] = documents(result.rows);
@@ -228,10 +228,10 @@ export async function handleSearch(ctx: Ctx, search: URLSearchParams): Promise<R
   const result = await ctx.tx.execute(
     `SELECT to_jsonb(s) AS doc
      FROM crm.global_search(
-       $1::uuid,
+       $1::text::uuid,
        $2::text,
-       (SELECT array_agg(e) FROM jsonb_array_elements_text($3::jsonb) e),
-       $4::integer
+       (SELECT array_agg(e) FROM jsonb_array_elements_text($3::text::jsonb) e),
+       $4::text::integer
      ) s`,
     [ctx.scope.orgId, q, resources ? JSON.stringify(resources) : null, String(limit)],
   );
@@ -241,28 +241,28 @@ export async function handleSearch(ctx: Ctx, search: URLSearchParams): Promise<R
 export async function handleDashboard(ctx: Ctx): Promise<Response> {
   const result = await ctx.tx.execute(
     `SELECT jsonb_build_object(
-       'companies', (SELECT count(*) FROM crm.companies c WHERE c.org_id = $1::uuid),
-       'contacts', (SELECT count(*) FROM crm.contacts c WHERE c.org_id = $1::uuid),
+       'companies', (SELECT count(*) FROM crm.companies c WHERE c.org_id = $1::text::uuid),
+       'contacts', (SELECT count(*) FROM crm.contacts c WHERE c.org_id = $1::text::uuid),
        'deals', jsonb_build_object(
-         'open', (SELECT count(*) FROM crm.deals d WHERE d.org_id = $1::uuid AND d.archived_at IS NULL),
-         'amount', (SELECT coalesce(sum(d.amount), 0) FROM crm.deals d WHERE d.org_id = $1::uuid AND d.archived_at IS NULL),
+         'open', (SELECT count(*) FROM crm.deals d WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL),
+         'amount', (SELECT coalesce(sum(d.amount), 0) FROM crm.deals d WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL),
          'byStage', (
            SELECT coalesce(jsonb_agg(jsonb_build_object('stage', x.stage, 'count', x.n, 'amount', x.amount) ORDER BY x.stage), '[]'::jsonb)
            FROM (
              SELECT d.stage, count(*) AS n, coalesce(sum(d.amount), 0) AS amount
              FROM crm.deals d
-             WHERE d.org_id = $1::uuid AND d.archived_at IS NULL
+             WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL
              GROUP BY d.stage
            ) x
          )
        ),
        'tasks', jsonb_build_object(
-         'open', (SELECT count(*) FROM crm.tasks t WHERE t.org_id = $1::uuid AND t.done_date IS NULL),
-         'overdue', (SELECT count(*) FROM crm.tasks t WHERE t.org_id = $1::uuid AND t.done_date IS NULL AND t.due_date < now())
+         'open', (SELECT count(*) FROM crm.tasks t WHERE t.org_id = $1::text::uuid AND t.done_date IS NULL),
+         'overdue', (SELECT count(*) FROM crm.tasks t WHERE t.org_id = $1::text::uuid AND t.done_date IS NULL AND t.due_date < now())
        ),
        'notes', (
-         (SELECT count(*) FROM crm.contact_notes n WHERE n.org_id = $1::uuid)
-         + (SELECT count(*) FROM crm.deal_notes n WHERE n.org_id = $1::uuid)
+         (SELECT count(*) FROM crm.contact_notes n WHERE n.org_id = $1::text::uuid)
+         + (SELECT count(*) FROM crm.deal_notes n WHERE n.org_id = $1::text::uuid)
        )
      ) AS doc`,
     [ctx.scope.orgId],

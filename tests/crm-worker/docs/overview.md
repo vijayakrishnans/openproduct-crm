@@ -22,3 +22,19 @@ WebAssembly) and drives every route of the worker against it.
 - `pnpm exec turbo run build --filter=./` — build
 - `pnpm exec turbo run typecheck --filter=./` — typecheck
 - `pnpm exec turbo run test --filter=./` — the suite itself
+
+## Against the production driver
+
+PGlite takes parameters as they are; the driver used on Workers
+(postgres.js) re-encodes each one by the type Postgres infers for it. To run
+the behaviour suite through that driver, point it at a Postgres that has the
+migration applied and empty `crm` tables:
+
+```bash
+CRM_TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/crm_test \
+  pnpm --filter @saas/crm-worker-tests test -- src/crm-worker.test.ts
+```
+
+The worker binds text parameters only and casts in SQL; the PGlite harness
+rejects any other parameter type, and a source check holds every placeholder
+to a `::text` cast.

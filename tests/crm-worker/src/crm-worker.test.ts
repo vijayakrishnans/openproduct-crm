@@ -12,6 +12,26 @@ function filter(value: Record<string, unknown>): string {
   return `filter=${encodeURIComponent(JSON.stringify(value))}`;
 }
 
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+describe("crm-worker SQL", () => {
+  const src = resolve(dirname(fileURLToPath(import.meta.url)), "../../../apps/crm-worker/src");
+
+  it.each(["handlers.ts", "query.ts", "db.ts"])("binds every parameter of %s as text", (file) => {
+    const code = readFileSync(resolve(src, file), "utf-8")
+      .replace(/^\s*\/\/.*$/gm, "")
+      // bind() mints the placeholder; its callers add the cast.
+      .replace("return `$${params.length}`;", "");
+    const placeholders = code.match(/(\$\d+|\$\$\{[^}]+\}|\$\{p\})(::\w+)?/g) ?? [];
+    expect(placeholders.length).toBeGreaterThan(0);
+    for (const placeholder of placeholders) {
+      expect(placeholder).toMatch(/::text$/);
+    }
+  });
+});
+
 describe("crm-worker", () => {
   let h: Harness;
   const ids: Record<string, number> = {};

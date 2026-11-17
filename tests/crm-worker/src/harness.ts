@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gin } from "@electric-sql/pglite/contrib/btree_gin";
 import { unaccent } from "@electric-sql/pglite/contrib/unaccent";
-import type { SqlExecutor, SqlRow } from "@saas/db/hyperdrive";
+import { createSqlExecutor, type SqlExecutor, type SqlRow } from "@saas/db/hyperdrive";
 import type { Db } from "@crm-worker/db";
 import type { Env } from "@crm-worker/env";
 import { route } from "@crm-worker/router";
@@ -43,6 +43,15 @@ export async function createDatabase(): Promise<PGlite> {
 
 export function executorFor(pg: PGlite): Db {
   const execute = async <T extends SqlRow = SqlRow>(text: string, params?: unknown[]) => {
+    // The production driver (postgres.js) re-encodes a parameter by the type
+    // Postgres infers for it: a JSON string bound to $n::jsonb is stringified
+    // again, "true" bound to $n::boolean becomes false. The worker therefore
+    // binds text only and casts in SQL; hold it to that here.
+    for (const param of params ?? []) {
+      if (param !== null && typeof param !== "string") {
+        throw new Error(`crm-worker must bind text parameters only, got ${typeof param}`);
+      }
+    }
     const res = await pg.query(text, params);
     return { rows: res.rows as T[], rowCount: res.rows.length };
   };
@@ -73,6 +82,11 @@ export interface Harness {
   call(member: Member | null, method: string, path: string, body?: unknown): Promise<{ status: number; body: any }>;
   close(): Promise<void>;
 }
+
+/** With CRM_TEST_DATABASE_URL set (a Postgres that already has the migration
+ *  applied, empty crm tables), requests go through the real driver instead of
+ *  PGlite, exactly as on Workers. */
+const REAL_DATABASE_URL = process.env["CRM_TEST_DATABASE_URL"];
 
 export async function createHarness(members: Member[]): Promise<Harness> {
   const pg = await createDatabase();
@@ -117,7 +131,10 @@ export async function createHarness(members: Member[]): Promise<Harness> {
       const init: RequestInit = { method, headers };
       if (body !== undefined) init.body = JSON.stringify(body);
       const request = new Request(`https://crm.internal${path}`, init);
-      const response = await route(request, env, { createDb: () => executorFor(pg) });
+      const response = await route(request, env, {
+        createDb: () =>
+          REAL_DATABASE_URL ? createSqlExecutor({ connectionString: REAL_DATABASE_URL }) : executorFor(pg),
+      });
       return { status: response.status, body: await response.json() };
     },
     close: () => pg.close(),
