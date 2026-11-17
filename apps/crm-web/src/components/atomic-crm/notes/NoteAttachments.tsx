@@ -1,6 +1,7 @@
 import { Paperclip } from "lucide-react";
 
 import type { AttachmentNote, ContactNote, DealNote } from "../types";
+import { AttachmentAnchor } from "./AttachmentAnchor";
 
 /**
  * Displays persisted note attachments in note show/list views.
@@ -28,20 +29,7 @@ export const NoteAttachments = ({ note }: { note: ContactNote | DealNote }) => {
         <div className="grid grid-cols-4 gap-8">
           {imageAttachments.map((attachment: AttachmentNote, index: number) => (
             <div key={index}>
-              <a
-                href={attachment.src}
-                title={attachment.title}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <img
-                  src={attachment.src}
-                  alt={attachment.title}
-                  className="w-[200px] h-[100px] object-cover cursor-pointer object-left border border-border"
-                />
-              </a>
+              <AttachmentAnchor src={attachment.src} title={attachment.title} image className="block" />
             </div>
           ))}
         </div>
@@ -50,15 +38,12 @@ export const NoteAttachments = ({ note }: { note: ContactNote | DealNote }) => {
         otherAttachments.map((attachment: AttachmentNote, index: number) => (
           <div key={index} className="flex items-center gap-2">
             <Paperclip className="w-4 h-4" />
-            <a
-              href={attachment.src}
-              target="_blank"
-              rel="noopener noreferrer"
+            <AttachmentAnchor
+              src={attachment.src}
+              title={attachment.title}
+              image={false}
               className="underline hover:no-underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {attachment.title}
-            </a>
+            />
           </div>
         ))}
     </div>

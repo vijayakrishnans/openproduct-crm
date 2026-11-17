@@ -30,6 +30,13 @@ class Api {
     return (payload["data"] ?? payload) as T;
   }
 
+  async status(method: string, path: string): Promise<number> {
+    const headers: Record<string, string> = {};
+    if (this.token) headers["authorization"] = `Bearer ${this.token}`;
+    const response = await this.http.fetch(path, { method, headers });
+    return response.status();
+  }
+
   /** Signs in the way a person does; the API returns the code where
    *  identity runs with debug delivery. */
   static async signIn(http: APIRequestContext, email: string): Promise<Api> {
@@ -110,6 +117,26 @@ export class Workspace {
         ...(date ? { date } : {}),
       });
     }
+  }
+
+  async listNotes(contactId: number) {
+    const filter = encodeURIComponent(JSON.stringify({ contact_id: contactId }));
+    const { items } = await this.api.call<{ items: { id: number; attachments: Json[] }[] }>(
+      "GET",
+      `${this.crm}/contact_notes?filter=${filter}`,
+    );
+    return items;
+  }
+
+  async deleteNote(noteId: number) {
+    await this.api.call("DELETE", `${this.crm}/contact_notes/${noteId}`);
+  }
+
+  /** The status this member gets for a stored file, in their own
+   *  organization or, with `orgId`, in another's. */
+  async fileStatus(path: string, orgId = this.orgId): Promise<number> {
+    const encoded = path.split("/").map(encodeURIComponent).join("/");
+    return this.api.status("GET", `/v1/organizations/${orgId}/crm/attachments/${encoded}`);
   }
 
   async createContact({

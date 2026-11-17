@@ -1,6 +1,7 @@
 import { useFieldValue, useRecordContext, useTranslate } from "ra-core";
 import type { FileFieldProps } from "@/components/admin";
 import { cn } from "@/lib/utils";
+import { AttachmentAnchor } from "./AttachmentAnchor";
 
 /**
  * Displays a preview for a single attachment record.
@@ -51,36 +52,13 @@ export const AttachmentField = (props: FileFieldProps) => {
 
   return (
     <div className={cn("inline-block", className)} {...rest}>
-      {isImageMimeType(type) ? (
-        <a
-          href={srcValue}
-          title={titleValue}
-          target={target}
-          rel="noopener noreferrer"
-          download={download}
-          // useful to prevent click bubbling in a DataTable with rowClick
-          onClick={(e) => e.stopPropagation()}
-        >
-          <img
-            alt={titleValue}
-            title={titleValue}
-            src={srcValue}
-            className="w-[200px] h-[100px] object-cover cursor-pointer object-left border border-border"
-          />
-        </a>
-      ) : (
-        <a
-          href={srcValue}
-          title={titleValue}
-          target={target}
-          rel="noopener noreferrer"
-          download={download}
-          // useful to prevent click bubbling in a DataTable with rowClick
-          onClick={(e) => e.stopPropagation()}
-        >
-          {titleValue}
-        </a>
-      )}
+      <AttachmentAnchor
+        src={srcValue}
+        title={titleValue}
+        image={isImageMimeType(type)}
+        target={target}
+        download={download}
+      />
     </div>
   );
 };
