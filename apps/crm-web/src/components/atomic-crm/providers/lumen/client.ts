@@ -137,6 +137,12 @@ export function crmPath(): string {
   return `/v1/organizations/${orgId}/crm`;
 }
 
+/** The organization's MCP endpoint, or null when not signed in (the demo). */
+export function mcpUrl(): string | null {
+  const orgId = getSession()?.orgId;
+  return orgId ? `${apiBaseUrl()}/v1/organizations/${orgId}/crm/mcp` : null;
+}
+
 export function orgPath(): string {
   const orgId = getSession()?.orgId;
   if (!orgId) throw new HttpError("No organization selected", 401);

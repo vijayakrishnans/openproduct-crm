@@ -1,0 +1,19 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-10
+  title: "M5: the MCP server"
+spec:
+  goal: An AI assistant can read and write one organization's CRM over MCP with a Lumen API key, through typed, org-scoped tools.
+  affects:
+    - apps/crm-worker/**
+    - tests/crm-worker/**
+    - apps/crm-web/**
+    - ai/context/crm-port-ledger.md
+    - specs/epics/openproduct-crm-port/IMPLEMENTATION-STATUS.md
+    - tasks/CRM-10.TaskContract.yaml
+  doneWhen:
+    - the MCP endpoint lists typed tools with closed schemas and no free-form SQL
+    - tool calls pass their tests, including denial for another organization's key and for a read-only key's writes
+    - on stage, an API key of one organization lists and calls tools through api-edge, and gets 404 on another organization's endpoint
+  gates: []

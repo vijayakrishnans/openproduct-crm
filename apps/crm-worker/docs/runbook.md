@@ -48,6 +48,18 @@ exercised through `api-edge` (this Worker has no public URL).
   the Cloudflare dashboard (R2 → Create bucket) with exactly that name, then
   re-run the failed lane. This happened on the first deploy, 2026-11-17.
 
+## Connecting an assistant over MCP
+
+1. In the console, an owner or admin creates an API key for the organization
+   (role `viewer` for read-only, `builder` to let the assistant write). The
+   secret is shown once.
+2. Point the MCP client at
+   `https://<api-edge host>/v1/organizations/<org_…>/crm/mcp` with the header
+   `Authorization: Bearer <the key>`. The CRM's profile page shows the URL.
+3. `tools/list` should answer thirteen tools. A `404` means the key does not
+   belong to that organization; a tool result with `forbidden` means its role
+   cannot write.
+
 ## Turning inbound email on
 
 Needs a domain on this Cloudflare account with Email Routing enabled (see
@@ -68,6 +80,7 @@ Needs a domain on this Cloudflare account with Email Routing enabled (see
 
 `tests/crm-worker` runs every route against a real Postgres (PGlite) with the
 migration applied, including the cross-org isolation matrix: a member of
-another org gets `404` on every route and changes nothing. `files.test.ts`
+another org gets `404` on every route and changes nothing. `mcp.test.ts` drives
+the MCP endpoint, including another organization's key. `files.test.ts`
 covers attachments and favicons against an in-memory bucket and a fake
 fetch; `inbound-email.test.ts` feeds raw RFC 822 messages to the handler.
