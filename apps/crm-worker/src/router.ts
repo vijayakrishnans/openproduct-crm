@@ -22,6 +22,7 @@ import {
 import { errorResponse, forbidden, methodNotAllowed, notFound, successResponse } from "./http.js";
 import { generateRequestId, parseOrgPublicId, parseRecordId } from "./ids.js";
 import { handleMcp } from "./mcp.js";
+import { flushPlatformWork, type PlatformWork } from "./platform.js";
 import { RESOURCES, type ResourceDef } from "./resources.js";
 
 const REQUEST_ID_RE = /^[\w-]{1,128}$/;
@@ -130,6 +131,7 @@ function health(env: Env, requestId: string): Response {
         attachments: { configured: !!env.ATTACHMENTS },
         membership: { configured: !!env.MEMBERSHIP_WORKER },
         policy: { configured: !!env.POLICY_WORKER },
+        billing: { configured: !!env.BILLING_WORKER },
       },
     },
     requestId,
@@ -217,6 +219,7 @@ export async function route(request: Request, env: Env, deps: RouteDeps = {}): P
       const db = deps.createDb ? deps.createDb(env) : env.PLATFORM_DB ? createSqlExecutor(env.PLATFORM_DB) : null;
       if (!db) return errorResponse("internal_error", "Service unavailable", 503, requestId);
       const afterCommit: (() => Promise<void>)[] = [];
+      const platform: PlatformWork = { events: [], newSeats: [] };
       try {
         const response = await withOrg(db, { orgId, subjectId: actor.subjectId }, async (tx) => {
           const ctx: Ctx = {
@@ -228,9 +231,13 @@ export async function route(request: Request, env: Env, deps: RouteDeps = {}): P
             bucket: env.ATTACHMENTS,
             fetcher,
             afterCommit,
+            platform,
+            billing: env.BILLING_WORKER,
           };
           const response = await work(ctx);
           if (!response.ok) throw new Rollback(response);
+          // Events and seats go in with the records they describe.
+          await flushPlatformWork(tx, { orgId, actor, requestId }, platform);
           return response;
         });
         // The records are gone for good; a file that fails to delete is only

@@ -10,6 +10,7 @@ import type { Actor } from "./authz.js";
 import { DOC, documents, type OrgScope } from "./db.js";
 import { companyLogo, contactAvatar, type Fetch } from "./favicons.js";
 import { errorResponse, forbidden, notFound, successResponse, validationError } from "./http.js";
+import { checkContactsLimit, type PlatformWork } from "./platform.js";
 import { parseListQuery } from "./query.js";
 import { SEARCH_RESOURCES, type ResourceDef } from "./resources.js";
 
@@ -26,6 +27,10 @@ export interface Ctx {
   /** Work to do once the transaction has committed (R2 deletes): a
    *  rolled-back request must not have removed any file. */
   afterCommit: (() => Promise<void>)[];
+  /** Events and seat records to write with this request (see platform.ts). */
+  platform: PlatformWork;
+  /** billing-worker, for the plan's contact limit; absent turns the check off. */
+  billing: Fetcher | undefined;
 }
 
 type Body = Record<string, unknown>;
@@ -53,12 +58,17 @@ function quoted(columns: string[], prefix = ""): string {
 export async function ensureSalesProfile(ctx: Ctx): Promise<void> {
   const email = ctx.actor.email?.trim() || `${ctx.actor.subjectId}@no-email.invalid`;
   const firstName = ctx.actor.email ? email.split("@")[0]! : "API";
-  await ctx.tx.execute(
+  const created = await ctx.tx.execute(
     `INSERT INTO crm.sales (org_id, subject_id, email, first_name, last_name, administrator)
      VALUES ($1::text::uuid, $2::text, $3::text, $4::text, '', $5::text::boolean)
-     ON CONFLICT DO NOTHING`,
+     ON CONFLICT DO NOTHING
+     RETURNING id`,
     [ctx.scope.orgId, ctx.actor.subjectId, email, firstName, String(ctx.isAdmin)],
   );
+  // A person's first use of the CRM is a seat; an API key is not a person.
+  if (created.rows.length > 0 && ctx.actor.subjectType === "user") {
+    ctx.platform.newSeats.push(ctx.actor.subjectId);
+  }
 }
 
 export async function handleMe(ctx: Ctx): Promise<Response> {
@@ -127,6 +137,11 @@ export async function handleCreate(ctx: Ctx, def: ResourceDef, body: Body | null
   if (invalid) return invalid;
   const columns = Object.keys(values);
 
+  if (def.name === "contacts") {
+    const refused = await contactsLimitReached(ctx);
+    if (refused) return refused;
+  }
+
   const result = await ctx.tx.execute(
     `INSERT INTO ${def.table} AS t (org_id${columns.length ? ", " + quoted(columns) : ""})
      SELECT $1::text::uuid${columns.length ? ", " + quoted(columns, "r.") : ""}
@@ -135,7 +150,60 @@ export async function handleCreate(ctx: Ctx, def: ResourceDef, body: Body | null
     [ctx.scope.orgId, JSON.stringify(values)],
   );
   const [doc] = documents(result.rows);
+  if (doc) announceCreated(ctx, def, doc);
   return successResponse(doc, ctx.requestId, 201);
+}
+
+/** Refuses one more contact when the organization's plan is full. */
+async function contactsLimitReached(ctx: Ctx): Promise<Response | null> {
+  if (!ctx.billing) return null;
+  const count = await ctx.tx.execute<{ n: number }>(
+    "SELECT count(*)::integer AS n FROM crm.contacts c WHERE c.org_id = $1::text::uuid",
+    [ctx.scope.orgId],
+  );
+  const gate = await checkContactsLimit(ctx.billing, ctx.scope.orgId, Number(count.rows[0]?.n ?? 0), ctx.requestId);
+  if (gate.kind === "allow") return null;
+  if (gate.kind === "unavailable") {
+    return errorResponse("internal_error", "Billing service unavailable", 503, ctx.requestId);
+  }
+  return errorResponse("precondition_failed", gate.message, 412, ctx.requestId, {
+    reason: "limit_reached",
+    entitlementKey: "limit.crm_contacts",
+  });
+}
+
+const fullName = (doc: Record<string, unknown>) =>
+  [doc["first_name"], doc["last_name"]].filter((part) => typeof part === "string" && part !== "").join(" ");
+
+function announceCreated(ctx: Ctx, def: ResourceDef, doc: Record<string, unknown>): void {
+  if (def.name === "contacts") {
+    const name = fullName(doc);
+    ctx.platform.events.push({
+      type: "crm.contact.created",
+      subjectKind: "contact",
+      subjectId: String(doc["id"]),
+      subjectName: name,
+      description: `Created contact ${name || `#${doc["id"]}`}`,
+      payload: { contactId: doc["id"], companyId: doc["company_id"] ?? null, salesId: doc["sales_id"] ?? null },
+    });
+  } else if (def.name === "contact_notes" || def.name === "deal_notes") {
+    const on = def.name === "contact_notes" ? "contact" : "deal";
+    const parentId = doc[`${on}_id`];
+    ctx.platform.events.push({
+      type: "crm.note.created",
+      subjectKind: "note",
+      subjectId: String(doc["id"]),
+      description: `Added a note to ${on} #${parentId}`,
+      payload: {
+        noteId: doc["id"],
+        on,
+        contactId: on === "contact" ? parentId : null,
+        dealId: on === "deal" ? parentId : null,
+        salesId: doc["sales_id"] ?? null,
+        attachments: Array.isArray(doc["attachments"]) ? doc["attachments"].length : 0,
+      },
+    });
+  }
 }
 
 export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body: Body | null): Promise<Response> {
@@ -175,6 +243,17 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
       ? await attachmentPathsUnder(ctx.tx, ctx.scope.orgId, def.name, id)
       : [];
 
+  // A deal that moves is announced; know where it was before it moves.
+  const stageBefore =
+    def.name === "deals" && typeof values["stage"] === "string"
+      ? (
+          await ctx.tx.execute<{ stage: string }>(
+            "SELECT d.stage FROM crm.deals d WHERE d.org_id = $1::text::uuid AND d.id = $2::text::bigint",
+            [ctx.scope.orgId, id],
+          )
+        ).rows[0]?.stage
+      : undefined;
+
   const result = await ctx.tx.execute(
     `UPDATE ${def.table} AS t SET ${assignments.join(", ")}
      FROM jsonb_populate_record(NULL::${def.table}, $3::text::jsonb) r
@@ -187,6 +266,27 @@ export async function handleUpdate(ctx: Ctx, def: ResourceDef, id: string, body:
   if (replaced.length > 0) {
     const kept = new Set(pathsOf(values["attachments"]));
     removeFilesAfterCommit(ctx, replaced.filter((path) => !kept.has(path)));
+  }
+  if (stageBefore !== undefined && stageBefore !== doc["stage"]) {
+    const deal = { dealId: doc["id"], companyId: doc["company_id"] ?? null, amount: doc["amount"] ?? null };
+    ctx.platform.events.push({
+      type: "crm.deal.stage_changed",
+      subjectKind: "deal",
+      subjectId: String(doc["id"]),
+      subjectName: String(doc["name"] ?? ""),
+      description: `Moved deal ${doc["name"]} from ${stageBefore} to ${doc["stage"]}`,
+      payload: { ...deal, from: stageBefore, to: doc["stage"] },
+    });
+    if (doc["stage"] === "won") {
+      ctx.platform.events.push({
+        type: "crm.deal.won",
+        subjectKind: "deal",
+        subjectId: String(doc["id"]),
+        subjectName: String(doc["name"] ?? ""),
+        description: `Won deal ${doc["name"]}`,
+        payload: deal,
+      });
+    }
   }
   return successResponse(doc, ctx.requestId);
 }

@@ -6,5 +6,7 @@ export interface Env {
   ATTACHMENTS?: R2Bucket;
   MEMBERSHIP_WORKER?: Fetcher;
   POLICY_WORKER?: Fetcher;
+  /** Answers what the organization's plan allows (the contact limit). */
+  BILLING_WORKER?: Fetcher;
   ENVIRONMENT: string;
 }

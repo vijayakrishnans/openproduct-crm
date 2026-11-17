@@ -9,10 +9,10 @@ const A = `/v1/organizations/${orgPublicId(ORG_A)}/crm`;
 const B = `/v1/organizations/${orgPublicId(ORG_B)}/crm`;
 
 // API keys reach the worker as service principals with a role in one org.
-const keyA: Member = { subjectId: "svc_key_a", email: "", roles: { [ORG_A]: "builder" } };
-const readOnlyA: Member = { subjectId: "svc_reader_a", email: "", roles: { [ORG_A]: "viewer" } };
-const keyB: Member = { subjectId: "svc_key_b", email: "", roles: { [ORG_B]: "owner" } };
-const stranger: Member = { subjectId: "svc_stranger", email: "", roles: {} };
+const keyA: Member = { subjectId: "svc_key_a", subjectType: "service_principal", email: "", roles: { [ORG_A]: "builder" } };
+const readOnlyA: Member = { subjectId: "svc_reader_a", subjectType: "service_principal", email: "", roles: { [ORG_A]: "viewer" } };
+const keyB: Member = { subjectId: "svc_key_b", subjectType: "service_principal", email: "", roles: { [ORG_B]: "owner" } };
+const stranger: Member = { subjectId: "svc_stranger", subjectType: "service_principal", email: "", roles: {} };
 
 describe("MCP server", () => {
   let h: Harness;

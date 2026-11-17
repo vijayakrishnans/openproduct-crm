@@ -60,6 +60,9 @@ const DEFAULT_TIER_ENTITLEMENTS: Record<string, number> = {
   // repo link. Catalog rows override these the moment plans configure them.
   "feature.integrations.github": 1,
   "limit.repo_links": 1,
+  // The CRM's contact limit on the default tier, so an organization that
+  // predates the key (or has no plan rows yet) can use the CRM.
+  "limit.crm_contacts": 500,
 };
 
 

@@ -10,12 +10,15 @@ import type { Env } from "@crm-worker/env";
 import { route } from "@crm-worker/router";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const MIGRATIONS = resolve(__dirname, "../../..", "packages/db/src/migrations");
 const MIGRATION = resolve(__dirname, "../../..", "packages/db/src/migrations/200_crm_core/up.sql");
 
 export type Role = "owner" | "admin" | "builder" | "viewer" | "billing_admin";
 
 export interface Member {
   subjectId: string;
+  /** "user" unless given; an API key reaches the worker as "service_principal". */
+  subjectType?: "user" | "service_principal";
   email: string;
   /** org uuid → role */
   roles: Record<string, Role>;
@@ -37,17 +40,27 @@ function json(data: unknown): Response {
  *  executor interface the worker uses in production. */
 export async function createDatabase(): Promise<PGlite> {
   const pg = new PGlite({ extensions: { unaccent, btree_gin } });
+  // The contexts crm-worker writes to besides its own: the event log (audit,
+  // webhooks) and metering.
+  for (const migration of ["030_events_audit_core", "100_metering_foundation"]) {
+    await pg.exec(readFileSync(resolve(MIGRATIONS, migration, "up.sql"), "utf-8"));
+  }
   await pg.exec(readFileSync(MIGRATION, "utf-8"));
   return pg;
 }
 
 export function executorFor(pg: PGlite): Db {
+  let asOwner = false;
   const execute = async <T extends SqlRow = SqlRow>(text: string, params?: unknown[]) => {
     // The production driver (postgres.js) re-encodes a parameter by the type
     // Postgres infers for it: a JSON string bound to $n::jsonb is stringified
     // again, "true" bound to $n::boolean becomes false. The worker therefore
     // binds text only and casts in SQL; hold it to that here.
-    for (const param of params ?? []) {
+    // After RESET ROLE the transaction is writing to other contexts through
+    // their own repositories (events, metering), which bind as they always
+    // have; the rule is for the CRM's own statements.
+    if (text === "RESET ROLE") asOwner = true;
+    for (const param of asOwner ? [] : (params ?? [])) {
       if (param !== null && typeof param !== "string") {
         throw new Error(`crm-worker must bind text parameters only, got ${typeof param}`);
       }
@@ -59,6 +72,7 @@ export function executorFor(pg: PGlite): Db {
     execute,
     async transaction<T>(fn: (executor: SqlExecutor) => Promise<T>): Promise<T> {
       await pg.exec("BEGIN");
+      asOwner = false;
       try {
         const result = await fn({ execute });
         await pg.exec("COMMIT");
@@ -118,7 +132,13 @@ export interface Harness {
  *  PGlite, exactly as on Workers. */
 const REAL_DATABASE_URL = process.env["CRM_TEST_DATABASE_URL"];
 
-export async function createHarness(members: Member[]): Promise<Harness> {
+export interface HarnessOptions {
+  /** Stands in for billing-worker: what the plan says for an entitlement
+   *  key. Absent, no BILLING_WORKER is bound and the limit is not checked. */
+  billing?: (entitlementKey: string, orgPublicId: string) => Response | Promise<Response>;
+}
+
+export async function createHarness(members: Member[], options: HarnessOptions = {}): Promise<Harness> {
   const pg = await createDatabase();
   const bySubject = new Map(members.map((m) => [m.subjectId, m]));
 
@@ -161,13 +181,25 @@ export async function createHarness(members: Member[]): Promise<Harness> {
     MEMBERSHIP_WORKER: membership,
     POLICY_WORKER: policy,
     ATTACHMENTS: bucket as unknown as R2Bucket,
+    ...(options.billing
+      ? {
+          BILLING_WORKER: {
+            async fetch(_url: string, init: RequestInit) {
+              const headers = new Headers(init.headers);
+              if (headers.get("x-internal-caller") !== "crm-worker") return new Response("forbidden", { status: 403 });
+              const { orgId, entitlementKey } = JSON.parse(String(init.body)) as { orgId: string; entitlementKey: string };
+              return options.billing!(entitlementKey, orgId);
+            },
+          } as unknown as Fetcher,
+        }
+      : {}),
   };
 
   const actorHeaders = (member: Member | null) => {
     const headers = new Headers({ "x-request-id": "req_test" });
     if (member) {
       headers.set("x-actor-subject-id", member.subjectId);
-      headers.set("x-actor-subject-type", "user");
+      headers.set("x-actor-subject-type", member.subjectType ?? "user");
       headers.set("x-actor-email", member.email);
     }
     return headers;

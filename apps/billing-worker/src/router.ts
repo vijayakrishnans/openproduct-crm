@@ -36,6 +36,8 @@ const ALLOWED_INTERNAL_CALLERS: ReadonlySet<string> = new Set([
   "projects-worker",
   "membership-worker",
   "integrations-worker",
+  // crm-worker asks for the plan's contact limit (limit.crm_contacts).
+  "crm-worker",
   // api-edge forwards verified-at-source-of-truth inbound provider webhooks
   // (it streams the raw body here; this worker verifies the signature).
   "api-edge",

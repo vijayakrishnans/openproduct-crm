@@ -12,8 +12,8 @@ departs from [design.md](design.md).
 | M2 crm-worker and crm-facade | done | #16, #18 |
 | M3 frontend swap | done | #19, #20 |
 | M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21, #23 |
-| M5 MCP server | built; not merged | |
-| M6 product glue | | |
+| M5 MCP server | done | #24 |
+| M6 product glue | built; not merged | |
 | M7 prod and docs | | |
 
 ## Departures from design.md
@@ -61,3 +61,9 @@ departs from [design.md](design.md).
   which identity-worker already owns.
 - MCP is served by crm-worker at `/crm/mcp`, not by a separate Worker (M5),
   and has thirteen task-shaped tools rather than one per table operation.
+- Event names are `crm.`-prefixed (M6): `crm.contact.created`,
+  `crm.deal.stage_changed`, `crm.deal.won`, `crm.note.created`.
+- Plan gating is one limit, the number of contacts (M6), not a per-feature
+  gate. Seats are metered, not limited: `limit.members` already limits them.
+- Contacts created by inbound email are not counted against the limit and
+  emit no event (M6).

@@ -5,7 +5,7 @@ from `apps/crm-worker`, deployed per environment by its CI lane.
 
 ## Bindings and wiring
 
-- **Service bindings** → `membership-worker`, `policy-worker` —
+- **Service bindings** → `membership-worker`, `policy-worker`, `billing-worker` —
   in-process RPC to sibling Workers; no public hops between contexts.
 - **R2** `ATTACHMENTS` → `openproduct-crm-crm-attachments-<env>`, created once by
   hand (the deploy token has no R2 permission). Keys are
@@ -39,6 +39,15 @@ The org is the security boundary. A request passes, in order:
 Another org's record is indistinguishable from a missing one: `404`.
 
 A response that is not a success rolls its transaction back.
+
+## Writing outside the crm schema
+
+`crm_app` has no rights outside the `crm` schema, on purpose. Events and
+seat records belong to the events and metering contexts, so handlers only
+queue them (`src/platform.ts`); at the end of the request's transaction the
+worker runs `RESET ROLE` and writes them through `@saas/db`'s events and
+metering repositories, as every Lumen worker does. They commit with the CRM
+write or not at all. Nothing after `RESET ROLE` touches a `crm` table.
 
 ## Boundaries
 

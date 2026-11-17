@@ -48,6 +48,22 @@ exercised through `api-edge` (this Worker has no public URL).
   the Cloudflare dashboard (R2 → Create bucket) with exactly that name, then
   re-run the failed lane. This happened on the first deploy, 2026-11-17.
 
+- **Creating a contact answers 412**: the organization is at its plan's
+  `limit.crm_contacts`. The response names the limit. Raise it by assigning a
+  plan with a higher limit in billing.
+- **Creating a contact answers 503 "Billing service unavailable"**:
+  billing-worker did not answer the entitlement check, or refused the caller
+  (`crm-worker` must be in its `ALLOWED_INTERNAL_CALLERS`). The check fails
+  closed. Everything else in the CRM keeps working.
+
+## Receiving CRM events as webhooks
+
+In the console, add a webhook endpoint for the organization and subscribe it
+to `crm.contact.created`, `crm.note.created`, `crm.deal.stage_changed`,
+`crm.deal.won`, to a prefix such as `crm.deal.*`, or to `*`. Deliveries go
+out within about a minute (webhooks-worker's cron) and are listed in the
+endpoint's delivery history.
+
 ## Connecting an assistant over MCP
 
 1. In the console, an owner or admin creates an API key for the organization
@@ -80,7 +96,8 @@ Needs a domain on this Cloudflare account with Email Routing enabled (see
 
 `tests/crm-worker` runs every route against a real Postgres (PGlite) with the
 migration applied, including the cross-org isolation matrix: a member of
-another org gets `404` on every route and changes nothing. `mcp.test.ts` drives
+another org gets `404` on every route and changes nothing. `platform.test.ts`
+covers events, seats and the contact limit. `mcp.test.ts` drives
 the MCP endpoint, including another organization's key. `files.test.ts`
 covers attachments and favicons against an in-memory bucket and a fake
 fetch; `inbound-email.test.ts` feeds raw RFC 822 messages to the handler.

@@ -84,6 +84,7 @@ export const PLAN_CATALOG: PlanDefinition[] = [
       { entitlementKey: "feature.custom_domains", valueType: "boolean", enabled: false, limitValue: null },
       { entitlementKey: "feature.multi_org", valueType: "boolean", enabled: false, limitValue: null },
       { entitlementKey: "limit.organizations", valueType: "quantity", enabled: true, limitValue: 1 },
+      { entitlementKey: "limit.crm_contacts", valueType: "quantity", enabled: true, limitValue: 500 },
     ],
   },
   {
@@ -101,6 +102,7 @@ export const PLAN_CATALOG: PlanDefinition[] = [
       { entitlementKey: "feature.custom_domains", valueType: "boolean", enabled: true, limitValue: null },
       { entitlementKey: "feature.multi_org", valueType: "boolean", enabled: false, limitValue: null },
       { entitlementKey: "limit.organizations", valueType: "quantity", enabled: true, limitValue: 1 },
+      { entitlementKey: "limit.crm_contacts", valueType: "quantity", enabled: true, limitValue: 10000 },
     ],
   },
   {
@@ -118,6 +120,7 @@ export const PLAN_CATALOG: PlanDefinition[] = [
       { entitlementKey: "feature.custom_domains", valueType: "boolean", enabled: true, limitValue: null },
       { entitlementKey: "feature.multi_org", valueType: "boolean", enabled: true, limitValue: null },
       { entitlementKey: "limit.organizations", valueType: "quantity", enabled: true, limitValue: 5 },
+      { entitlementKey: "limit.crm_contacts", valueType: "quantity", enabled: true, limitValue: 100000 },
     ],
   },
   {
@@ -135,6 +138,7 @@ export const PLAN_CATALOG: PlanDefinition[] = [
       { entitlementKey: "feature.custom_domains", valueType: "boolean", enabled: true, limitValue: null },
       { entitlementKey: "feature.multi_org", valueType: "boolean", enabled: true, limitValue: null },
       { entitlementKey: "limit.organizations", valueType: "quantity", enabled: true, limitValue: null },
+      { entitlementKey: "limit.crm_contacts", valueType: "quantity", enabled: true, limitValue: null },
     ],
   },
 ];

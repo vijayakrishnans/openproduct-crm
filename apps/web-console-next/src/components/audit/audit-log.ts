@@ -208,6 +208,7 @@ export const AUDIT_CATEGORY_OPTIONS: ReadonlyArray<string> = [
   "metering",
   "notifications",
   "security",
+  "crm",
 ];
 
 export const AUDIT_ACTOR_TYPE_OPTIONS: ReadonlyArray<EventActorType> = [

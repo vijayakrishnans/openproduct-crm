@@ -8,11 +8,11 @@ product. Read it first on every resume, then `gh pr list --state all` and
 
 Phase A, CRM0, the multi-tenant profile (CRM-4), M0, the public listing, M1
 (the `crm` schema), M2 (`crm-worker` and the edge's `crm-facade`), M3 (the
-web app on the Lumen API, with the ported e2e specs) and M4's attachments
-and favicons have landed and are verified on stage. M4's inbound-email
-handler is deployed but receives nothing until the owner provides a domain
-(WAITING.md). M5 (CRM-10, the MCP server) is built and tested and waits for
-its pull request. M6 and M7 have not landed.
+web app on the Lumen API, with the ported e2e specs), M4's attachments and
+favicons, and M5 (the MCP server) have landed. M4's inbound-email handler is
+deployed but receives nothing until the owner provides a domain
+(WAITING.md). M6 (CRM-11: events, seats, the contact limit) is built and
+tested and waits for its pull request. M7 has not landed.
 
 ## Inputs used
 
@@ -41,8 +41,8 @@ its pull request. M6 and M7 have not landed.
 | M2 crm-worker and crm-facade | CRM-7 | done | #16, #18 | `afe8b8d`, `32da23e` | `tests/crm-worker`: 225 tests on PGlite, including the isolation matrix. On stage through api-edge, 2026-11-17: a member created and read a company, contact and deal, searched and loaded the dashboard; a member of a second org got `404` on seven routes of the first and `422` when referencing its company. Prod answers `401` without a session; nobody can sign in on prod yet (WAITING.md) |
 | M3 frontend swap | CRM-8 | done | #19, #20 | `1c90e81`, `475942e` | Ten ported specs pass in Chromium against the stage API, locally and in CI (`crm-web-e2e`, about 13 minutes there), and the sign-in and onboarding specs pass against the deployed stage app. A new org starts with the default deal stages (no setting stored) |
 | M4 files and email | CRM-9 | attachments and favicons done; inbound email waits on a domain | #21, #23 | `a4e78ca`, `4e2c51c` | On stage through api-edge, 2026-11-17: upload `201`, download returns the same bytes as an attachment, another org gets `404` by either route, no session `401`, the file is gone after its note is deleted, and a new company got `https://cloudflare.com/favicon.ico`. `attachments.spec.ts` passes in Chromium against stage. Inbound email: 16 handler tests; not live (WAITING.md) |
-| M5 MCP server | CRM-10 | built; not merged | | | `tests/crm-worker` `mcp.test.ts`: 14 tests (protocol, every tool, schema refusals, a read-only key, another organization's key). On stage, API keys already work on the CRM REST routes: own org `200`, another org `404` |
-| M6 product glue | | not started | | | |
+| M5 MCP server | CRM-10 | merged | #24 | `bfa4051` | `tests/crm-worker` `mcp.test.ts`: 14 tests (protocol, every tool, schema refusals, a read-only key, another organization's key). On stage, API keys already work on the CRM REST routes: own org `200`, another org `404` |
+| M6 product glue | CRM-11 | built; not merged | | | `tests/crm-worker` `platform.test.ts`: events with ids only, per organization, none for a failed request; one seat per person; the contact limit at 412 and fail-closed at 503. The behaviour suite through postgres.js on Postgres 16 wrote the events and seat records |
 | M7 prod and docs | | not started | | | |
 
 ## Live URLs
@@ -172,6 +172,26 @@ its pull request. M6 and M7 have not landed.
 - 2026-11-17: an MCP client signs in with a Lumen API key. Its role decides:
   `viewer` reads, `builder` and up write. A key of another organization gets
   `404` from the endpoint.
+
+- 2026-11-17: CRM events and seat records are written in the request's
+  transaction after `RESET ROLE`, through the events and metering
+  repositories. `crm_app` gets no grant outside the `crm` schema.
+- 2026-11-17: event payloads carry ids only (no names, emails or note
+  text), because webhooks send them to third parties.
+- 2026-11-17: a seat is one `crm_seats` usage record the first time a person
+  uses an organization's CRM. Seats are never decremented; API keys are not
+  seats.
+- 2026-11-17: the plan limit is `limit.crm_contacts` (free 500, pro 10 000,
+  business 100 000, enterprise unlimited; default tier 500). The numbers are
+  the agent's proposal and the owner may change them in
+  `apps/billing-worker/src/plan-catalog.ts`. The check fails closed, like the
+  platform's other limits. It needs no Polar connection.
+- 2026-11-17: inbound email and MCP go through the same handlers, so MCP
+  writes emit events and obey the limit; contacts created by inbound email
+  do neither yet.
+- 2026-11-17: "onboarding" in M6 is what M3 already built: sign in, name an
+  organization, and the first-run checklist on an empty dashboard. Nothing
+  was added for it.
 
 ## Open risks
 
