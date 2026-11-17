@@ -34,6 +34,7 @@ import { api, crmPath, orgPath } from "./client";
 import { translateFilter } from "./filters";
 
 const CONFIGURATION_KEY = "crm.configuration";
+const CONFIGURATION_RESOURCE = "configuration";
 const MAX_PER_PAGE = 1000;
 
 // Lists and single reads of these go through the summary views, which add the
@@ -136,6 +137,11 @@ const baseDataProvider = {
   },
 
   async getOne(resource: string, params: GetOneParams) {
+    // The settings page edits one record, `configuration/1`. It is not a CRM
+    // table: it is the organization's `crm.configuration` setting.
+    if (resource === CONFIGURATION_RESOURCE) {
+      return { data: { id: params.id, config: await getConfiguration() } };
+    }
     const row = await api("GET", `${crmPath()}/${READ_ALIAS[resource] ?? resource}/${params.id}`, {
       signal: params.signal,
     });
@@ -167,6 +173,9 @@ const baseDataProvider = {
   },
 
   async update(resource: string, params: UpdateParams) {
+    if (resource === CONFIGURATION_RESOURCE) {
+      return { data: { id: params.id, config: await updateConfiguration(params.data.config ?? {}) } };
+    }
     const row = await api("PATCH", `${crmPath()}/${resource}/${params.id}`, { body: params.data });
     return { data: fromServer(resource, row) };
   },
@@ -205,6 +214,28 @@ function parseConfiguration(value: unknown): ConfigurationContextValue {
     }
   }
   return ((value as ConfigurationContextValue) ?? {}) as ConfigurationContextValue;
+}
+
+async function getConfiguration(): Promise<ConfigurationContextValue> {
+  const setting = await findConfigurationSetting();
+  return setting ? parseConfiguration(setting.value) : ({} as ConfigurationContextValue);
+}
+
+async function updateConfiguration(config: ConfigurationContextValue): Promise<ConfigurationContextValue> {
+  const next = {
+    ...config,
+    lightModeLogo: await configLogo(config.lightModeLogo),
+    darkModeLogo: await configLogo(config.darkModeLogo),
+  };
+  const existing = await findConfigurationSetting();
+  const { setting } = existing
+    ? await api<{ setting: SettingRow }>("PATCH", `${orgPath()}/config/settings/${existing.id}`, {
+        body: { value: next },
+      })
+    : await api<{ setting: SettingRow }>("POST", `${orgPath()}/config/settings`, {
+        body: { key: CONFIGURATION_KEY, value: next },
+      });
+  return parseConfiguration(setting.value);
 }
 
 const dataProviderWithCustomMethods = {
@@ -297,27 +328,8 @@ const dataProviderWithCustomMethods = {
     });
   },
 
-  async getConfiguration(): Promise<ConfigurationContextValue> {
-    const setting = await findConfigurationSetting();
-    return setting ? parseConfiguration(setting.value) : ({} as ConfigurationContextValue);
-  },
-
-  async updateConfiguration(config: ConfigurationContextValue): Promise<ConfigurationContextValue> {
-    const next = {
-      ...config,
-      lightModeLogo: await configLogo(config.lightModeLogo),
-      darkModeLogo: await configLogo(config.darkModeLogo),
-    };
-    const existing = await findConfigurationSetting();
-    const { setting } = existing
-      ? await api<{ setting: SettingRow }>("PATCH", `${orgPath()}/config/settings/${existing.id}`, {
-          body: { value: next },
-        })
-      : await api<{ setting: SettingRow }>("POST", `${orgPath()}/config/settings`, {
-          body: { key: CONFIGURATION_KEY, value: next },
-        });
-    return parseConfiguration(setting.value);
-  },
+  getConfiguration,
+  updateConfiguration,
 } satisfies DataProvider;
 
 async function configLogo(logo: any): Promise<string> {
