@@ -4,15 +4,21 @@ The authoritative progress record for porting Atomic CRM onto this Lumen
 product. Read it first on every resume, then `gh pr list --state all` and
 `orun baseline new … --status`. Do not redo merged work.
 
-## Summary (2026-11-17)
+## Summary (2026-11-18)
+
+The product is live as **BrokeCRM** at https://www.brokecrm.cloud (stage:
+https://stage.brokecrm.cloud). The repository, Worker names and identity
+record keep the name `openproduct-crm`.
 
 Every milestone is merged: Phase A, CRM0, the multi-tenant profile, M0, the
 public listing, M1 (the `crm` schema), M2 (`crm-worker`, `crm-facade`), M3
 (the web app on the Lumen API), M4 (attachments, favicons, the inbound-email
 handler), M5 (MCP), M6 (events, seats, the contact limit) and M7 (the smoke
-and the docs). After M7 came fixes from the owner's own use of stage (the
-settings page, the deal board), the relicensing to Apache-2.0, and the
-listing on openproduct.live; see "After M7" below.
+and the docs). After M7: fixes from the owner's own use (the settings page,
+the deal board), the relicensing to Apache-2.0, the openproduct.live listing,
+the custom domain, prod sign-in by email, the BrokeCRM name with a landing
+page and SEO, and sign-in with Google and GitHub (built, not switched on).
+See "After M7" below.
 
 What is not done, and why:
 
@@ -35,7 +41,7 @@ What is not done, and why:
 | Orun account | `openproduct` (`openproduct-6ny98czp`) |
 | Workspace | `openproduct-crm` (`ws_9JAJMRHA`) |
 | Repository | https://github.com/vijayakrishnans/openproduct-crm (public) |
-| Product name | OpenProduct CRM |
+| Product name | BrokeCRM for people (since 2026-11-18); `OpenProduct CRM` in the repository's identity record |
 | workers.dev subdomain | `vijayakrishnan12994` |
 | Lumen | `baseline-v33` (`4cacc01`) |
 | Atomic CRM | `aeccb98` (MIT) |
@@ -73,8 +79,8 @@ Work that followed the milestones, each its own pull request into `main`.
 | Listed on openproduct.live | (no PR: done by the owner on Orunbase) | | https://openproduct.live/atomic-crm, slug `atomic-crm`, published 2026-11-17T08:02Z, on the home feed and the Products page. `GET https://api.openproduct.live/v1/products/atomic-crm` answers `200`. Its licence, language and last commit are still empty and `indexable` is `false` (WAITING.md) |
 | Custom domain `brokecrm.cloud` | #33 | `b94a9f2` | Done in another session: `www.brokecrm.cloud` (prod) and `stage.brokecrm.cloud` serve the CRM web app |
 | Prod sign-in emails | #34 | `a9d680d` | Sender is `no-reply@brokecrm.cloud`; the owner onboarded the domain to Cloudflare Email Sending and signed in on prod with an emailed code, 2026-11-18 |
-| BrokeCRM name, landing page, SEO | #35 | `6da014c` | The name on every screen; a static landing page at the site's root for visitors with no session (free, open source, hosted; credit to Atomic CRM; links to Orunbase and openproduct); title, description, Open Graph, structured data, sitemap; only `www.brokecrm.cloud` indexable. `landing.spec.ts` and the full browser suite green in CI |
-| Sign-in with Google and GitHub | this pull request | | Web app: provider buttons for whatever `GET /v1/auth/oauth/providers` lists, and the return from a provider. Identity worker: the CRM web app's origins may be returned to; client ids come from Orunbase secrets beside their secrets. `socialSignIn.spec.ts` passes against stage with the provider list and the return simulated. Not live: no provider is configured yet (WAITING.md) |
+| BrokeCRM name, landing page, SEO | #35 | `6da014c` | Checked in a browser on the deployed sites, 2026-11-18: prod and stage show the landing page to a visitor with no session, "Start free" leads to the sign-in form, the sitemap and preview image are served, prod has no `noindex` and stage does. The name on every screen; a static landing page at the site's root for visitors with no session (free, open source, hosted; credit to Atomic CRM; links to Orunbase and openproduct); title, description, Open Graph, structured data, sitemap; only `www.brokecrm.cloud` indexable. `landing.spec.ts` and the full browser suite green in CI |
+| Sign-in with Google and GitHub | #36 | `f3130e0` | Web app: provider buttons for whatever `GET /v1/auth/oauth/providers` lists, and the return from a provider. Identity worker: the CRM web app's origins may be returned to; client ids come from Orunbase secrets beside their secrets. `socialSignIn.spec.ts` passes against stage with the provider list and the return simulated. After the deploy, 2026-11-18: api-edge healthy on stage and prod, email sign-in still starts on stage, and `GET /v1/auth/oauth/providers` is empty on both, as expected. Not live: no provider is configured yet (WAITING.md) |
 
 ## Live URLs
 
@@ -83,6 +89,7 @@ Work that followed the milestones, each its own pull request into `main`.
 | api-edge | https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev | https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev |
 | console | https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev | https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev |
 | crm-web (M0) | https://openproduct-crm-crm-web-stage.vijayakrishnan12994.workers.dev | https://openproduct-crm-crm-web-prod.vijayakrishnan12994.workers.dev |
+| BrokeCRM, the custom domain (crm-web) | https://stage.brokecrm.cloud | https://www.brokecrm.cloud |
 
 ## Decisions
 

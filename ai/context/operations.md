@@ -198,7 +198,7 @@ Postgres as the rest.
 
 | surface | where |
 |---|---|
-| web app | `https://openproduct-crm-crm-web-<env>.<subdomain>.workers.dev` (`?demo` for the in-browser demo) |
+| web app | `https://www.brokecrm.cloud` (prod) and `https://stage.brokecrm.cloud`, also `https://openproduct-crm-crm-web-<env>.<subdomain>.workers.dev` (`?demo` for the in-browser demo). People see the name BrokeCRM; with no session, the root is the landing page and `/#/login` the sign-in form |
 | API | `https://openproduct-crm-api-edge-<env>.<subdomain>.workers.dev/v1/organizations/<org_…>/crm/…` |
 | MCP | the API's `/crm/mcp`, with an organization API key as Bearer token |
 
@@ -221,10 +221,13 @@ deploys or works:
   deploy token has no R2 permission, so nothing in the pipeline creates them;
   create them once in the Cloudflare dashboard. Without them the deploy fails
   with code 10085.
-- **A verified sending domain**, for anyone to sign in on prod.
-- **A domain with Email Routing**, for inbound email to notes.
+- **The domain onboarded to Cloudflare Email Sending**, for sign-in emails
+  (done for `brokecrm.cloud`, 2026-11-18; needs Workers Paid).
+- **Email Routing on the domain**, for inbound email to notes (not done).
+- **OAuth apps and their keys in Orunbase secrets**, for sign-in with Google
+  and GitHub (not done).
 
-The last two are tracked in `WAITING.md`. Runbooks: `apps/crm-worker/docs/`.
+The open ones are tracked in `WAITING.md`, with the steps. Runbooks: `apps/crm-worker/docs/`.
 
 Two facts worth knowing before changing the CRM:
 

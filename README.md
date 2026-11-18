@@ -1,12 +1,15 @@
 # OpenProduct CRM
 
+**Live as [BrokeCRM](https://www.brokecrm.cloud): free, open source, and
+hosted.** This repository is its source.
+
 An open-source, multi-tenant CRM that runs on Cloudflare's edge. Track
 contacts, companies and deals on a kanban board; keep notes, tasks and tags;
 search everything; import and export CSV. It is built for many
 organizations at once: each one's data is kept apart, teams sign in with
 their own accounts, and AI agents work with the CRM through an MCP server.
 
-**[Try the demo →](https://openproduct-crm-crm-web-prod.vijayakrishnan12994.workers.dev/?demo)**
+**[Try the demo →](https://www.brokecrm.cloud/?demo)**
 The demo runs entirely in your browser on fake data; nothing you type leaves
 the page. Without `?demo`, the same address is the real CRM: sign in with a
 code sent to your email.
@@ -34,10 +37,11 @@ The CRM is deployed on stage and prod:
 - **Platform** — CRM events in the audit log and as webhooks, seats in
   metering, a contact limit per plan.
 
-Two things wait on a domain (see [WAITING.md](WAITING.md)): signing in on prod
-(sign-in codes are emailed, and prod has no verified sending domain yet) and
-inbound email to notes. Until then stage is where the full flow runs; it hands
-out sign-in codes on screen and holds only fake data.
+Sign in at [www.brokecrm.cloud](https://www.brokecrm.cloud) with a code sent
+to your email. Still open (see [WAITING.md](WAITING.md)): sign-in with Google
+and GitHub is built but not switched on, and inbound email to notes is not
+live. Stage ([stage.brokecrm.cloud](https://stage.brokecrm.cloud)) shows
+sign-in codes on screen and holds only fake data.
 
 How it was built, and what departs from the design:
 [plan](specs/epics/openproduct-crm-port/implementation-plan.md),

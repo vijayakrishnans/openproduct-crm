@@ -14,11 +14,15 @@ departs from [design.md](design.md).
 | M4 files and email | attachments and favicons done; inbound email not live (needs a domain) | #21, #23 |
 | M5 MCP server | done | #24 |
 | M6 product glue | done | #25 |
-| M7 prod and docs | docs and smoke done; the prod smoke waits on a sending domain | #26 |
+| M7 prod and docs | docs and smoke done; the prod smoke waits on a prod credential | #26 |
 | After M7: settings page fix | done | #27 |
 | After M7: deal board fixes and drag test | done; the crash the owner saw was not reproduced | #28, #29 |
 | After M7: licence | Apache-2.0 with a `NOTICE` | #30, #31 |
 | After M7: openproduct.live listing | published as `atomic-crm`; not indexed, repo facts not read yet | |
+| After M7: custom domain `brokecrm.cloud` | done | #33 |
+| After M7: prod sign-in by email | done; the owner signed in on prod, 2026-11-18 | #34 |
+| After M7: BrokeCRM name, landing page, SEO | done | #35 |
+| After M7: sign-in with Google and GitHub | built; no provider configured yet (the owner's OAuth apps and keys) | #36 |
 
 ## Departures from design.md
 
@@ -71,8 +75,9 @@ departs from [design.md](design.md).
   gate. Seats are metered, not limited: `limit.members` already limits them.
 - Contacts created by inbound email are not counted against the limit and
   emit no event (M6).
-- The prod smoke has not run (M7): nobody can sign in on prod until a sending
-  domain is verified. The same script passes on stage.
+- The prod smoke has not run (M7). Prod sign-in works since 2026-11-18; the
+  smoke needs a prod credential the agent does not have. The same script
+  passes on stage.
 - The settings page never worked on the real CRM until #27: the upstream form
   edits a `configuration` record that only the demo's provider had.
 - The deal board saves a move from the server's state, not the screen's
@@ -80,3 +85,11 @@ departs from [design.md](design.md).
   wrong whenever a second move starts before the first is saved.
 - The licence is Apache-2.0, not MIT as the brief said (#31, the owner's
   decision). Atomic CRM's code keeps its MIT notice.
+- The product's name for people is BrokeCRM (#35); the design called it
+  OpenProduct CRM. Only what people see changed.
+- The site's root is a landing page for visitors with no session (#35); the
+  design had the sign-in form there. It is static HTML in `index.html`, and
+  the app does not start until the visitor follows a link into it.
+- Sign-in offers Google and GitHub beside the email code (#36); the design
+  had the email code only. OAuth client ids are read from Orunbase secrets,
+  not committed as config.
