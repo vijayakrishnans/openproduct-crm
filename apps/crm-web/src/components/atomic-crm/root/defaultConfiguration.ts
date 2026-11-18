@@ -10,7 +10,7 @@ export const defaultLightModeLogo = lightModeLogo;
 
 export const defaultCurrency = "USD";
 
-export const defaultTitle = "OpenProduct CRM";
+export const defaultTitle = "BrokeCRM";
 
 export const defaultCompanySectors = [
   { value: "communication-services", label: "Communication Services" },

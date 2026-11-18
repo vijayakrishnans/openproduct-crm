@@ -10,12 +10,12 @@
 // serve any product and any environment: the root layout resolves the config
 // on the server and hands it to the client through <Providers config>. The
 // constants are the fallback — what a deploy with no `vars` gets — and they
-// keep their old exported names on purpose: `PRODUCT_NAME = "OpenProduct CRM"` and
+// keep their old exported names on purpose: `PRODUCT_NAME = "BrokeCRM"` and
 // `STORAGE_PREFIX = "openproduct-crm.next"` are literal seams tooling/rebrand/rebrand.mjs
 // matches, so a fork's identity still lands here with no change to the rebrand.
 
 /** Product/brand name shown across the console. */
-export const PRODUCT_NAME = "OpenProduct CRM";
+export const PRODUCT_NAME = "BrokeCRM";
 
 /** Marketing-facing product description (document metadata). */
 export const PRODUCT_DESCRIPTION =

@@ -24,7 +24,7 @@
   // serve stage and prod. A custom-domain deploy, whose host names no
   // environment, sets it here.
   "vars": {
-    "CONSOLE_PRODUCT_NAME": "OpenProduct CRM",
+    "CONSOLE_PRODUCT_NAME": "BrokeCRM",
     "CONSOLE_WORKERS_DEV_SUBDOMAIN": "vijayakrishnan12994",
     "CONSOLE_API_WORKER_PREFIX": "openproduct-crm-api-edge",
     "CONSOLE_STORAGE_PREFIX": "openproduct-crm.next",

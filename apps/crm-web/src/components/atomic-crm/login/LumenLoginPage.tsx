@@ -22,7 +22,7 @@ type Step =
   | { name: "organization"; organizations: Organization[] };
 
 /**
- * Sign-in for OpenProduct CRM. Accounts are Lumen identities, so there is no
+ * Sign-in for BrokeCRM. Accounts are Lumen identities, so there is no
  * password and no separate sign-up: enter an email, enter the code sent to
  * it, then pick the organization to work in (or name a new one).
  */

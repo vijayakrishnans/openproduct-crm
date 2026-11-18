@@ -19,7 +19,7 @@ import {
 import { RESOURCES, SEARCH_RESOURCES, type ResourceDef } from "./resources.js";
 
 const PROTOCOL_VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"];
-const SERVER_INFO = { name: "openproduct-crm", title: "OpenProduct CRM", version: "1.0.0" };
+const SERVER_INFO = { name: "openproduct-crm", title: "BrokeCRM", version: "1.0.0" };
 
 type Json = Record<string, unknown>;
 type JsonSchema = Json;

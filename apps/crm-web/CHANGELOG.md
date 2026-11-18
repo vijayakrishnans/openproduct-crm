@@ -1,3 +1,13 @@
+## crm-web v0.4.0 - 2026-11-18
+
+- The product is now called BrokeCRM, on every screen, in the browser tab and
+  in the emails it sends.
+- A landing page greets visitors who are not signed in: what BrokeCRM is, that
+  it is free, open source and hosted, where it comes from (Atomic CRM), and
+  how to start. Signed-in users still land in the app.
+- Search engines and link previews get a proper title, description and
+  preview image.
+
 ## crm-web v0.3.3 - 2026-11-17
 
 - Moving a deal again before its previous move was saved now works. The

@@ -9,7 +9,7 @@ test.describe("user creating a contact from the deal form", () => {
 
   test("creates the missing contact without leaving the deal form", async ({ page, workspace }) => {
     await signIn(page, workspace.owner.email);
-    await expect(page).toHaveTitle(/OpenProduct CRM/);
+    await expect(page).toHaveTitle(/BrokeCRM/);
 
     await page.getByRole("link", { name: "Deals" }).click();
     await page.waitForLoadState("networkidle");
