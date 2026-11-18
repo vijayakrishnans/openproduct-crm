@@ -95,7 +95,7 @@ spec:
     # `${WORKERS_DEV_SUBDOMAIN}` is exported by the composition's deploy/smoke
     # step from the `workersDevSubdomain` parameter above (BF3: no duplicated
     # subdomain literal here).
-    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -q 'OpenProduct CRM Console' && health=$(curl -sf \"https://openproduct-crm-api-edge-${ORUN_ENVIRONMENT}.${WORKERS_DEV_SUBDOMAIN}.workers.dev/health\") && echo \"${health}\" | grep -q ok"
+    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -q 'BrokeCRM Console' && health=$(curl -sf \"https://openproduct-crm-api-edge-${ORUN_ENVIRONMENT}.${WORKERS_DEV_SUBDOMAIN}.workers.dev/health\") && echo \"${health}\" | grep -q ok"
   labels:
     team: platform
     layer: delivery
