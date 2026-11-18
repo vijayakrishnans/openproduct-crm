@@ -88,7 +88,7 @@ variable "terraformVersion" {
 
 variable "baseDomain" {
   type        = string
-  default     = "openproduct-crm.example.com"
+  default     = "brokecrm.cloud"
   description = "Root domain to manage (from BASE_DOMAIN env or component parameter)"
 }
 
@@ -114,12 +114,34 @@ variable "CONSOLE_CUSTOM_DOMAIN" {
   description = "Custom domain for the console (from CONSOLE_CUSTOM_DOMAIN env var via TF_VAR)"
 }
 
+# The CRM web app's hostname (apps/crm-web), attached to that environment's
+# crm-web Worker. Arrives per-environment from intent.yaml's
+# `parameterDefaults.terraform.CRM_WEB_CUSTOM_DOMAIN` (stage:
+# stage.brokecrm.cloud, prod: www.brokecrm.cloud). Empty (the dev default)
+# attaches nothing; the workers.dev hostname keeps serving alongside a custom
+# domain either way.
+variable "CRM_WEB_CUSTOM_DOMAIN" {
+  type        = string
+  default     = ""
+  description = "Custom domain for the CRM web app (crm-web), from CRM_WEB_CUSTOM_DOMAIN via TF_VAR. Empty = not attached."
+}
+
+variable "crmWebWorkerNamePrefix" {
+  type        = string
+  default     = "openproduct-crm-crm-web"
+  description = "Worker name prefix for crm-web; the environment is appended."
+}
+
 # --- Locals ---
 
 locals {
   console_custom_domain = var.CONSOLE_CUSTOM_DOMAIN
   worker_name           = "${var.workerNamePrefix}-${var.environment}"
   has_custom_domain     = local.console_custom_domain != ""
+
+  crm_web_custom_domain     = var.CRM_WEB_CUSTOM_DOMAIN
+  crm_web_worker_name       = "${var.crmWebWorkerNamePrefix}-${var.environment}"
+  has_crm_web_custom_domain = local.crm_web_custom_domain != ""
 }
 
 # --- Zone lookup (existing mode) ---
@@ -201,6 +223,27 @@ removed {
 #   environment = "production"
 # }
 
+# --- CRM web app custom domain ---
+#
+# Same mechanism orun-cloud uses for its console and API hostnames: the v4
+# `cloudflare_workers_domain` under the ~> 4.52 pin. A Workers custom domain
+# provisions its own DNS record and certificate, so the zone needs no record
+# for the hostname — and must not already hold one (an A/CNAME on the same
+# name makes the attach fail with "already has externally managed DNS
+# records"). This resource has never been in state, so nothing here is part
+# of the console's 0085a/0085b migration above. When the provider moves to
+# v5, rename to `cloudflare_workers_custom_domain` with a state move.
+
+resource "cloudflare_workers_domain" "crm_web" {
+  count = local.has_crm_web_custom_domain ? 1 : 0
+
+  account_id  = var.cloudflare_account_id
+  zone_id     = local.zone_id
+  hostname    = local.crm_web_custom_domain
+  service     = local.crm_web_worker_name
+  environment = "production"
+}
+
 # --- Outputs (non-secret) ---
 
 output "zone_id" {
@@ -231,4 +274,19 @@ output "worker_name" {
 output "worker_custom_domain_id" {
   description = "Cloudflare Workers custom domain attachment ID (placeholder during 0085a — the resource is intentionally untracked between Phase 1 state drop and Phase 2 v5 re-import; downstream consumers should not read this value during the 0085a → 0085b window)."
   value       = local.has_custom_domain ? "pending_v5_reimport_task_0085b" : "not_configured"
+}
+
+output "crm_web_custom_domain" {
+  description = "CRM web app custom domain hostname"
+  value       = local.crm_web_custom_domain
+}
+
+output "crm_web_worker_name" {
+  description = "crm-web Worker service name bound to the CRM custom domain"
+  value       = local.crm_web_worker_name
+}
+
+output "crm_web_worker_custom_domain_id" {
+  description = "ID of the crm-web Worker custom domain (if configured)"
+  value       = local.has_crm_web_custom_domain ? cloudflare_workers_domain.crm_web[0].id : "not_configured"
 }

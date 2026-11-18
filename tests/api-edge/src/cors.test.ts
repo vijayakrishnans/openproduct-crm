@@ -329,6 +329,23 @@ describe("api-edge cors — the CRM web app (apps/crm-web)", () => {
     expect(isAllowedOrigin(stage.replace("vijayakrishnan12994", "someone-else"), stageEnv)).toBe(false);
   });
 
+  it("allows the CRM web app's custom domain, per environment", () => {
+    const stageWithDomain: Env = { ...stageEnv, CRM_WEB_CUSTOM_DOMAIN: "stage.brokecrm.cloud" };
+    const prodWithDomain: Env = { ...prodEnv, CRM_WEB_CUSTOM_DOMAIN: "www.brokecrm.cloud" };
+
+    expect(isAllowedOrigin("https://stage.brokecrm.cloud", stageWithDomain)).toBe(true);
+    expect(isAllowedOrigin("https://www.brokecrm.cloud", prodWithDomain)).toBe(true);
+    // Each environment allows its own hostname only.
+    expect(isAllowedOrigin("https://www.brokecrm.cloud", stageWithDomain)).toBe(false);
+    expect(isAllowedOrigin("https://stage.brokecrm.cloud", prodWithDomain)).toBe(false);
+    // Not the bare apex, not http, not a look-alike.
+    expect(isAllowedOrigin("https://brokecrm.cloud", prodWithDomain)).toBe(false);
+    expect(isAllowedOrigin("http://www.brokecrm.cloud", prodWithDomain)).toBe(false);
+    expect(isAllowedOrigin("https://www.brokecrm.cloud.evil.example", prodWithDomain)).toBe(false);
+    // Unset, the custom domain is not allowed.
+    expect(isAllowedOrigin("https://www.brokecrm.cloud", prodEnv)).toBe(false);
+  });
+
   it("answers the preflight for a CRM write", () => {
     const res = handlePreflight(
       new Request("https://api.example.com/v1/organizations/org_a/crm/contacts", {

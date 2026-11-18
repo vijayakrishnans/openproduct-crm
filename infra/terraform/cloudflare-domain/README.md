@@ -1,8 +1,28 @@
 # cloudflare-domain
 
-Manages the Cloudflare zone and attaches Workers Custom Domains to
-environment-specific console Workers. Domain configuration is driven by
-environment variables declared in `intent.yaml`.
+Adopts the `brokecrm.cloud` Cloudflare zone and attaches the CRM web app's
+custom domain to each environment's `crm-web` Worker. Hostnames are set per
+environment in `intent.yaml`.
+
+| Environment | Hostname | Worker |
+|-------------|----------|--------|
+| stage | `stage.brokecrm.cloud` | `openproduct-crm-crm-web-stage` |
+| prod | `www.brokecrm.cloud` | `openproduct-crm-crm-web-prod` |
+
+Three places name these hostnames and must agree: `CRM_WEB_CUSTOM_DOMAIN` in
+`intent.yaml` (what this stack attaches), `CRM_WEB_CUSTOM_DOMAIN` in
+`apps/api-edge/wrangler.template.jsonc` (the origin CORS allows), and
+`CUSTOM_DOMAIN_API_URLS` in `apps/crm-web`'s Lumen client (where the app finds
+the API when it is opened on the custom domain).
+
+A Workers custom domain creates its own DNS record and certificate. The zone
+must not hold an A or CNAME on the same name, or the attach fails with
+"already has externally managed DNS records".
+
+The console (`web-console-next`) has no custom domain: its attachment is still
+fenced in `terraform/main.tf` (provider v4 → v5, Tasks 0085a/0085b), and the
+sections below that describe `CONSOLE_CUSTOM_DOMAIN` are about that parked
+half.
 
 ## Purpose
 
@@ -17,7 +37,8 @@ declarations:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `BASE_DOMAIN` | Root domain for the zone | `openproduct-crm.example.com` |
+| `BASE_DOMAIN` | Root domain for the zone | `brokecrm.cloud` |
+| `CRM_WEB_CUSTOM_DOMAIN` | Custom domain for the crm-web Worker | `www.brokecrm.cloud` |
 | `CONSOLE_CUSTOM_DOMAIN` | Custom domain for the console Worker | `stage.openproduct-crm.example.com` |
 
 These are exported as `TF_VAR_*` by the Orun job template and consumed by
@@ -30,6 +51,7 @@ vars) for runtime CORS decisions.
 |----------|-------------|
 | `data.cloudflare_zone.existing` | Looks up the existing zone (when `zoneMode: existing`) |
 | `cloudflare_zone.managed` | Creates a new zone (when `zoneMode: managed`) |
+| `cloudflare_workers_domain.crm_web` | Attaches `CRM_WEB_CUSTOM_DOMAIN` to `openproduct-crm-crm-web-{environment}` |
 | `cloudflare_workers_domain.console` | (Phase 1 of v4→v5 migration — Task 0085a) State entry dropped via `removed { lifecycle { destroy = false } }`. Live Cloudflare custom-domain resource is untouched; Phase 2 (Task 0085b) re-imports it as the v5 `cloudflare_workers_custom_domain.console`. |
 
 > v4 → v5 migration status: Phase 1 of 2 (Task 0085a). The provider pin
@@ -45,7 +67,8 @@ vars) for runtime CORS decisions.
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `baseDomain` | yes | Root domain (e.g. `openproduct-crm.example.com`) |
+| `baseDomain` | yes | Root domain (`brokecrm.cloud`) |
+| `crmWebWorkerNamePrefix` | yes | crm-web Worker name prefix; the environment is appended |
 | `zoneMode` | yes | `existing` or `managed` |
 | `workerNamePrefix` | yes | Worker name prefix (e.g. `openproduct-crm-web-console-next`); fully-qualified service name is `{workerNamePrefix}-{environment}` |
 | `stackName` | yes | Terraform stack identifier |

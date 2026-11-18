@@ -50,15 +50,21 @@ export function isAllowedOrigin(origin: string | null, env: Env): boolean {
 
   const environment = env.ENVIRONMENT;
   const customDomain = env.CONSOLE_CUSTOM_DOMAIN;
+  // The CRM web app answers on its custom domain as well as workers.dev
+  // (infra/terraform/cloudflare-domain attaches it), and calls the API from
+  // whichever one the page was opened on.
+  const crmWebCustomDomain = env.CRM_WEB_CUSTOM_DOMAIN;
 
   if (environment === "stage" || environment === "prod") {
     if (customDomain && origin === `https://${customDomain}`) return true;
+    if (crmWebCustomDomain && origin === `https://${crmWebCustomDomain}`) return true;
     if (origin === WORKERS_ORIGINS[environment]) return true;
     if (origin === CRM_WEB_ORIGINS[environment]) return true;
     return false;
   }
 
   if (customDomain && origin === `https://${customDomain}`) return true;
+  if (crmWebCustomDomain && origin === `https://${crmWebCustomDomain}`) return true;
   for (const workerOrigin of [...Object.values(WORKERS_ORIGINS), ...Object.values(CRM_WEB_ORIGINS)]) {
     if (origin === workerOrigin) return true;
   }
