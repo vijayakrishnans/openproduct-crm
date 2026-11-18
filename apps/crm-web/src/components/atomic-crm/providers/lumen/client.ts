@@ -17,10 +17,21 @@ export type Session = {
 export type Organization = { id: string; name: string; slug: string };
 
 /**
+ * api-edge for each custom domain crm-web answers on. A custom hostname says
+ * nothing about where the API is, so it is listed here; the hostnames are the
+ * ones `CRM_WEB_CUSTOM_DOMAIN` in intent.yaml attaches, and api-edge allows
+ * the same ones as CORS origins. Keep the three in step.
+ */
+const CUSTOM_DOMAIN_API_URLS: Record<string, string> = {
+  "www.brokecrm.cloud": "https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev",
+  "stage.brokecrm.cloud": "https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev",
+};
+
+/**
  * Where api-edge lives. On a deployed crm-web the Worker is named like
  * api-edge's with `crm-web` in its place, on the same workers.dev subdomain,
- * so the URL follows from the page's own host. VITE_API_URL overrides it
- * (local development, a custom domain).
+ * so the URL follows from the page's own host; on a custom domain it comes
+ * from the table above. VITE_API_URL overrides both (local development).
  */
 export function apiBaseUrl(): string {
   const explicit = import.meta.env.VITE_API_URL as string | undefined;
@@ -29,6 +40,8 @@ export function apiBaseUrl(): string {
   if (hostname.includes("-crm-web-")) {
     return `${protocol}//${hostname.replace("-crm-web-", "-api-edge-")}`;
   }
+  const custom = CUSTOM_DOMAIN_API_URLS[hostname];
+  if (custom) return custom;
   return "http://localhost:8787";
 }
 

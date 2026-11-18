@@ -113,7 +113,7 @@ orun integrations list --org <ws> --json && orun cloud check --org <ws>
 | add a runtime secret | `orun secrets set <KEY> --org <ws> --env <env>` |
 | resolve workspace identity | `orun workspace <ws-id-or-slug>` |
 | check integrations | `orun integrations list --org <ws> --json` |
-| custom domain | see [Setting the domain later](#setting-the-domain-later): replace the domain string, create the zone, restore `infra/terraform/cloudflare-domain`'s commented-out `subscribe` block (it ships parked, `subscribe.environments: []`, mid-way to provider v5), merge, then run the `08-docs` phase |
+| custom domain | the CRM web app is on `brokecrm.cloud` (`www.` prod, `stage.` stage), attached by `infra/terraform/cloudflare-domain` — its README lists the three places that name the hostnames. The console and the mail domain still carry the placeholder: see [Setting the domain later](#setting-the-domain-later) |
 | headless/CI credentials | `ORUN_TOKEN` (workspace-scoped) + `GITHUB_TOKEN` |
 
 The ops phases (docs refresh and the original deployment sequence) all

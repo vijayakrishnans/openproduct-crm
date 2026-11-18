@@ -3,7 +3,7 @@ kind: Component
 
 metadata:
   name: cloudflare-domain
-  description: Manages the Cloudflare zone and attaches custom domains to environment-specific Worker services (web-console-next)
+  description: Adopts the brokecrm.cloud Cloudflare zone and attaches the CRM web app's custom domain to each environment's crm-web Worker
   labels:
     domain: infra
     scope: dns-and-custom-domains
@@ -24,48 +24,49 @@ spec:
     stackName: cloudflare-domain
     terraformDir: terraform
     terraformVersion: "1.15.3"
-    baseDomain: openproduct-crm.example.com
+    baseDomain: brokecrm.cloud
+    # The zone was added to the account in the dashboard (the platform does
+    # not create zones), so this stack adopts it by name.
     zoneMode: existing
     workerNamePrefix: openproduct-crm-web-console-next
-    # NOTE: `CONSOLE_CUSTOM_DOMAIN` is intentionally NOT declared here.
-    # It is supplied per-environment via
-    # `environments.{dev,stage,prod}.parameterDefaults.terraform.CONSOLE_CUSTOM_DOMAIN`
-    # in `intent.yaml` (dev: "", stage: stage.openproduct-crm.example.com,
-    # prod: prod.openproduct-crm.example.com) and surfaced to Terraform as
-    # `TF_VAR_CONSOLE_CUSTOM_DOMAIN` by the generic `.parameters` →
-    # `TF_VAR_<key>` loop in the cloudflare-domain-validate job template.
-    # Declaring a default here would shadow the parameterDefault override
-    # and cause the rendered TF_VAR to resolve to the local default ('')
-    # in every environment — exactly the silent-empty failure that
-    # broke Task 0083 (0 added, 0 changed, 0 destroyed). The Terraform
-    # variable itself already defaults to "" in
-    # `terraform/variables.tf`, so absence here is safe for dev.
+    crmWebWorkerNamePrefix: openproduct-crm-crm-web
+    # NOTE: `CRM_WEB_CUSTOM_DOMAIN` and `CONSOLE_CUSTOM_DOMAIN` are
+    # intentionally NOT declared here. They are supplied per-environment via
+    # `environments.{dev,stage,prod}.parameterDefaults.terraform` in
+    # `intent.yaml` (CRM_WEB_CUSTOM_DOMAIN — dev: "", stage:
+    # stage.brokecrm.cloud, prod: www.brokecrm.cloud) and surfaced to
+    # Terraform as `TF_VAR_<key>` by the generic `.parameters` → `TF_VAR_<key>`
+    # loop in the job template. Declaring a default here would shadow the
+    # parameterDefault override and resolve to '' in every environment — the
+    # silent-empty failure of Task 0083 (0 added, 0 changed, 0 destroyed).
+    # Both Terraform variables default to "", so absence is safe for dev.
 
+  # The Cloudflare Terraform provider authenticates via the CLOUDFLARE_API_TOKEN
+  # env var, resolved by orun from the project-rung brokered secret (fresh per
+  # run), exactly as cloudflare-kv does. Declared at component level because
+  # plan-only lanes look the zone up against the live Cloudflare API too.
+  secretEnv:
+    CLOUDFLARE_API_TOKEN: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/CLOUDFLARE_API_TOKEN"
+    CLOUDFLARE_ACCOUNT_ID: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/CLOUDFLARE_ACCOUNT_ID"
+    TF_VAR_cloudflare_account_id: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/CLOUDFLARE_ACCOUNT_ID"
+
+  # A Workers custom domain attaches to a Worker by name, so the Worker must
+  # exist first.
   dependsOn:
-    - component: web-console-next
+    - component: crm-web
 
-  # PARKED — no environment subscriptions, so no jobs are planned. The zone
-  # this stack manages (baseDomain openproduct-crm.example.com) is not delegated to Cloudflare
-  # and does not exist in the connected account (the domain is parked at
-  # dns.ws — a rebrand artifact), so `data.cloudflare_zone.existing` fails
-  # every plan with "no zone found". Restore the subscribe block below once
-  # the zone exists in the account (and finish the 0085b v5 re-import).
-  #
-  # subscribe:
-  #   environments:
-  #     - name: stage
-  #       profile: plan-only
-  #       profileRules:
-  #         - profile: apply
-  #           when:
-  #             triggerRef: github-push-main
-  #
-  #     - name: prod
-  #       profile: plan-only
-  #       profileRules:
-  #         - profile: apply
-  #           when:
-  #             triggerRef: github-push-main
   subscribe:
-    environments: []
-# ci: trigger full-component verification (orun v2.12.0 upgrade — PR #183)
+    environments:
+      - name: stage
+        profile: plan-only
+        profileRules:
+          - profile: apply
+            when:
+              triggerRef: github-push-main
+
+      - name: prod
+        profile: plan-only
+        profileRules:
+          - profile: apply
+            when:
+              triggerRef: github-push-main

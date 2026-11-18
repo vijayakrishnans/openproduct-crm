@@ -155,10 +155,11 @@ environments:
         owner: sourceplane
         repo: openproduct-crm
         CONSOLE_CUSTOM_DOMAIN: ""
+        CRM_WEB_CUSTOM_DOMAIN: ""
     policies:
       requireApproval: "false"
     env:
-      BASE_DOMAIN: openproduct-crm.example.com
+      BASE_DOMAIN: brokecrm.cloud
 
   stage:
     description: The fleet, the API edge and the console, deployed on every merge to main before prod.
@@ -179,10 +180,13 @@ environments:
         owner: sourceplane
         repo: openproduct-crm
         CONSOLE_CUSTOM_DOMAIN: stage.openproduct-crm.example.com
+        # The CRM web app's hostname; infra/terraform/cloudflare-domain attaches
+        # it to openproduct-crm-crm-web-stage.
+        CRM_WEB_CUSTOM_DOMAIN: stage.brokecrm.cloud
     policies:
       requireApproval: "false"
     env:
-      BASE_DOMAIN: openproduct-crm.example.com
+      BASE_DOMAIN: brokecrm.cloud
 
   prod:
     description: Where customers are. Deploys after stage converges on the same commit.
@@ -206,10 +210,13 @@ environments:
         owner: sourceplane
         repo: openproduct-crm
         CONSOLE_CUSTOM_DOMAIN: prod.openproduct-crm.example.com
+        # The CRM web app's hostname; infra/terraform/cloudflare-domain attaches
+        # it to openproduct-crm-crm-web-prod.
+        CRM_WEB_CUSTOM_DOMAIN: www.brokecrm.cloud
     policies:
       requireApproval: "false"
     env:
-      BASE_DOMAIN: openproduct-crm.example.com
+      BASE_DOMAIN: brokecrm.cloud
 
 # Repo-level catalog entity: front page + role-tagged docs (rendered in
 # the workspace Docs library, pinned to the commit by `orun plan`).
