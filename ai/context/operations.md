@@ -229,6 +229,13 @@ deploys or works:
 
 The open ones are tracked in `WAITING.md`, with the steps. Runbooks: `apps/crm-worker/docs/`.
 
+After a merge that deploys, **read the deploy run on `main`**, not only the
+pull request's checks: the pull request stops at "Verify deploy", and the
+post-deploy smoke runs only on `main`. A failed stage smoke blocks prod and
+everything downstream, silently as far as the pull request is concerned. The
+crm-web and console smokes look for the product's name in the page
+(`smokeCommand` in their `component.yaml`), so a rename must change them too.
+
 Two facts worth knowing before changing the CRM:
 
 - `tests/crm-worker` is the only test component that runs its tests in CI
