@@ -23,6 +23,9 @@ departs from [design.md](design.md).
 | After M7: prod sign-in by email | done; the owner signed in on prod, 2026-11-18 | #34 |
 | After M7: BrokeCRM name, landing page, SEO | done | #35 |
 | After M7: sign-in with Google and GitHub | built; no provider configured yet (the owner's OAuth apps and keys) | #36 |
+| After M7: bare domain redirects to `www` | done | #39 |
+| After M7: deploy smokes fixed after the rename (prod was blocked from #36 to #40) | done | #40 |
+| After M7: terms, privacy policy, licence statement | done as drafts; not reviewed by a lawyer | |
 
 ## Departures from design.md
 

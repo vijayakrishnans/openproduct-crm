@@ -1,3 +1,10 @@
+## crm-web v0.6.0 - 2026-11-18
+
+- Terms of use and a privacy policy, linked from the landing page and the
+  sign-in form.
+- The landing page says plainly that all of BrokeCRM is open source under the
+  Apache 2.0 licence, with a link to the licence.
+
 ## crm-web v0.5.1 - 2026-11-18
 
 - `brokecrm.cloud` without `www` now takes you to `www.brokecrm.cloud`; it

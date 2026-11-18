@@ -37,6 +37,29 @@ checks for before it carries on.
   `google`, and "Continue with Google" on https://www.brokecrm.cloud/#/login
   signs a person in.
 
+### Terms and privacy policy: three blanks and a review (owner)
+
+- **Why:** https://www.brokecrm.cloud/terms.html and `/privacy.html` are
+  live as plain-language drafts written by the agent from what the product
+  does. They are not legal advice and no lawyer has read them.
+- **Blanks the owner must fill:**
+  1. **Who operates the service.** The pages say "the maintainers of
+     vijayakrishnans/openproduct-crm". A legal name (a person or a company)
+     belongs there.
+  2. **A contact address.** The pages send requests to GitHub issues, with a
+     note not to post personal data. A mailbox such as
+     `privacy@brokecrm.cloud` is better; it needs Email Routing on the
+     domain.
+  3. **Governing law.** The terms name none.
+- **Promises in them the owner must keep:** delete an account's or
+  organization's data within 30 days of a request (there is no button for
+  it; it is done by hand in the database), give 30 days' notice before
+  ending the service, and tell users of a breach.
+- **Also:** Google's OAuth consent screen asks for a privacy policy URL and
+  a terms URL; these two are the ones to give.
+- **Unblock signal:** the owner names the three, and says whether a lawyer
+  should look before they stay.
+
 ### The prod smoke (needs a prod credential)
 
 - **Why:** prod sign-in works (see Done), so `tooling/smoke/crm-smoke.mjs`
