@@ -5,21 +5,27 @@ checks for before it carries on.
 
 ## Open
 
-### A sending domain for prod sign-in emails (blocks prod sign-in and the M7 prod smoke)
+### Enable email for brokecrm.cloud in Cloudflare (blocks prod sign-in and the M7 prod smoke)
 
-- **Why:** prod sends magic-link codes through Cloudflare Email Service from
-  `no-reply@mail.openproduct-crm.example.com`, a placeholder. Until a real,
-  verified sending domain replaces it, nobody can sign in on prod. Stage is
-  unaffected (it returns codes inline; see the risk below).
-- **Steps:** pick a domain you control on this Cloudflare account, onboard it
-  to Cloudflare Email Service (Email → Email Sending), and say which address to
-  send from. The agent then sets `EMAIL_FROM_ADDRESS` for prod in
-  `apps/notifications-worker/wrangler.template.jsonc` in a PR.
-- **Unblock signal:** the domain is listed as verified for sending in the
-  Cloudflare account, and the owner has named the address.
+- **Why:** prod emails its sign-in codes from `no-reply@brokecrm.cloud`
+  (set 2026-11-18). The domain serves the web app but is not enabled for
+  email: it has no mail DNS records at all, so nothing is delivered and
+  nobody can sign in on prod. Stage is unaffected (it shows codes on
+  screen). Nothing in this repository or its pipeline can enable it; it is a
+  setting of the Cloudflare account.
+- **Steps, to let anyone sign in:** put the account on the Workers Paid plan
+  (Cloudflare does not send to arbitrary recipients on the free plan), then
+  dashboard → Compute → Email Service → Email Sending → Onboard Domain →
+  `brokecrm.cloud`. Cloudflare adds the DNS records itself.
+- **Steps, to let only the owner sign in, on the free plan:** dashboard →
+  Compute → Email Service → Email Routing → enable it for `brokecrm.cloud`,
+  then Destination Addresses → add the owner's own address and click the
+  link in the verification email. Cloudflare delivers to verified
+  destination addresses on any plan, free.
+- **Unblock signal:** `brokecrm.cloud` has MX records, and a sign-in code
+  requested on https://www.brokecrm.cloud arrives.
 - **Also blocked by this:** M7's prod smoke. `tooling/smoke/crm-smoke.mjs`
-  passes on stage and stops on prod at sign-up, because prod emails its
-  codes and has nowhere to send them from. Once someone can sign in on
+  passes on stage and stops on prod at sign-up. Once someone can sign in on
   prod, run it with `CRM_SMOKE_TOKEN` and `CRM_SMOKE_ORG`.
 
 ### A domain for inbound email (blocks M4's inbound-email check on stage and prod)

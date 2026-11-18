@@ -25,16 +25,22 @@
     },
     "stage": {
       "workers_dev": false,
-      // cloudflare-email sends through the Email Service `send_email` binding.
-      // One-time account prerequisites before real delivery works: Workers
-      // Paid plan, sending domain verified in Email Service (DKIM/SPF), and
-      // EMAIL_FROM_ADDRESS on that verified domain. Until then the worker
-      // still deploys; failed sends surface as notification.failed events.
+      // cloudflare-email sends through the Email Service `send_email` binding,
+      // from an address on brokecrm.cloud. What the Cloudflare account needs
+      // before mail is delivered (dashboard, Email Service; nothing here
+      // creates it):
+      //   - to anyone: Workers Paid, and brokecrm.cloud onboarded to Email
+      //     Sending;
+      //   - to the owner only, on the free plan: Email Routing enabled on
+      //     brokecrm.cloud and the owner's address added as a verified
+      //     destination address.
+      // Until then the worker still deploys; failed sends surface as
+      // notification.failed events.
       "vars": {
         "ENVIRONMENT": "stage",
         "NOTIFICATIONS_PROVIDER": "cloudflare-email",
         "DEBUG_DELIVERY": "true",
-        "EMAIL_FROM_ADDRESS": "no-reply@mail.openproduct-crm.example.com",
+        "EMAIL_FROM_ADDRESS": "no-reply@brokecrm.cloud",
         "EMAIL_FROM_NAME": "OpenProduct CRM"
       },
       "send_email": [
@@ -61,7 +67,7 @@
         "ENVIRONMENT": "prod",
         "NOTIFICATIONS_PROVIDER": "cloudflare-email",
         "DEBUG_DELIVERY": "false",
-        "EMAIL_FROM_ADDRESS": "no-reply@mail.openproduct-crm.example.com",
+        "EMAIL_FROM_ADDRESS": "no-reply@brokecrm.cloud",
         "EMAIL_FROM_NAME": "OpenProduct CRM"
       },
       "send_email": [

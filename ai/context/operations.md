@@ -151,7 +151,7 @@ anyone's real domain). Nothing that uses the domain was removed; it waits:
 | `infra/terraform/cloudflare-domain` | `baseDomain` in its `component.yaml`, the Terraform variable's default, its README |
 | `apps/api-edge/wrangler.template.jsonc` | `CONSOLE_CUSTOM_DOMAIN`, the console origin CORS allows besides the workers.dev one |
 | `apps/identity-worker/wrangler.template.jsonc` | `OAUTH_ALLOWED_CONSOLE_ORIGINS`, which lists the workers.dev console too, so sign-in works without a domain |
-| `apps/notifications-worker/wrangler.template.jsonc` | `EMAIL_FROM_ADDRESS`, `no-reply@mail.openproduct-crm.example.com` |
+| `apps/notifications-worker/wrangler.template.jsonc` | `EMAIL_FROM_ADDRESS`, now `no-reply@brokecrm.cloud` (stage and prod). Delivery still needs the domain enabled for email in the Cloudflare account: see WAITING.md |
 | `apps/billing-worker/wrangler.template.jsonc` | `POLAR_SUCCESS_URL`, the fallback return after checkout |
 | `tests/api-edge` | the CORS fixtures, which follow the edge's config |
 
