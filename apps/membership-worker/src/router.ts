@@ -10,6 +10,7 @@ import { handleCreateInvitation } from "./handlers/create-invitation.js";
 import { handleListInvitations } from "./handlers/list-invitations.js";
 import { handleRevokeInvitation } from "./handlers/revoke-invitation.js";
 import { handleAcceptInvitation } from "./handlers/accept-invitation.js";
+import { handleAcceptMyInvitation, handleListMyInvitations } from "./handlers/my-invitations.js";
 import { handleAuthorizationContext } from "./handlers/authorization-context.js";
 import { handleSyncAccountChildren } from "./handlers/sync-account-children.js";
 import { handleResolveBillingParent } from "./handlers/resolve-billing-parent.js";
@@ -43,6 +44,8 @@ const ORG_MEMBER_ID_RE = /^\/v1\/organizations\/([^/]+)\/members\/([^/]+)$/;
 const ORG_INVITATIONS_ACCEPT_RE = /^\/v1\/organizations\/([^/]+)\/invitations\/accept$/;
 const ORG_INVITATIONS_RE = /^\/v1\/organizations\/([^/]+)\/invitations$/;
 const ORG_INVITATION_ID_RE = /^\/v1\/organizations\/([^/]+)\/invitations\/([^/]+)$/;
+const MY_INVITATIONS_PATH = "/v1/invitations";
+const MY_INVITATION_ACCEPT_RE = /^\/v1\/invitations\/([^/]+)\/accept$/;
 const SP_BINDINGS_PATH = "/v1/internal/membership/service-principal-bindings";
 const SP_BINDING_ID_RE = /^\/v1\/internal\/membership\/service-principal-bindings\/([^/]+)$/;
 
@@ -116,6 +119,22 @@ export async function route(request: Request, env: Env): Promise<Response> {
         return handleListOrganizations(env, requestId, actor, url);
       }
       return methodNotAllowed(requestId);
+    }
+
+    const myAcceptMatch = url.pathname.match(MY_INVITATION_ACCEPT_RE);
+    if (url.pathname === MY_INVITATIONS_PATH || myAcceptMatch) {
+      if (request.method !== (myAcceptMatch ? "POST" : "GET")) {
+        return methodNotAllowed(requestId);
+      }
+      const actor = resolveActor(request);
+      const actorEmail = request.headers.get("x-actor-email");
+      if (!actor || !actorEmail) {
+        return errorResponse("unauthenticated", "Authentication required", 401, requestId);
+      }
+      const invitee = { ...actor, email: actorEmail };
+      return myAcceptMatch
+        ? handleAcceptMyInvitation(env, requestId, invitee, myAcceptMatch[1]!)
+        : handleListMyInvitations(env, requestId, invitee);
     }
 
     const acceptMatch = url.pathname.match(ORG_INVITATIONS_ACCEPT_RE);

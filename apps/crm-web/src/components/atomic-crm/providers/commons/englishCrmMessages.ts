@@ -297,7 +297,7 @@ export const englishCrmMessages = {
       create: {
         error: "An error occurred while creating the user.",
         success:
-          "User created. They will soon receive an email to set their password.",
+          "Invitation created. They join by signing in with this email address.",
         title: "Create a new user",
       },
       edit: {

@@ -16,6 +16,8 @@ import {
 } from "./client";
 
 const CURRENT_SALE_CACHE_KEY = "RaStore.auth.current_sale";
+/** Where react-query's persister keeps its default cache. */
+const QUERY_CACHE_KEY = "REACT_QUERY_OFFLINE_CACHE";
 
 type CurrentSale = {
   id: number;
@@ -190,7 +192,41 @@ export function selectOrganization(org: Organization): void {
   const session = getSession();
   if (!session) throw new Error("Not signed in");
   clearSaleCache();
+  // Query results are saved to localStorage for offline use (see CRM.tsx).
+  // They belong to the organization they were read from.
+  try {
+    window.localStorage.removeItem(QUERY_CACHE_KEY);
+  } catch {
+    // No storage, so nothing was saved.
+  }
   setSession({ ...session, orgId: org.id, orgSlug: org.slug, orgName: org.name });
+}
+
+/** Moves the running app to another organization. A full reload, so that no
+ *  screen or in-memory query keeps showing the previous one's records. The
+ *  query string goes too: a leftover `?org=` would choose the old one again. */
+export function openOrganization(org: Organization): void {
+  selectOrganization(org);
+  window.history.replaceState(null, "", `${window.location.pathname}#/`);
+  window.location.reload();
+}
+
+// --- invitations addressed to the signed-in person -------------------------
+
+export type PendingInvitation = {
+  id: string;
+  role: string;
+  expiresAt: string;
+  organization: Organization;
+};
+
+export async function listPendingInvitations(): Promise<PendingInvitation[]> {
+  const data = await api<{ invitations: PendingInvitation[] }>("GET", "/v1/invitations");
+  return data.invitations ?? [];
+}
+
+export async function acceptPendingInvitation(invitation: PendingInvitation): Promise<void> {
+  await api("POST", `/v1/invitations/${encodeURIComponent(invitation.id)}/accept`);
 }
 
 // ---------------------------------------------------------------------------

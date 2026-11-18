@@ -35,6 +35,7 @@ export function isSoloMode(env: Env): boolean {
 // api-keys, with or without a trailing id segment).
 const ORG_MEMBERS_RE = /^\/v1\/organizations\/[^/]+\/members(?:\/[^/]+)?$/;
 const ORG_INVITATIONS_RE = /^\/v1\/organizations\/[^/]+\/invitations(?:\/[^/]+)?$/;
+const MY_INVITATIONS_RE = /^\/v1\/invitations(?:\/[^/]+\/accept)?$/;
 const ORG_API_KEYS_RE = /^\/v1\/organizations\/[^/]+\/api-keys(?:\/[^/]+)?$/;
 const ORG_COLLECTION = "/v1/organizations";
 
@@ -70,6 +71,7 @@ export function isSoloSuppressed(pathname: string, method: string): boolean {
   // Org collaboration + credential sub-resources.
   if (ORG_MEMBERS_RE.test(pathname)) return true;
   if (ORG_INVITATIONS_RE.test(pathname)) return true;
+  if (MY_INVITATIONS_RE.test(pathname)) return true;
   if (ORG_API_KEYS_RE.test(pathname)) return true;
 
   // The user is the tenant: never let them create a second org. Listing and

@@ -889,6 +889,48 @@ describe("api-edge org facade", () => {
     });
   });
 
+  describe("the signed-in person's invitations", () => {
+    it("routes only the list and the accept path", () => {
+      expect(isOrgRoute("/v1/invitations")).toBe(true);
+      expect(isOrgRoute("/v1/invitations/inv_1/accept")).toBe(true);
+      expect(isOrgRoute("/v1/invitations/inv_1")).toBe(false);
+    });
+
+    it("forwards the verified email from the session, not from the caller", async () => {
+      const { fetcher: identityFetcher } = createSessionFetcher("usr_invitee");
+      const { fetcher: membershipFetcher, calls } = createFakeFetcher();
+      const request = new Request("https://api.example.com/v1/invitations", {
+        headers: { authorization: "Bearer sps_ses_abc.secret", "x-actor-email": "victim@test.com" },
+      });
+
+      const response = await handleOrgRoute(
+        request,
+        { IDENTITY_WORKER: identityFetcher, MEMBERSHIP_WORKER: membershipFetcher, ENVIRONMENT: "test" } as never,
+        "req_test",
+        "/v1/invitations",
+      );
+
+      expect(response.status).toBe(200);
+      expect(calls[0]!.url).toContain("/v1/invitations");
+      expect(new Headers(calls[0]!.init.headers as HeadersInit).get("x-actor-email")).toBe("user@test.com");
+    });
+
+    it.each([
+      ["/v1/invitations", "POST"],
+      ["/v1/invitations/inv_1/accept", "GET"],
+    ])("rejects %s with %s", async (path, method) => {
+      const { fetcher } = createFakeFetcher();
+      const request = new Request(`https://api.example.com${path}`, { method });
+      const response = await handleOrgRoute(
+        request,
+        { IDENTITY_WORKER: fetcher, MEMBERSHIP_WORKER: fetcher, ENVIRONMENT: "test" } as never,
+        "req_test",
+        path,
+      );
+      expect(response.status).toBe(405);
+    });
+  });
+
   describe("invitation routes", () => {
     describe("isOrgRoute for invitation paths", () => {
       it("matches /v1/organizations/{orgId}/invitations", () => {

@@ -1,6 +1,7 @@
 import type { Env } from "../env.js";
 import type { MembershipRepository } from "@saas/db/membership";
 import type { EventsRepository } from "@saas/db/events";
+import type { Uuid } from "@saas/db/ids";
 import { createSqlExecutor } from "@saas/db/hyperdrive";
 import { createMembershipRepository } from "@saas/db/membership";
 import { createEventsRepository } from "@saas/db/events";
@@ -91,12 +92,29 @@ export async function handleAcceptInvitation(
 
   const validToken = token as string;
 
+  const hashFn = deps?.hashToken ?? hashToken;
+  const tokenHash = await hashFn(validToken);
+
+  return completeInvitationAcceptance(env, requestId, actor, orgUuid, tokenHash, deps);
+}
+
+/**
+ * Accepts the invitation stored under `tokenHash` for `actor`. The repository
+ * still requires the invitation's org and addressee to match. Reached with a
+ * token from the invitation, or by id once the session's verified email has
+ * been matched to it (see my-invitations.ts).
+ */
+export async function completeInvitationAcceptance(
+  env: Env,
+  requestId: string,
+  actor: AcceptActorContext,
+  orgUuid: Uuid,
+  tokenHash: string,
+  deps?: AcceptInvitationDeps,
+): Promise<Response> {
   if (!deps && !env.PLATFORM_DB) {
     return errorResponse("internal_error", "Database not configured", 503, requestId);
   }
-
-  const hashFn = deps?.hashToken ?? hashToken;
-  const tokenHash = await hashFn(validToken);
 
   const now = deps?.now ? deps.now() : new Date();
   const memberId = crypto.randomUUID();

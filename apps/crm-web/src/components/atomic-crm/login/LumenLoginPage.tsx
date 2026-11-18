@@ -7,22 +7,26 @@ import { Label } from "@/components/ui/label";
 import { Notification } from "@/components/admin/notification";
 import { useConfigurationContext } from "@/components/atomic-crm/root/ConfigurationContext.tsx";
 import {
+  acceptPendingInvitation,
   completeLogin,
   createOrganization,
   listOAuthProviders,
   listOrganizations,
+  listPendingInvitations,
   oauthStartUrl,
   selectOrganization,
   startLogin,
   takeOAuthError,
   type LoginChallenge,
   type OAuthProvider,
+  type PendingInvitation,
 } from "../providers/lumen/authProvider";
 import { clearSession, getSession, type Organization } from "../providers/lumen/client";
 
 type Step =
   | { name: "email" }
   | { name: "code"; email: string; challenge: LoginChallenge }
+  | { name: "invitations"; invitations: PendingInvitation[]; organizations: Organization[] }
   | { name: "organization"; organizations: Organization[] };
 
 /**
@@ -68,8 +72,31 @@ export const LumenLoginPage = () => {
     const wanted = new URLSearchParams(window.location.search).get("org");
     const match = organizations.find((o) => o.id === wanted || o.slug === wanted);
     if (match) return enter(match);
+    // An invitation is worth a stop, but must never get in the way of signing in.
+    const invitations = await listPendingInvitations().catch(() => []);
+    if (invitations.length > 0) {
+      setStep({ name: "invitations", invitations, organizations });
+      return;
+    }
+    await continueWith(organizations);
+  };
+
+  const continueWith = async (organizations: Organization[]) => {
     if (organizations.length === 1) return enter(organizations[0]!);
     setStep({ name: "organization", organizations });
+  };
+
+  const join = async (invitation: PendingInvitation) => {
+    await acceptPendingInvitation(invitation);
+    await enter(invitation.organization);
+  };
+
+  const act = (task: () => Promise<void>) => {
+    if (busy) return;
+    setBusy(true);
+    task()
+      .catch(fail)
+      .finally(() => setBusy(false));
   };
 
   useEffect(() => {
@@ -204,6 +231,45 @@ export const LumenLoginPage = () => {
                   Use a different email
                 </button>
               </form>
+            ) : null}
+
+            {step.name === "invitations" ? (
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <h1 className="text-2xl font-semibold tracking-tight">You have been invited</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Join an organization to work with its members.
+                  </p>
+                </div>
+                <ul className="space-y-2">
+                  {step.invitations.map((invitation) => (
+                    <li key={invitation.id} className="flex items-center justify-between gap-3">
+                      <span className="min-w-0 text-sm">
+                        <span className="block truncate font-medium">{invitation.organization.name}</span>
+                        <span className="text-muted-foreground">as {invitation.role}</span>
+                      </span>
+                      <Button
+                        type="button"
+                        className="cursor-pointer"
+                        disabled={busy}
+                        aria-label={`Join ${invitation.organization.name}`}
+                        onClick={() => act(() => join(invitation))}
+                      >
+                        Join
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full cursor-pointer"
+                  disabled={busy}
+                  onClick={() => act(() => continueWith(step.organizations))}
+                >
+                  Not now
+                </Button>
+              </div>
             ) : null}
 
             {step.name === "organization" ? (

@@ -14,6 +14,9 @@ const ORG_MEMBER_ID_RE = /^\/v1\/organizations\/[^/]+\/members\/[^/]+$/;
 const ORG_INVITATIONS_ACCEPT_RE = /^\/v1\/organizations\/[^/]+\/invitations\/accept$/;
 const ORG_INVITATIONS_RE = /^\/v1\/organizations\/[^/]+\/invitations$/;
 const ORG_INVITATION_ID_RE = /^\/v1\/organizations\/[^/]+\/invitations\/[^/]+$/;
+// The signed-in person's own invitations, matched on their verified email.
+const MY_INVITATIONS_PATH = "/v1/invitations";
+const MY_INVITATION_ACCEPT_RE = /^\/v1\/invitations\/[^/]+\/accept$/;
 const ORG_API_KEYS_RE = /^\/v1\/organizations\/[^/]+\/api-keys$/;
 const ORG_API_KEY_ID_RE = /^\/v1\/organizations\/[^/]+\/api-keys\/[^/]+$/;
 
@@ -25,7 +28,7 @@ const FORWARDED_HEADERS = [
 ];
 
 export function isOrgRoute(pathname: string): boolean {
-  return pathname in ORG_ROUTES || ORG_ID_RE.test(pathname) || ORG_MEMBERS_RE.test(pathname) || ORG_MEMBER_ID_RE.test(pathname) || ORG_INVITATIONS_ACCEPT_RE.test(pathname) || ORG_INVITATIONS_RE.test(pathname) || ORG_INVITATION_ID_RE.test(pathname) || ORG_API_KEYS_RE.test(pathname) || ORG_API_KEY_ID_RE.test(pathname);
+  return pathname === MY_INVITATIONS_PATH || MY_INVITATION_ACCEPT_RE.test(pathname) || pathname in ORG_ROUTES || ORG_ID_RE.test(pathname) || ORG_MEMBERS_RE.test(pathname) || ORG_MEMBER_ID_RE.test(pathname) || ORG_INVITATIONS_ACCEPT_RE.test(pathname) || ORG_INVITATIONS_RE.test(pathname) || ORG_INVITATION_ID_RE.test(pathname) || ORG_API_KEYS_RE.test(pathname) || ORG_API_KEY_ID_RE.test(pathname);
 }
 
 export async function handleOrgRoute(
@@ -36,6 +39,14 @@ export async function handleOrgRoute(
 ): Promise<Response> {
   const allowedMethods = ORG_ROUTES[pathname];
   if (allowedMethods && !allowedMethods.includes(request.method)) {
+    return errorResponse("unsupported", "Method not allowed", 405, requestId);
+  }
+
+  if (pathname === MY_INVITATIONS_PATH && request.method !== "GET") {
+    return errorResponse("unsupported", "Method not allowed", 405, requestId);
+  }
+
+  if (MY_INVITATION_ACCEPT_RE.test(pathname) && request.method !== "POST") {
     return errorResponse("unsupported", "Method not allowed", 405, requestId);
   }
 
