@@ -5,30 +5,50 @@ checks for before it carries on.
 
 ## Open
 
-### Enable email for brokecrm.cloud in Cloudflare (blocks prod sign-in and the M7 prod smoke)
+### Sign-in with Google and GitHub: create the OAuth apps and add their keys (owner)
 
-- **Why:** prod emails its sign-in codes from `no-reply@brokecrm.cloud`
-  (set 2026-11-18). The domain serves the web app but is not enabled for
-  email: it has no mail DNS records at all, so nothing is delivered and
-  nobody can sign in on prod. Stage is unaffected (it shows codes on
-  screen). Nothing in this repository or its pipeline can enable it; it is a
-  setting of the Cloudflare account.
-- **Steps, to let anyone sign in:** put the account on the Workers Paid plan
-  (Cloudflare does not send to arbitrary recipients on the free plan), then
-  dashboard → Compute → Email Service → Email Sending → Onboard Domain →
-  `brokecrm.cloud`. Cloudflare adds the DNS records itself.
-- **Steps, to let only the owner sign in, on the free plan:** dashboard →
-  Compute → Email Service → Email Routing → enable it for `brokecrm.cloud`,
-  then Destination Addresses → add the owner's own address and click the
-  link in the verification email. Cloudflare delivers to verified
-  destination addresses on any plan, free.
-- **Unblock signal:** `brokecrm.cloud` has MX records, and a sign-in code
-  requested on https://www.brokecrm.cloud arrives.
-- **Also blocked by this:** M7's prod smoke. `tooling/smoke/crm-smoke.mjs`
-  passes on stage and stops on prod at sign-up. Once someone can sign in on
-  prod, run it with `CRM_SMOKE_TOKEN` and `CRM_SMOKE_ORG`.
+- **Why:** the code is in place and the buttons appear on the sign-in page by
+  themselves, but only for a provider whose keys exist. On 2026-11-18
+  `GET /v1/auth/oauth/providers` answered an empty list on stage and prod.
+  (The client ids that used to sit in the identity worker's config came with
+  the baseline and belonged to someone else's OAuth apps; they are gone.)
+- **Steps:**
+  1. **GitHub:** Settings → Developer settings → OAuth Apps → New OAuth App,
+     once per environment (GitHub allows one callback URL per app).
+     Homepage `https://www.brokecrm.cloud` (stage: `https://stage.brokecrm.cloud`).
+     Authorization callback URL:
+     `https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev/v1/auth/oauth/github/callback`
+     (stage: the same with `-stage`). Generate a client secret.
+  2. **Google:** Google Cloud console → APIs & Services → Credentials →
+     Create credentials → OAuth client ID → Web application. Authorized
+     redirect URIs: the two URLs above with `google` in place of `github`
+     (one client can hold both). The consent screen needs the app name, a
+     support email and the `email` and `profile` scopes; publish it, or only
+     listed test users can sign in.
+  3. **Orunbase secrets**, for each of `stage` and `prod`
+     (`orun secrets set <KEY> --org ws_9JAJMRHA --env <env>`, or the
+     Orunbase UI): `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`,
+     `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, and
+     `OAUTH_STATE_SECRET` (any random string of 16 or more characters, for
+     example the output of `openssl rand -hex 32`).
+  4. Redeploy `identity-worker` so it picks the secrets up: say so, and the
+     agent merges a one-line redeploy marker.
+- **Unblock signal:** `GET <api>/v1/auth/oauth/providers` lists `github` and
+  `google`, and "Continue with Google" on https://www.brokecrm.cloud/#/login
+  signs a person in.
 
-### A domain for inbound email (blocks M4's inbound-email check on stage and prod)
+### The prod smoke (needs a prod credential)
+
+- **Why:** prod sign-in works (see Done), so `tooling/smoke/crm-smoke.mjs`
+  can run against prod, but it needs a credential of a prod organization and
+  the agent has none.
+- **Steps:** create an API key with the builder role in the console for a
+  prod organization, and hand it over through the secure credential form
+  (never in chat). The agent runs the smoke with it; it creates a company,
+  a contact, a deal and a note, checks them, and deletes them.
+- **Unblock signal:** the smoke prints "CRM smoke passed" against prod.
+
+### Email Routing for inbound email (blocks M4's inbound-email check on stage and prod)
 
 - **Why:** crm-worker turns an email sent to an organization's inbound address
   into notes (M4). The code is deployed and tested, but mail only reaches it
@@ -88,6 +108,11 @@ checks for before it carries on.
   and every organization starts on the free tier.
 
 ## Done
+
+- **Prod sign-in by email (2026-11-18):** `brokecrm.cloud` was onboarded to
+  Cloudflare Email Sending (the account is on Workers Paid), prod sends from
+  `no-reply@brokecrm.cloud` (#34), and the owner received a code and signed in
+  on https://www.brokecrm.cloud. The agent did not send a test email itself.
 
 - **Listed on openproduct.live (2026-11-17):** the owner published it through
   Orunbase as `atomic-crm`: https://openproduct.live/atomic-crm.

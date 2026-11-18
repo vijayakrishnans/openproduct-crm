@@ -16,9 +16,11 @@ listing on openproduct.live; see "After M7" below.
 
 What is not done, and why:
 
-- The **prod smoke** and **prod sign-in** need a verified sending domain, and
-  **inbound email** needs a domain with Email Routing. Both are the owner's
-  to provide (WAITING.md). Stage runs the whole flow.
+- **Prod sign-in works** since 2026-11-18 (email codes from
+  `no-reply@brokecrm.cloud`). The **prod smoke** still needs a prod
+  credential, **sign-in with Google and GitHub** needs the owner's OAuth
+  apps and their keys in Orunbase secrets, and **inbound email** needs Email
+  Routing on the domain (WAITING.md).
 - The owner saw "Something went wrong" on the deal board while dragging a
   deal. It was **not reproduced**; the board was hardened and two real drag
   defects were fixed, but nothing shows that screen is gone (WAITING.md).
@@ -69,6 +71,10 @@ Work that followed the milestones, each its own pull request into `main`.
 | `LICENSE` is plain MIT text | #30 | `b044515` | GitHub reported "Other"; a sentence after the MIT text kept it from matching. Superseded the same day by #31 |
 | Relicensed to Apache-2.0 | #31 | `88f7ab5` | `LICENSE` is the unmodified Apache text; `NOTICE` reads `Copyright 2026 vijayakrishnans and Orunbase`. GitHub's API reports `Apache-2.0` for the repository, 2026-11-17 |
 | Listed on openproduct.live | (no PR: done by the owner on Orunbase) | | https://openproduct.live/atomic-crm, slug `atomic-crm`, published 2026-11-17T08:02Z, on the home feed and the Products page. `GET https://api.openproduct.live/v1/products/atomic-crm` answers `200`. Its licence, language and last commit are still empty and `indexable` is `false` (WAITING.md) |
+| Custom domain `brokecrm.cloud` | #33 | `b94a9f2` | Done in another session: `www.brokecrm.cloud` (prod) and `stage.brokecrm.cloud` serve the CRM web app |
+| Prod sign-in emails | #34 | `a9d680d` | Sender is `no-reply@brokecrm.cloud`; the owner onboarded the domain to Cloudflare Email Sending and signed in on prod with an emailed code, 2026-11-18 |
+| BrokeCRM name, landing page, SEO | #35 | `6da014c` | The name on every screen; a static landing page at the site's root for visitors with no session (free, open source, hosted; credit to Atomic CRM; links to Orunbase and openproduct); title, description, Open Graph, structured data, sitemap; only `www.brokecrm.cloud` indexable. `landing.spec.ts` and the full browser suite green in CI |
+| Sign-in with Google and GitHub | this pull request | | Web app: provider buttons for whatever `GET /v1/auth/oauth/providers` lists, and the return from a provider. Identity worker: the CRM web app's origins may be returned to; client ids come from Orunbase secrets beside their secrets. `socialSignIn.spec.ts` passes against stage with the provider list and the return simulated. Not live: no provider is configured yet (WAITING.md) |
 
 ## Live URLs
 
@@ -235,6 +241,21 @@ Work that followed the milestones, each its own pull request into `main`.
   by the owner's choice, though the repository and product are named
   OpenProduct CRM.
 
+- 2026-11-18: the product is named **BrokeCRM** and lives at
+  `www.brokecrm.cloud`, by the owner's choice. Only what people see changed:
+  the repository, Worker names, storage keys and `.rebrand/values.json` keep
+  `openproduct-crm`. The landing page links to `openproduct.live` (where the
+  listing is); the owner wrote `openproduct.com`, which could not be reached
+  to confirm.
+
+- 2026-11-18: the landing page is static HTML inside `index.html`, not a
+  React route, so it paints without the app and crawlers can read it. The
+  app does not start on it, and removes it from the document when it does
+  start.
+
+- 2026-11-18: OAuth client ids are read from Orunbase secrets like their
+  secrets, not committed as config, so turning a provider on is one place.
+
 - 2026-11-17: deal moves are saved one at a time against the server's state
   (two extra reads per move) rather than from the cards on screen. Stage
   takes about five seconds per save, so the screen is routinely ahead of the
@@ -245,8 +266,6 @@ Work that followed the milestones, each its own pull request into `main`.
 See `specs/epics/openproduct-crm-port/risks-and-open-questions.md`.
 
 ## Deferred
-
-- Prod sign-in: needs a verified sending domain (WAITING.md).
 
 - The OpenProduct GitHub org transfer (needs org membership; see WAITING.md).
 

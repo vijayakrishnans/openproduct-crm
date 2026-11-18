@@ -28,7 +28,14 @@ const mount = () => {
 // form. It starts when the visitor follows a link into the app (#/login).
 const root = document.documentElement;
 const isRoute = () => !["", "#", "#/"].includes(window.location.hash);
-if (root.getAttribute("data-mode") === "landing") {
+const isOAuthReturn = new URLSearchParams(window.location.search).has("signin");
+if (isOAuthReturn && !isDemo) {
+  // Back from Google, GitHub…: take the result out of the address before the
+  // router reads it, then start.
+  void import("./components/atomic-crm/providers/lumen/authProvider")
+    .then((auth) => auth.consumeOAuthReturn())
+    .finally(mount);
+} else if (root.getAttribute("data-mode") === "landing") {
   const start = () => {
     if (!isRoute()) return;
     window.removeEventListener("hashchange", start);

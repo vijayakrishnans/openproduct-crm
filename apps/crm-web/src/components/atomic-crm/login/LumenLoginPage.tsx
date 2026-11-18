@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useLogin, useNotify } from "ra-core";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Notification } from "@/components/admin/notification";
@@ -9,10 +9,14 @@ import { useConfigurationContext } from "@/components/atomic-crm/root/Configurat
 import {
   completeLogin,
   createOrganization,
+  listOAuthProviders,
   listOrganizations,
+  oauthStartUrl,
   selectOrganization,
   startLogin,
+  takeOAuthError,
   type LoginChallenge,
+  type OAuthProvider,
 } from "../providers/lumen/authProvider";
 import { clearSession, getSession, type Organization } from "../providers/lumen/client";
 
@@ -35,6 +39,18 @@ export const LumenLoginPage = () => {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [orgName, setOrgName] = useState("");
+  const [providers, setProviders] = useState<OAuthProvider[]>([]);
+
+  useEffect(() => {
+    let live = true;
+    void listOAuthProviders().then((list) => live && setProviders(list));
+    const failed = takeOAuthError();
+    if (failed) notify(failed, { type: "error" });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fail = (error: unknown) => {
     notify((error as Error)?.message || "ra.auth.sign_in_error", { type: "error" });
@@ -129,6 +145,25 @@ export const LumenLoginPage = () => {
                 <Button type="submit" className="w-full cursor-pointer" disabled={busy}>
                   Send code
                 </Button>
+                {providers.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="h-px flex-1 bg-border" />
+                      or
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                    {providers.map((provider) => (
+                      // a plain link: starting a provider sign-in is a page navigation
+                      <a
+                        key={provider.id}
+                        href={oauthStartUrl(provider.id)}
+                        className={buttonVariants({ variant: "outline", className: "w-full" })}
+                      >
+                        Continue with {provider.displayName}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
                 <a href="?demo" className="block text-sm text-center hover:underline">
                   Just looking? Try the demo, no account needed
                 </a>
