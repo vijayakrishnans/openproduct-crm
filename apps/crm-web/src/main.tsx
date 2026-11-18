@@ -9,7 +9,10 @@ import "./index.css";
 const isDemo = new URLSearchParams(window.location.search).has("demo");
 const App = lazy(() => (isDemo ? import("../demo/App.tsx") : import("./App.tsx")));
 
-const mount = () =>
+const mount = () => {
+  // The landing page is done once the app starts: take it out of the page, so
+  // it cannot be found, focused or read behind the app.
+  document.getElementById("landing")?.remove();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <Suspense fallback={null}>
@@ -17,6 +20,7 @@ const mount = () =>
       </Suspense>
     </StrictMode>,
   );
+};
 
 // index.html decides, before anything loads, whether this visit gets the
 // landing page or the app (see the script in its <head>). On the landing page
