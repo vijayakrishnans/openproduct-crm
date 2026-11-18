@@ -1,3 +1,8 @@
+## crm-web v0.5.0 - 2026-11-18
+
+- Sign in with Google or GitHub, beside the email code. A provider's button
+  appears once it is set up for the site.
+
 ## crm-web v0.4.0 - 2026-11-18
 
 - The product is now called BrokeCRM, on every screen, in the browser tab and

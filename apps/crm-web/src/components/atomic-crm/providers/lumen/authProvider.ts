@@ -7,6 +7,7 @@ import type { AuthProvider } from "ra-core";
 import { canAccess } from "../commons/canAccess";
 import {
   api,
+  apiBaseUrl,
   clearSession,
   crmPath,
   getSession,
@@ -75,6 +76,90 @@ export async function completeLogin(challengeId: string, code: string): Promise<
   }>("POST", "/v1/auth/login/complete", { body: { challengeId, code }, anonymous: true });
   clearSaleCache();
   setSession({ token: data.token, expiresAt: data.expiresAt, email: data.user.email });
+}
+
+// --- sign-in with Google, GitHub… -------------------------------------------
+//
+// The identity service does the OAuth dance. The browser is sent to
+// `/v1/auth/oauth/<provider>/start?return_to=<this site>`, and comes back to
+// `return_to` with the result in the URL fragment: `#token=…&expires_at=…`,
+// or `#error=<code>`. A provider is offered only when the service lists it,
+// which it does once its client id and secret are configured.
+
+export type OAuthProvider = { id: string; displayName: string };
+
+export async function listOAuthProviders(): Promise<OAuthProvider[]> {
+  try {
+    const data = await api<{ providers: OAuthProvider[] }>("GET", "/v1/auth/oauth/providers", {
+      anonymous: true,
+    });
+    return data.providers ?? [];
+  } catch {
+    // Sign-in by email code still works; the buttons are an extra.
+    return [];
+  }
+}
+
+const OAUTH_RETURN_PARAM = "signin";
+const OAUTH_ERROR_KEY = "openproduct-crm.oauth-error";
+
+/** Where the browser goes to start a provider's sign-in. */
+export function oauthStartUrl(providerId: string): string {
+  const returnTo = `${window.location.origin}/?${OAUTH_RETURN_PARAM}=${encodeURIComponent(providerId)}`;
+  return `${apiBaseUrl()}/v1/auth/oauth/${encodeURIComponent(providerId)}/start?return_to=${encodeURIComponent(returnTo)}`;
+}
+
+const OAUTH_ERRORS: Record<string, string> = {
+  access_denied: "Sign-in was cancelled.",
+  email_required:
+    "That account has no email address. Add one with the provider, or sign in with an email code.",
+  email_unverified:
+    "That account's email is not verified. Verify it with the provider, or sign in with an email code.",
+  provider_unavailable: "That sign-in method is not available right now.",
+};
+
+/**
+ * Handles the return from a provider, before the app starts (the fragment
+ * would otherwise be read as a route). Stores the session, or keeps the
+ * reason it failed for the sign-in page, and puts the address back to the
+ * sign-in route with nothing secret in it. No-op on any other visit.
+ */
+export async function consumeOAuthReturn(): Promise<void> {
+  if (!new URLSearchParams(window.location.search).has(OAUTH_RETURN_PARAM)) return;
+  const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const token = fragment.get("token");
+  const expiresAt = fragment.get("expires_at");
+  const error = fragment.get("error");
+  // First of all: the token must not stay in the address bar or the history.
+  window.history.replaceState(null, "", `${window.location.pathname}#/login`);
+
+  if (token && expiresAt) {
+    clearSaleCache();
+    setSession({ token, expiresAt, email: "" });
+    try {
+      const data = await api<{ user?: { email?: string } }>("GET", "/v1/auth/session");
+      setSession({ token, expiresAt, email: data.user?.email ?? "" });
+    } catch {
+      clearSession();
+      window.sessionStorage.setItem(OAUTH_ERROR_KEY, "Sign-in did not complete. Please try again.");
+    }
+    return;
+  }
+  window.sessionStorage.setItem(
+    OAUTH_ERROR_KEY,
+    OAUTH_ERRORS[error ?? ""] ?? "Sign-in did not complete. Please try again.",
+  );
+}
+
+/** The message left by a failed provider sign-in, once. */
+export function takeOAuthError(): string | null {
+  try {
+    const message = window.sessionStorage.getItem(OAUTH_ERROR_KEY);
+    if (message) window.sessionStorage.removeItem(OAUTH_ERROR_KEY);
+    return message;
+  } catch {
+    return null;
+  }
 }
 
 export async function listOrganizations(): Promise<Organization[]> {

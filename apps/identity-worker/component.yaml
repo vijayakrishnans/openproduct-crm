@@ -47,6 +47,10 @@ spec:
   # an unseeded key is skipped at resolve (and by secrets-live), so
   # this block is inert until the value is stored in orun secrets.
   optionalSecretEnv:
+    # The client ids are not secret, but they live beside their secrets so
+    # that turning a provider on is one place: seed both and redeploy.
+    GITHUB_OAUTH_CLIENT_ID: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/GITHUB_OAUTH_CLIENT_ID"
+    GOOGLE_OAUTH_CLIENT_ID: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/GOOGLE_OAUTH_CLIENT_ID"
     GITHUB_OAUTH_CLIENT_SECRET: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/GITHUB_OAUTH_CLIENT_SECRET"
     GOOGLE_OAUTH_CLIENT_SECRET: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/GOOGLE_OAUTH_CLIENT_SECRET"
     OAUTH_STATE_SECRET: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/OAUTH_STATE_SECRET"

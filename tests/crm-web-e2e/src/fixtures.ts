@@ -50,6 +50,17 @@ class Api {
     });
     return new Api(http, session["token"]);
   }
+
+  /** A second session for the same account, as a provider sign-in would yield. */
+  static async newSession(http: APIRequestContext, email: string): Promise<{ token: string; expiresAt: string }> {
+    const anonymous = new Api(http);
+    const challenge = await anonymous.call("POST", "/v1/auth/login/start", { email });
+    const session = await anonymous.call("POST", "/v1/auth/login/complete", {
+      challengeId: challenge["challengeId"],
+      code: challenge["delivery"]?.code,
+    });
+    return { token: session["token"], expiresAt: session["expiresAt"] };
+  }
 }
 
 export type Sales = { id: number; email: string; first_name: string; last_name: string };
@@ -106,6 +117,11 @@ export class Workspace {
       contact_ids: [],
       ...deal,
     });
+  }
+
+  /** A fresh session token for the owner (see Api.newSession). */
+  ownerSession() {
+    return Api.newSession(this.http, this.owner.email);
   }
 
   async createCompany({ name, salesId }: { name: string; salesId?: number }) {
