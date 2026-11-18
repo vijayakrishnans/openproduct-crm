@@ -8,7 +8,10 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // The Worker sees every request first: it redirects the bare domain to
+    // www and marks the non-public hosts noindex (worker/index.js).
+    "run_worker_first": true
   },
   "observability": { "enabled": true }
 }

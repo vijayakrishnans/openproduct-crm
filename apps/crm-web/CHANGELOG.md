@@ -6,6 +6,11 @@
   and join with one click.
 - The Users page lists pending invitations, and an admin can revoke them.
 
+## crm-web v0.5.1 - 2026-11-18
+
+- `brokecrm.cloud` without `www` now takes you to `www.brokecrm.cloud`; it
+  used to lead nowhere.
+
 ## crm-web v0.5.0 - 2026-11-18
 
 - Sign in with Google or GitHub, beside the email code. A provider's button

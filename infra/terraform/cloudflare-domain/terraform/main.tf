@@ -244,6 +244,22 @@ resource "cloudflare_workers_domain" "crm_web" {
   environment = "production"
 }
 
+# The bare domain, on prod only: when the CRM web app is served at
+# `www.<baseDomain>`, the apex is attached to the same Worker, which answers
+# it with a redirect to www (apps/crm-web/worker/index.js). Without this the
+# apex resolves to nothing. Like the hostname above, the attachment brings
+# its own DNS record and certificate.
+
+resource "cloudflare_workers_domain" "crm_web_apex" {
+  count = local.crm_web_custom_domain == "www.${var.baseDomain}" ? 1 : 0
+
+  account_id  = var.cloudflare_account_id
+  zone_id     = local.zone_id
+  hostname    = var.baseDomain
+  service     = local.crm_web_worker_name
+  environment = "production"
+}
+
 # --- Outputs (non-secret) ---
 
 output "zone_id" {
