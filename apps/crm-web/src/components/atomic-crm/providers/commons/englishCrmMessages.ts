@@ -390,7 +390,7 @@ export const englishCrmMessages = {
         creating: "Creating...",
         initial_user_created: "Initial user successfully created",
       },
-      welcome_title: "Welcome to OpenProduct CRM",
+      welcome_title: "Welcome to BrokeCRM",
     },
     common: {
       account_manager: "Account manager",
@@ -436,7 +436,7 @@ export const englishCrmMessages = {
       latest_notes: "My Latest Notes",
       latest_notes_added_ago: "added %{timeAgo}",
       stepper: {
-        install: "Install OpenProduct CRM",
+        install: "Install BrokeCRM",
         progress: "%{step}/3 done",
         whats_next: "What's next?",
       },
@@ -582,7 +582,7 @@ export const englishCrmMessages = {
         "Other addresses you send emails from. Leave one empty to remove it.",
       inbound: {
         description:
-          "You can start sending emails to your server's inbound email address, e.g. by adding it to the %{field} field. OpenProduct CRM will process the emails and add notes to the corresponding contacts.",
+          "You can start sending emails to your server's inbound email address, e.g. by adding it to the %{field} field. BrokeCRM will process the emails and add notes to the corresponding contacts.",
         title: "Inbound email",
       },
       mcp: {

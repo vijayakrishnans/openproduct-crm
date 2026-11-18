@@ -50,7 +50,7 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
         type: getRandomContactDetailsType(),
       },
     ];
-    // OpenProduct CRM: no hot-linked photos of real people in the demo; the UI
+    // BrokeCRM: no hot-linked photos of real people in the demo; the UI
     // falls back to initials.
     const avatar = { src: undefined };
     const title = fakerCompany.bsAdjective();

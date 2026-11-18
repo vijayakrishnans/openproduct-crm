@@ -7,10 +7,10 @@ import { StartPage } from "@/components/atomic-crm/login/StartPage";
 import { memoryStore } from "ra-core";
 
 // The public demo: the whole CRM in the browser on generated, fake data.
-// Telemetry is off: OpenProduct CRM sends nothing to third parties.
+// Telemetry is off: BrokeCRM sends nothing to third parties.
 const App = () => (
   <CRM
-    title="OpenProduct CRM"
+    title="BrokeCRM"
     dataProvider={dataProvider}
     authProvider={authProvider}
     store={memoryStore()}

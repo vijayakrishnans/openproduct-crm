@@ -195,7 +195,8 @@ export class Workspace {
 /** The adapted login: email, then the code (prefilled where the API returns
  *  it), then straight into the user's only organization. */
 export async function signIn(page: Page, email: string) {
-  await page.goto("/");
+  // "/" is the landing page for a signed-out visitor; this is the sign-in form
+  await page.goto("/#/login");
   await page.getByLabel("Email").fill(email);
   await page.getByRole("button", { name: "Send code" }).click();
   await expect(page.getByLabel("Sign-in code")).not.toHaveValue("");

@@ -129,7 +129,7 @@ export const CRM = ({
   disableTelemetry,
   ...rest
 }: CRMProps) => {
-  // OpenProduct CRM: the upstream telemetry ping is removed; nothing is sent
+  // BrokeCRM: the upstream telemetry ping is removed; nothing is sent
   // to third parties.
 
   // Seed the store with CRM prop values if not already stored

@@ -18,7 +18,7 @@ test.describe("user adding a task", () => {
   test("user adding a task", async ({ page, workspace, menu, dismissToast }) => {
     await signIn(page, workspace.owner.email);
 
-    await expect(page).toHaveTitle(/OpenProduct CRM/);
+    await expect(page).toHaveTitle(/BrokeCRM/);
     await expect(page.getByText("Latest Activity")).toBeVisible();
 
     await menu.goToContacts();

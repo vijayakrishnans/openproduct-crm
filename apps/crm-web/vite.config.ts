@@ -17,7 +17,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     createHtmlPlugin({
-      minify: true,
+      // Not minified: the minifier drops the space between a word and a link,
+      // which the landing page text in index.html depends on.
+      minify: false,
       inject: {
         data: {
           mainScript: `src/main.tsx`,

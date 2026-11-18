@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export const Welcome = () => (
   <Card>
     <CardHeader className="px-4">
-      <CardTitle>Welcome to OpenProduct CRM</CardTitle>
+      <CardTitle>Welcome to BrokeCRM</CardTitle>
     </CardHeader>
     <CardContent className="px-4">
       <p className="text-sm mb-4">
-        OpenProduct CRM is an open-source, multi-tenant CRM that runs at the
+        BrokeCRM is an open-source, multi-tenant CRM that runs at the
         edge on Cloudflare Workers.
       </p>
       <p className="text-sm mb-4">

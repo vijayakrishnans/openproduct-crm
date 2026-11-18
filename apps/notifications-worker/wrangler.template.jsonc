@@ -41,7 +41,7 @@
         "NOTIFICATIONS_PROVIDER": "cloudflare-email",
         "DEBUG_DELIVERY": "true",
         "EMAIL_FROM_ADDRESS": "no-reply@brokecrm.cloud",
-        "EMAIL_FROM_NAME": "OpenProduct CRM"
+        "EMAIL_FROM_NAME": "BrokeCRM"
       },
       "send_email": [
         {
@@ -68,7 +68,7 @@
         "NOTIFICATIONS_PROVIDER": "cloudflare-email",
         "DEBUG_DELIVERY": "false",
         "EMAIL_FROM_ADDRESS": "no-reply@brokecrm.cloud",
-        "EMAIL_FROM_NAME": "OpenProduct CRM"
+        "EMAIL_FROM_NAME": "BrokeCRM"
       },
       "send_email": [
         {

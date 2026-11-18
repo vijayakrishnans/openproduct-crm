@@ -15,6 +15,12 @@ test("signing out ends the session", async ({ page, workspace }) => {
 
   await page.evaluate(() => window.localStorage.removeItem("openproduct-crm.session"));
   await page.reload();
+  // with no session, the site's root is the landing page again, not the app
+  await expect(page.getByRole("heading", { level: 1, name: "The CRM for teams with no CRM budget." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toHaveCount(0);
+
+  // and a route inside the app asks for a sign-in
+  await page.goto("/#/contacts");
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 });
 

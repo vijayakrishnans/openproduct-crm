@@ -5,7 +5,7 @@ test("user adds a tag to several contacts", async ({ page, workspace, menu, dism
   await workspace.createContact({ first_name: "Grace", last_name: "Hopper", title: "Rear Admiral" });
 
   await signIn(page, workspace.owner.email);
-  await expect(page).toHaveTitle(/OpenProduct CRM/);
+  await expect(page).toHaveTitle(/BrokeCRM/);
   await expect(page.getByRole("link", { name: "Contacts" })).toBeVisible();
 
   await menu.goToContacts();

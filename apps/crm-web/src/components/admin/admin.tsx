@@ -38,7 +38,7 @@ const AdminContext = (props: CoreAdminContextProps) => (
 const AdminUI = (props: CoreAdminUIProps) => {
   const { disableTelemetry = false, ...rest } = props;
 
-  // OpenProduct CRM: the upstream telemetry ping is removed; nothing is sent
+  // BrokeCRM: the upstream telemetry ping is removed; nothing is sent
   // to third parties.
 
   return (

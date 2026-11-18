@@ -9,10 +9,29 @@ import "./index.css";
 const isDemo = new URLSearchParams(window.location.search).has("demo");
 const App = lazy(() => (isDemo ? import("../demo/App.tsx") : import("./App.tsx")));
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Suspense fallback={null}>
-      <App />
-    </Suspense>
-  </StrictMode>,
-);
+const mount = () =>
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <Suspense fallback={null}>
+        <App />
+      </Suspense>
+    </StrictMode>,
+  );
+
+// index.html decides, before anything loads, whether this visit gets the
+// landing page or the app (see the script in its <head>). On the landing page
+// the app is not started: unauthenticated, it would redirect to the sign-in
+// form. It starts when the visitor follows a link into the app (#/login).
+const root = document.documentElement;
+const isRoute = () => !["", "#", "#/"].includes(window.location.hash);
+if (root.getAttribute("data-mode") === "landing") {
+  const start = () => {
+    if (!isRoute()) return;
+    window.removeEventListener("hashchange", start);
+    root.setAttribute("data-mode", "app");
+    mount();
+  };
+  window.addEventListener("hashchange", start);
+} else {
+  mount();
+}

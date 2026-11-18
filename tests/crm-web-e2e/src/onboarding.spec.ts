@@ -5,8 +5,8 @@ import { expect, test } from "./fixtures";
 test("user onboarding", async ({ page, menu, dismissToast }) => {
   const local = `e2e-onboarding-${Date.now().toString(36)}`;
 
-  await page.goto("/");
-  await expect(page).toHaveTitle(/OpenProduct CRM/);
+  await page.goto("/#/login");
+  await expect(page).toHaveTitle(/BrokeCRM/);
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 
   await page.getByLabel("Email").fill(`${local}@example.com`);
@@ -20,7 +20,7 @@ test("user onboarding", async ({ page, menu, dismissToast }) => {
 
   await expect(page.getByText("What's next?")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText("1/3 done")).toBeVisible();
-  await expect(page.getByText("Install OpenProduct CRM")).toBeVisible();
+  await expect(page.getByText("Install BrokeCRM")).toBeVisible();
   await expect(page.getByText("Add your first contact")).toBeVisible();
   await expect(page.getByText("Add your first note")).toBeVisible();
   await expect(page.getByRole("button", { name: "Import data" })).toBeVisible();
