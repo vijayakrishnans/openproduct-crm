@@ -8,6 +8,7 @@ environment in `intent.yaml`.
 |-------------|----------|--------|
 | stage | `stage.brokecrm.cloud` | `openproduct-crm-crm-web-stage` |
 | prod | `www.brokecrm.cloud` | `openproduct-crm-crm-web-prod` |
+| prod | `brokecrm.cloud` (the bare domain) | the same Worker, which answers it with a redirect to `www` |
 
 Three places name these hostnames and must agree: `CRM_WEB_CUSTOM_DOMAIN` in
 `intent.yaml` (what this stack attaches), `CRM_WEB_CUSTOM_DOMAIN` in
