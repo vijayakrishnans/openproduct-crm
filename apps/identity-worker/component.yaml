@@ -109,7 +109,9 @@ spec:
 
     # Runtime worker secrets, pushed by the secrets-live step from the
     # values orun resolves for the optionalSecretEnv references below.
-    runtimeSecrets: "GITHUB_OAUTH_CLIENT_SECRET,GOOGLE_OAUTH_CLIENT_SECRET,OAUTH_STATE_SECRET"
+    # Every name in optionalSecretEnv must be listed here too, or it is
+    # resolved and then never pushed to the Worker.
+    runtimeSecrets: "GITHUB_OAUTH_CLIENT_ID,GOOGLE_OAUTH_CLIENT_ID,GITHUB_OAUTH_CLIENT_SECRET,GOOGLE_OAUTH_CLIENT_SECRET,OAUTH_STATE_SECRET"
     turboFilter: "@saas/identity-worker"
     wranglerConfig: wrangler.jsonc
     wranglerTemplate: wrangler.template.jsonc
