@@ -41,7 +41,8 @@
         "NOTIFICATIONS_PROVIDER": "cloudflare-email",
         "DEBUG_DELIVERY": "true",
         "EMAIL_FROM_ADDRESS": "no-reply@brokecrm.cloud",
-        "EMAIL_FROM_NAME": "BrokeCRM"
+        "EMAIL_FROM_NAME": "BrokeCRM",
+        "APP_URL": "https://stage.brokecrm.cloud"
       },
       "send_email": [
         {
@@ -68,7 +69,8 @@
         "NOTIFICATIONS_PROVIDER": "cloudflare-email",
         "DEBUG_DELIVERY": "false",
         "EMAIL_FROM_ADDRESS": "no-reply@brokecrm.cloud",
-        "EMAIL_FROM_NAME": "BrokeCRM"
+        "EMAIL_FROM_NAME": "BrokeCRM",
+        "APP_URL": "https://www.brokecrm.cloud"
       },
       "send_email": [
         {
