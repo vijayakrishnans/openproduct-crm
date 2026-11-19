@@ -1,4 +1,4 @@
-import { handleCrmRoute } from "@api-edge/crm-facade";
+import { handleCrmRoute, isCrmRoute } from "@api-edge/crm-facade";
 import { handleOAuthServerRoute, isOAuthServerRoute } from "@api-edge/oauth-facade";
 import { handleOrgRoute } from "@api-edge/org-facade";
 
@@ -165,5 +165,86 @@ describe("OAuth access tokens at the edge", () => {
     );
     expect(res.status).toBe(401);
     expect(membership.calls).toHaveLength(0);
+  });
+});
+
+describe("the general MCP address, /mcp", () => {
+  /** identity-worker answering /v1/auth/resolve for an organization API key. */
+  const keyIdentity = () =>
+    fetcher(() =>
+      Response.json({
+        data: { actor: { actorType: "api_key", actorId: "key_abc", orgId: ORG } },
+      }),
+    );
+  /** ...and for a web session, which belongs to a person and no organization. */
+  const sessionIdentity = () =>
+    fetcher(() =>
+      Response.json({
+        data: { actor: { actorType: "user", actorId: "usr_abc", email: "rahul@example.com" } },
+      }),
+    );
+
+  it("is a CRM route and a protected resource", async () => {
+    expect(isCrmRoute("/mcp")).toBe(true);
+    expect(isCrmRoute("/mcp/anything")).toBe(false);
+    const res = await handleOAuthServerRoute(
+      new Request(`${HOST}/.well-known/oauth-protected-resource/mcp`),
+      { ENVIRONMENT: "prod" } as never,
+      "req",
+      "/.well-known/oauth-protected-resource/mcp",
+    );
+    expect(await res.json()).toMatchObject({ resource: `${HOST}/mcp`, authorization_servers: [HOST] });
+  });
+
+  it("asks a client without a token to sign in, naming itself", async () => {
+    const crm = ok();
+    const res = await handleCrmRoute(
+      new Request(`${HOST}/mcp`, { method: "POST", body: "{}" }),
+      { ENVIRONMENT: "test", IDENTITY_WORKER: ok().fetcher, CRM_WORKER: crm.fetcher } as never,
+      "req",
+      "/mcp",
+    );
+    expect(res.status).toBe(401);
+    expect(res.headers.get("www-authenticate")).toBe(
+      `Bearer resource_metadata="${HOST}/.well-known/oauth-protected-resource/mcp", scope="crm"`,
+    );
+    expect(crm.calls).toHaveLength(0);
+  });
+
+  it("sends an OAuth token to the organization its owner chose", async () => {
+    const crm = ok();
+    const res = await handleCrmRoute(
+      new Request(`${HOST}/mcp`, { method: "POST", headers: bearer(), body: "{}" }),
+      { ENVIRONMENT: "test", IDENTITY_WORKER: oauthIdentity(OTHER).fetcher, CRM_WORKER: crm.fetcher } as never,
+      "req",
+      "/mcp",
+    );
+    expect(res.status).toBe(200);
+    expect(crm.calls[0]!.url).toBe(`https://crm.internal/v1/organizations/${OTHER}/crm/mcp`);
+    expect(new Headers(crm.calls[0]!.init.headers as HeadersInit).get("x-actor-subject-id")).toBe("usr_abc");
+  });
+
+  it("sends an API key to the organization it belongs to", async () => {
+    const crm = ok();
+    const res = await handleCrmRoute(
+      new Request(`${HOST}/mcp`, { method: "POST", headers: { authorization: `Bearer sps_key_${n++}` }, body: "{}" }),
+      { ENVIRONMENT: "test", IDENTITY_WORKER: keyIdentity().fetcher, CRM_WORKER: crm.fetcher } as never,
+      "req",
+      "/mcp",
+    );
+    expect(res.status).toBe(200);
+    expect(crm.calls[0]!.url).toBe(`https://crm.internal/v1/organizations/${ORG}/crm/mcp`);
+  });
+
+  it("refuses a credential that names no organization", async () => {
+    const crm = ok();
+    const res = await handleCrmRoute(
+      new Request(`${HOST}/mcp`, { method: "POST", headers: { authorization: `Bearer sps_ses_${n++}` }, body: "{}" }),
+      { ENVIRONMENT: "test", IDENTITY_WORKER: sessionIdentity().fetcher, CRM_WORKER: crm.fetcher } as never,
+      "req",
+      "/mcp",
+    );
+    expect(res.status).toBe(403);
+    expect(crm.calls).toHaveLength(0);
   });
 });
