@@ -29,6 +29,19 @@ export interface TemplateRenderOptions {
    * deployment still produces a sensible email.
    */
   brandName?: string;
+  /**
+   * Where the product's web app lives (e.g. "https://www.brokecrm.cloud"),
+   * so that an email asking the reader to sign in can link there. Without it
+   * the email says what to do and carries no link.
+   */
+  appUrl?: string;
+}
+
+/** The sign-in address of the web app, or null when none is configured. */
+function signInUrl(opts: TemplateRenderOptions): string | null {
+  const base = (opts.appUrl ?? "").trim().replace(/\/+$/, "");
+  if (!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(base)) return null;
+  return `${base}/#/login`;
 }
 
 function escapeHtml(value: string): string {
@@ -119,10 +132,13 @@ const renderInvitationCreated: TemplateRenderer = (data, opts) => {
     : "You have been invited to join an organization.";
   const expiryLineText = expires ? `The invitation expires at ${expires}.` : "";
 
+  const link = signInUrl(opts);
   const text = [
     roleLineText,
     expiryLineText,
-    "Sign in with this email address to view and accept the invitation.",
+    link
+      ? `Sign in with this email address to view and accept the invitation: ${link}`
+      : "Sign in with this email address to view and accept the invitation.",
     "If you were not expecting this invitation, you can safely ignore this email.",
   ]
     .filter((line) => line.length > 0)
@@ -135,7 +151,11 @@ const renderInvitationCreated: TemplateRenderer = (data, opts) => {
       expiryLineText
         ? `<p style="margin:0 0 16px;font-size:13px;color:#6b6b80;">${escapeHtml(expiryLineText)}</p>`
         : "",
-      '<p style="margin:0 0 8px;font-size:14px;">Sign in with this email address to view and accept the invitation.</p>',
+      '<p style="margin:0 0 16px;font-size:14px;">Sign in with this email address to view and accept the invitation.</p>',
+      link
+        ? `<p style="margin:0 0 16px;"><a href="${escapeHtml(link)}" style="display:inline-block;padding:10px 18px;border-radius:8px;background:#1f6f4a;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">View the invitation</a></p>` +
+          `<p style="margin:0 0 16px;font-size:13px;color:#6b6b80;">Or open this address: <a href="${escapeHtml(link)}" style="color:#6b6b80;">${escapeHtml(link)}</a></p>`
+        : "",
       '<p style="margin:0;font-size:13px;color:#6b6b80;">If you were not expecting this invitation, you can safely ignore this email.</p>',
     ].join(""),
     escapeHtml(brand ? `Sent by ${brand}` : "This is an automated email."),

@@ -178,6 +178,31 @@ describe("email templates", () => {
     expect(rendered!.html).toContain("as admin");
   });
 
+  test("invitation.created links to the web app's sign-in when its address is configured", () => {
+    const rendered = renderEmailTemplate(
+      "invitation.created",
+      { role: "admin", expiresAt: "2026-06-19T00:00:00.000Z" },
+      { brandName: "Acme", appUrl: "https://www.example.com/" },
+    );
+
+    expect(rendered!.text).toContain("https://www.example.com/#/login");
+    expect(rendered!.html).toContain('href="https://www.example.com/#/login"');
+    expect(rendered!.html).toContain("View the invitation");
+  });
+
+  test("invitation.created carries no link without an address, or with one that is not https", () => {
+    for (const appUrl of [undefined, "", "http://www.example.com", "javascript:alert(1)", 'https://x.example"><script>']) {
+      const rendered = renderEmailTemplate(
+        "invitation.created",
+        { role: "admin" },
+        { brandName: "Acme", ...(appUrl === undefined ? {} : { appUrl }) },
+      );
+      expect(rendered!.html).not.toContain("<a ");
+      expect(rendered!.html).not.toContain("<script");
+      expect(rendered!.text).toContain("Sign in with this email address");
+    }
+  });
+
   test("renders invitation.accepted with the granted role", () => {
     const rendered = renderEmailTemplate("invitation.accepted", {
       invitationId: "inv_abc",
