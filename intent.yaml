@@ -163,8 +163,11 @@ environments:
 
   stage:
     description: The fleet, the API edge and the console, deployed on every merge to main before prod.
-    url: https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev
+    # The address people use: the CRM web app on its own domain. The console
+    # stays one click away in the links.
+    url: https://stage.brokecrm.cloud
     links:
+      - { title: Console, url: https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev }
       - { title: API, url: https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev }
       - { title: Health, url: https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev/health }
     activation:
@@ -190,8 +193,11 @@ environments:
 
   prod:
     description: Where customers are. Deploys after stage converges on the same commit.
-    url: https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev
+    # The address people use: the CRM web app on its own domain. The console
+    # stays one click away in the links.
+    url: https://www.brokecrm.cloud
     links:
+      - { title: Console, url: https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev }
       - { title: API, url: https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev }
       - { title: Health, url: https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev/health }
     activation:
