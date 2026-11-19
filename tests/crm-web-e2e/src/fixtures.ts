@@ -138,7 +138,8 @@ export class Workspace {
       token: invitation["delivery"]?.token,
     });
     const session = sessions.get(email);
-    if (session) session.org = orgs.get(this.orgId);
+    const org = orgs.get(this.orgId);
+    if (session && org) session.org = org;
     const me = await mate.call("GET", `${this.crm}/sales/me`);
     return (await mate.call("PATCH", `${this.crm}/sales/${me["id"]}`, teammate)) as Sales;
   }

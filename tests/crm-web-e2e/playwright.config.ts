@@ -20,8 +20,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  // Four browsers at once keeps the load on stage modest.
-  workers: process.env.CI ? 4 : 2,
+  // Three browsers at once: stage caps sign-ins at 10 a minute per address,
+  // and the fixtures sign each test's user in through the API.
+  workers: 3,
   reporter: "list",
   timeout: 180_000,
   expect: { timeout: 20_000 },
