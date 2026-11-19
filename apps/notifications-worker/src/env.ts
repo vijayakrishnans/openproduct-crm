@@ -13,4 +13,6 @@ export interface Env {
   EMAIL_FROM_ADDRESS?: string;
   /** Optional sender display name / brand for the cloudflare-email provider. */
   EMAIL_FROM_NAME?: string;
+  /** The web app's address (https://…), linked from emails that ask the reader to sign in. */
+  APP_URL?: string;
 }

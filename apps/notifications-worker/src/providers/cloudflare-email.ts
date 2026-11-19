@@ -51,6 +51,8 @@ export interface CloudflareEmailProviderOptions {
   fromAddress: string;
   /** Optional display name rendered as `Name <address>` and used for branding copy. */
   fromName?: string;
+  /** The web app's address, for emails that link to it. */
+  appUrl?: string;
 }
 
 /**
@@ -73,6 +75,7 @@ export function createCloudflareEmailProvider(
     async send(ctx: ProviderSendContext): Promise<ProviderSendResult> {
       const rendered = renderEmailTemplate(ctx.templateKey, ctx.templateData, {
         ...(opts.fromName ? { brandName: opts.fromName } : {}),
+        ...(opts.appUrl ? { appUrl: opts.appUrl } : {}),
       });
       if (!rendered) {
         // Refuse to deliver an empty/generic body for a key nobody registered;
