@@ -89,6 +89,8 @@ function createFakeRepo(opts: {
     async listInvitations() { return { ok: true as const, value: [] }; },
     async listInvitationsPaged() { return { ok: true as const, value: { items: [], nextCursor: null } }; },
     async revokeInvitation() { return { ok: false as const, error: { kind: "not_found" as const } }; },
+    async listPendingInvitationsForEmail() { return { ok: true as const, value: [] }; },
+    async getInvitationAcceptTarget() { return { ok: false as const, error: { kind: "not_found" as const } }; },
     async acceptInvitation() { return { ok: false as const, error: { kind: "not_found" as const } }; },
     async revokeAllRoleAssignments(_orgId: string, _subjectId: string, _revokedAt?: Date) { return { ok: true as const, value: [] }; },
     async countActiveOwners() { return { ok: true as const, value: 0 }; },

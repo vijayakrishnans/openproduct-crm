@@ -83,6 +83,19 @@ export interface RevokeInvitationResponse {
   invitation: PublicInvitation;
 }
 
+/** GET /v1/invitations: invitations addressed to the signed-in person. */
+export interface MyInvitation {
+  id: string;
+  role: string;
+  expiresAt: string;
+  createdAt: string;
+  organization: { id: string; name: string; slug: string };
+}
+
+export interface ListMyInvitationsResponse {
+  invitations: MyInvitation[];
+}
+
 export interface UpdateMemberRoleRequest {
   role: string;
 }

@@ -30,7 +30,7 @@ export function SalesCreate() {
     onSuccess: () => {
       notify("resources.sales.create.success", {
         messageArgs: {
-          _: "User created. They will soon receive an email to set their password.",
+          _: "Invitation created. They join by signing in with this email address.",
         },
       });
       redirect("/sales");

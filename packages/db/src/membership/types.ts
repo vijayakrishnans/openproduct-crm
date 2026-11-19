@@ -141,6 +141,18 @@ export interface AcceptInvitationInput {
   acceptedAt: Date;
 }
 
+/** An invitation addressed to someone, with the organization it opens. */
+export interface PendingInvitation {
+  invitation: OrganizationInvitation;
+  organization: { id: string; name: string; slug: string };
+}
+
+/** What accepting an invitation by id needs, for its verified addressee only. */
+export interface InvitationAcceptTarget {
+  orgId: Uuid;
+  tokenHash: string;
+}
+
 export interface MembershipRepository {
   createOrganization(input: CreateOrganizationInput): Promise<MembershipResult<Organization>>;
   getOrganizationById(id: string): Promise<MembershipResult<Organization>>;
@@ -166,6 +178,10 @@ export interface MembershipRepository {
   listInvitations(orgId: Uuid): Promise<MembershipResult<OrganizationInvitation[]>>;
   listInvitationsPaged(orgId: Uuid, params: PageQueryParams): Promise<MembershipResult<PagedResult<OrganizationInvitation>>>;
   revokeInvitation(orgId: Uuid, invitationId: string, revokedAt: Date): Promise<MembershipResult<OrganizationInvitation>>;
+  /** Live invitations for this email, leaving out orgs the subject is already in. */
+  listPendingInvitationsForEmail(emailLower: string, subjectId: string, now: Date): Promise<MembershipResult<PendingInvitation[]>>;
+  /** Resolves an invitation only when it is addressed to this email. */
+  getInvitationAcceptTarget(invitationId: string, emailLower: string): Promise<MembershipResult<InvitationAcceptTarget>>;
   acceptInvitation(input: AcceptInvitationInput): Promise<MembershipResult<{ invitation: OrganizationInvitation; member: OrganizationMember; roleAssignment: RoleAssignment }>>;
 
   createRoleAssignment(input: CreateRoleAssignmentInput): Promise<MembershipResult<RoleAssignment>>;

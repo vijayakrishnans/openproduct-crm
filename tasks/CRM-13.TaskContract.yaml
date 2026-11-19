@@ -1,0 +1,25 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-13
+  title: "Switch organizations and accept invitations in the CRM"
+spec:
+  goal: A signed-in person can switch between their organizations from the CRM header, and someone invited to an organization can see the invitation and join it after signing in with the invited email.
+  affects:
+    - apps/crm-web/**
+    - apps/membership-worker/src/**
+    - apps/api-edge/src/org-facade.ts
+    - apps/api-edge/src/solo-mode.ts
+    - packages/contracts/src/membership.ts
+    - packages/db/src/membership/**
+    - tests/api-edge/src/**
+    - tests/crm-web-e2e/src/**
+    - tests/db/src/membership.test.ts
+    - tests/membership-worker/src/**
+    - tasks/CRM-13.TaskContract.yaml
+  doneWhen:
+    - the CRM header lists the person's organizations and switching opens the chosen one with no records cached from the previous one
+    - an invited person sees the invitation after signing in with the invited email and can join the organization
+    - an invitation addressed to another email can be neither listed nor accepted
+    - admins see pending invitations on the Users page and can revoke them
+  gates: []

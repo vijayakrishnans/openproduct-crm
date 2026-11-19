@@ -163,6 +163,8 @@ function createFakeRepository(): MembershipRepository & { _orgs: Map<string, Org
     async listInvitations() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },
     async listInvitationsPaged() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },
     async revokeInvitation() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },
+    async listPendingInvitationsForEmail() { return { ok: true as const, value: [] }; },
+    async getInvitationAcceptTarget() { return { ok: false as const, error: { kind: "not_found" as const } }; },
     async acceptInvitation() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },
     async createRoleAssignment() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },
     async revokeRoleAssignment() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },

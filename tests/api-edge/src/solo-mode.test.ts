@@ -85,6 +85,8 @@ describe("isSoloSuppressed — suppressed surfaces", () => {
     ["/v1/organizations/org_x/invitations", "POST"],
     ["/v1/organizations/org_x/invitations/inv_y", "DELETE"],
     ["/v1/organizations/org_x/invitations/accept", "POST"],
+    ["/v1/invitations", "GET"],
+    ["/v1/invitations/inv_y/accept", "POST"],
     ["/v1/organizations/org_x/api-keys", "POST"],
     ["/v1/organizations/org_x/api-keys/key_y", "DELETE"],
     ["/v1/organizations/org_x/projects", "GET"],

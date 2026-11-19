@@ -10,6 +10,7 @@ import { useConfigurationContext } from "../root/ConfigurationContext";
 import { ImportPage } from "../misc/ImportPage";
 import { ChangelogPage } from "../misc/ChangelogPage";
 import { GlobalSearchButton } from "../search/GlobalSearchButton";
+import { OrganizationSwitcher } from "./OrganizationSwitcher";
 
 const Header = () => {
   const { darkModeLogo, lightModeLogo, title } = useConfigurationContext();
@@ -35,6 +36,7 @@ const Header = () => {
         <header className="bg-secondary">
           <div className="px-4">
             <div className="flex justify-between items-center flex-1">
+              <div className="flex items-center gap-2 min-w-0">
               <Link
                 to="/"
                 className="flex items-center gap-2 text-secondary-foreground no-underline"
@@ -51,6 +53,8 @@ const Header = () => {
                 />
                 <h1 className="text-xl font-semibold">{title}</h1>
               </Link>
+              <OrganizationSwitcher />
+              </div>
               <div>
                 <nav className="flex">
                   <NavigationTab

@@ -1,4 +1,6 @@
 export type {
+  InvitationAcceptTarget,
+  PendingInvitation,
   Organization,
   OrganizationMember,
   OrganizationInvitation,

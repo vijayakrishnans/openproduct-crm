@@ -33,6 +33,8 @@ function createFakeRepo(roleAssignments: RoleAssignment[] = []): MembershipRepos
     async listInvitations() { return { ok: true, value: [] }; },
     async listInvitationsPaged() { return { ok: true, value: { items: [], nextCursor: null } }; },
     async revokeInvitation() { return { ok: false, error: { kind: "not_found" as const } }; },
+    async listPendingInvitationsForEmail() { return { ok: true as const, value: [] }; },
+    async getInvitationAcceptTarget() { return { ok: false as const, error: { kind: "not_found" as const } }; },
     async acceptInvitation() { return { ok: false, error: { kind: "not_found" as const } }; },
     async createRoleAssignment() { return { ok: false, error: { kind: "internal" as const, message: "not implemented" } }; },
     async revokeRoleAssignment() { return { ok: false, error: { kind: "not_found" as const } }; },

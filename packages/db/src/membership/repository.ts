@@ -1,4 +1,5 @@
 import type { SqlExecutor } from "../hyperdrive/executor.js";
+import type { Uuid } from "../ids/index.js";
 import type {
   AcceptInvitationInput,
   BootstrapOrganizationInput,
@@ -7,6 +8,7 @@ import type {
   CreateOrganizationMemberInput,
   CreateRoleAssignmentInput,
   CursorPosition,
+  InvitationAcceptTarget,
   MembershipRepository,
   MembershipResult,
   Organization,
@@ -14,6 +16,7 @@ import type {
   OrganizationMember,
   PagedResult,
   PageQueryParams,
+  PendingInvitation,
   RoleAssignment,
 } from "./types.js";
 
@@ -527,6 +530,58 @@ export function createMembershipRepository(executor: SqlExecutor): MembershipRep
         return { ok: true, value: mapInvitation(result.rows[0]!) };
       } catch (err) {
         return safeError("Failed to revoke invitation", err);
+      }
+    },
+
+    async listPendingInvitationsForEmail(emailLower: string, subjectId: string, now: Date): Promise<MembershipResult<PendingInvitation[]>> {
+      try {
+        const result = await executor.execute<Record<string, unknown>>(
+          `SELECT i.id, i.org_id, i.email, i.email_lower, i.role, i.status, i.invited_by, i.expires_at,
+                  i.accepted_at, i.revoked_at, i.created_at,
+                  o.name AS organization_name, o.slug AS organization_slug
+           FROM membership.organization_invitations i
+           INNER JOIN membership.organizations o ON o.id = i.org_id
+           WHERE i.email_lower = $1
+             AND i.status = 'pending'
+             AND i.accepted_at IS NULL
+             AND i.revoked_at IS NULL
+             AND i.expires_at > $2
+             AND NOT EXISTS (
+               SELECT 1 FROM membership.organization_members m
+               WHERE m.org_id = i.org_id AND m.subject_id = $3 AND m.status = 'active'
+             )
+           ORDER BY i.created_at DESC, i.id DESC
+           LIMIT 50`,
+          [emailLower, now.toISOString(), subjectId],
+        );
+        return {
+          ok: true,
+          value: result.rows.map((row) => ({
+            invitation: mapInvitation(row),
+            organization: {
+              id: row.org_id as string,
+              name: row.organization_name as string,
+              slug: row.organization_slug as string,
+            },
+          })),
+        };
+      } catch (err) {
+        return safeError("Failed to list pending invitations", err);
+      }
+    },
+
+    async getInvitationAcceptTarget(invitationId: string, emailLower: string): Promise<MembershipResult<InvitationAcceptTarget>> {
+      try {
+        const result = await executor.execute<Record<string, unknown>>(
+          `SELECT org_id, token_hash FROM membership.organization_invitations
+           WHERE id = $1 AND email_lower = $2`,
+          [invitationId, emailLower],
+        );
+        const row = result.rows[0];
+        if (!row) return { ok: false, error: { kind: "not_found" } };
+        return { ok: true, value: { orgId: row.org_id as Uuid, tokenHash: row.token_hash as string } };
+      } catch (err) {
+        return safeError("Failed to read invitation", err);
       }
     },
 

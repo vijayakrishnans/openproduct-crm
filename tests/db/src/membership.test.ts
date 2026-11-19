@@ -739,6 +739,42 @@ describe("MembershipRepository", () => {
     });
   });
 
+  describe("invitations by addressee", () => {
+    it("lists live invitations for the email, without orgs the subject already belongs to", async () => {
+      const { executor, queries } = createFakeExecutor({
+        callResponses: [
+          { rows: [{ ...SAMPLE_INVITATION_ROW, organization_name: "Acme", organization_slug: "acme" }], rowCount: 1 },
+        ],
+      });
+      const result = await createMembershipRepository(executor).listPendingInvitationsForEmail(
+        "invite@example.com",
+        "usr-002",
+        NOW,
+      );
+
+      expect(queries[0]!.text).toContain("i.email_lower = $1");
+      expect(queries[0]!.text).toContain("i.status = 'pending'");
+      expect(queries[0]!.text).toContain("i.revoked_at IS NULL");
+      expect(queries[0]!.text).toContain("i.expires_at > $2");
+      expect(queries[0]!.text).toContain("NOT EXISTS");
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value[0]!.organization).toMatchObject({ name: "Acme", slug: "acme" });
+      }
+    });
+
+    it("resolves an invitation only together with its addressee's email", async () => {
+      const { executor, queries } = createFakeExecutor({ callResponses: [{ rows: [], rowCount: 0 }] });
+      const result = await createMembershipRepository(executor).getInvitationAcceptTarget(
+        "inv-001",
+        "someone-else@example.com",
+      );
+
+      expect(queries[0]!.text).toContain("id = $1 AND email_lower = $2");
+      expect(result).toEqual({ ok: false, error: { kind: "not_found" } });
+    });
+  });
+
   describe("acceptInvitation", () => {
     it("validates invitation state and creates member + role assignment atomically", async () => {
       const { executor, queries } = createFakeExecutor({

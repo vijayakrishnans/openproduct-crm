@@ -7,6 +7,7 @@ import { SearchInput } from "@/components/admin/search-input";
 import { Badge } from "@/components/ui/badge";
 
 import { TopToolbar } from "../layout/TopToolbar";
+import { PendingInvitations } from "./PendingInvitations";
 
 const SalesListActions = () => (
   <TopToolbar>
@@ -45,19 +46,22 @@ const OptionsField = (_props: { label?: string | boolean }) => {
 
 export function SalesList() {
   return (
-    <List
-      filters={filters}
-      actions={<SalesListActions />}
-      sort={{ field: "first_name", order: "ASC" }}
-    >
-      <DataTable bulkActionButtons={false}>
-        <DataTable.Col source="first_name" />
-        <DataTable.Col source="last_name" />
-        <DataTable.Col source="email" />
-        <DataTable.Col label={false}>
-          <OptionsField />
-        </DataTable.Col>
-      </DataTable>
-    </List>
+    <>
+      <List
+        filters={filters}
+        actions={<SalesListActions />}
+        sort={{ field: "first_name", order: "ASC" }}
+      >
+        <DataTable bulkActionButtons={false}>
+          <DataTable.Col source="first_name" />
+          <DataTable.Col source="last_name" />
+          <DataTable.Col source="email" />
+          <DataTable.Col label={false}>
+            <OptionsField />
+          </DataTable.Col>
+        </DataTable>
+      </List>
+      <PendingInvitations />
+    </>
   );
 }
