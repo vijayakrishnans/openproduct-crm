@@ -3,7 +3,7 @@ import { errorResponse, withEdgeTimings } from "./http.js";
 import { replayOrExecute } from "./idempotency.js";
 import { resolveActor } from "./resolve-actor.js";
 import { createTimings } from "@saas/contracts/timing";
-import { isMcpPath, mcpAuthChallenge } from "./oauth-facade.js";
+import { GENERAL_MCP_PATH, isMcpPath, mcpAuthChallenge, mcpPathForOrg } from "./oauth-facade.js";
 
 // Everything under an org's /crm goes to crm-worker, which owns the routes
 // below it (resources, search, merge, dashboard). The edge authenticates,
@@ -17,15 +17,16 @@ const BODY_METHODS: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH"]);
 const FORWARDED_HEADERS = ["content-type", "traceparent", "idempotency-key"];
 
 export function isCrmRoute(pathname: string): boolean {
-  return CRM_RE.test(pathname);
+  return pathname === GENERAL_MCP_PATH || CRM_RE.test(pathname);
 }
 
 export async function handleCrmRoute(
   request: Request,
   env: Env,
   requestId: string,
-  pathname: string,
+  requestedPath: string,
 ): Promise<Response> {
+  let pathname = requestedPath;
   if (!METHODS.has(request.method)) {
     return errorResponse("unsupported", "Method not allowed", 405, requestId);
   }
@@ -51,6 +52,21 @@ export async function handleCrmRoute(
         return challenged;
       }
       return actor.error;
+    }
+    // The general MCP address: the credential says which organization. From
+    // here on the request is that organization's MCP path, checked like any
+    // other.
+    if (pathname === GENERAL_MCP_PATH) {
+      const orgId = actor.grant?.orgId ?? actor.orgId;
+      if (!orgId) {
+        return errorResponse(
+          "forbidden",
+          "This credential is not tied to an organization. Connect with OAuth, or use an organization API key",
+          403,
+          requestId,
+        );
+      }
+      pathname = mcpPathForOrg(orgId);
     }
     // An OAuth token was granted for one organization's MCP server, and only
     // works there.

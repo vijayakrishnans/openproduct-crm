@@ -15,6 +15,14 @@ import { errorResponse } from "./http";
 const PROTECTED_RESOURCE = "/.well-known/oauth-protected-resource";
 const AUTHORIZATION_SERVER = "/.well-known/oauth-authorization-server";
 const MCP_PATH_RE = /^\/v1\/organizations\/org_[0-9a-f]{32}\/crm\/mcp$/;
+
+/**
+ * The MCP server's one address for everyone: `<host>/mcp`. It names no
+ * organization; the credential does. An OAuth token carries the organization
+ * its owner chose when approving the client, and an API key belongs to one.
+ * The per-organization paths above keep working beside it.
+ */
+export const GENERAL_MCP_PATH = "/mcp";
 const IDENTITY_ROUTES: Record<string, string> = {
   "/v1/oauth/register": "POST",
   "/v1/oauth/token": "POST",
@@ -25,7 +33,12 @@ const CLIENT_RE = /^\/v1\/oauth\/clients\/[^/]+$/;
 export const OAUTH_SCOPE = "crm";
 
 export function isMcpPath(pathname: string): boolean {
-  return MCP_PATH_RE.test(pathname);
+  return pathname === GENERAL_MCP_PATH || MCP_PATH_RE.test(pathname);
+}
+
+/** The per-organization MCP path the general address stands for. */
+export function mcpPathForOrg(orgId: string): string {
+  return `/v1/organizations/${orgId}/crm/mcp`;
 }
 
 export function isOAuthServerRoute(pathname: string): boolean {
