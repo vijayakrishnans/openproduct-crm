@@ -28,15 +28,13 @@ const CUSTOM_DOMAIN_API_URLS: Record<string, string> = {
 };
 
 /**
- * api-edge on brokecrm.cloud itself, for the MCP server address people paste
- * into an assistant. `API_EDGE_CUSTOM_DOMAIN` in intent.yaml attaches these
- * hostnames to api-edge (infra/terraform/cloudflare-domain). The app calls
- * the same hosts (above): sign-in with a provider returns to this host, and
- * its state cookie is only sent back to the host that set it.
+ * The MCP server's own hostnames, the address people paste into an assistant.
+ * `MCP_CUSTOM_DOMAIN` in intent.yaml attaches them to api-edge
+ * (infra/terraform/cloudflare-domain).
  */
 const CUSTOM_DOMAIN_MCP_HOSTS: Record<string, string> = {
-  "www.brokecrm.cloud": "https://api.brokecrm.cloud",
-  "stage.brokecrm.cloud": "https://api-stage.brokecrm.cloud",
+  "www.brokecrm.cloud": "https://mcp.brokecrm.cloud",
+  "stage.brokecrm.cloud": "https://mcp-stage.brokecrm.cloud",
 };
 
 /**
@@ -162,11 +160,15 @@ export function crmPath(): string {
   return `/v1/organizations/${orgId}/crm`;
 }
 
-/** The organization's MCP endpoint, or null when not signed in (the demo). */
+/**
+ * The MCP server's address, or null when not signed in (the demo). It is the
+ * same for everyone: the credential an assistant presents says which
+ * organization it works in (api-edge's general MCP path).
+ */
 export function mcpUrl(): string | null {
-  const orgId = getSession()?.orgId;
+  if (!getSession()?.orgId) return null;
   const host = CUSTOM_DOMAIN_MCP_HOSTS[window.location.hostname] ?? apiBaseUrl();
-  return orgId ? `${host}/v1/organizations/${orgId}/crm/mcp` : null;
+  return `${host}/mcp`;
 }
 
 export function orgPath(): string {

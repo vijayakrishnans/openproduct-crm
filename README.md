@@ -32,8 +32,8 @@ The CRM is deployed on stage and prod:
   tasks, tags, search, import and export, per organization.
 - **API** — `/v1/organizations/:orgId/crm/…` behind the one public edge;
   another organization's record answers `404`.
-- **MCP** — `/v1/organizations/:orgId/crm/mcp`, signed in with an
-  organization API key; thirteen typed tools, no free-form SQL.
+- **MCP** — one address, `https://mcp.brokecrm.cloud/mcp`, signed in with
+  OAuth or an organization API key; thirteen typed tools, no free-form SQL.
 - **Platform** — CRM events in the audit log and as webhooks, seats in
   metering, a contact limit per plan.
 
