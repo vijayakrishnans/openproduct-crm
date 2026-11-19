@@ -192,5 +192,14 @@ export const manifest: MigrationManifest = {
       description:
         "CRM persistence foundation — the org-scoped port of Atomic CRM's schema: companies, contacts, deals, notes, tasks, tags and sales profiles with org_id on every row, composite org foreign keys, row-level security on app.org_id for the crm_app role, and the ported views, merge and global search",
     },
+    {
+      id: "210_identity_oauth_server",
+      context: "identity",
+      path: "210_identity_oauth_server/up.sql",
+      checksum:
+        "72aed5f64e93085efe7019d576dd4fa528af3d2fd79248b562e2b3bd2a2a3455",
+      description:
+        "OAuth 2.1 for the CRM's MCP server: dynamically registered public clients, single-use PKCE authorization codes, and hashed access/refresh tokens that act as one user in one organization",
+    },
   ],
 };

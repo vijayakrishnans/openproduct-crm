@@ -29,7 +29,14 @@ const mount = () => {
 const root = document.documentElement;
 const isRoute = () => !["", "#", "#/"].includes(window.location.hash);
 const isOAuthReturn = new URLSearchParams(window.location.search).has("signin");
-if (isOAuthReturn && !isDemo) {
+if (window.location.pathname === "/oauth/authorize") {
+  // An MCP client (Claude, for one) asks this person to approve access.
+  document.getElementById("landing")?.remove();
+  root.setAttribute("data-mode", "app");
+  void import("./oauth/AuthorizePage.tsx").then(({ mountAuthorizePage }) =>
+    mountAuthorizePage(document.getElementById("root")!),
+  );
+} else if (isOAuthReturn && !isDemo) {
   // Back from Google, GitHub…: take the result out of the address before the
   // router reads it, then start.
   void import("./components/atomic-crm/providers/lumen/authProvider")

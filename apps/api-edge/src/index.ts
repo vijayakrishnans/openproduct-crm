@@ -5,6 +5,7 @@ import { resolveRequestId, notFound } from "./http";
 import { handlePreflight, applyCorsHeaders } from "./cors";
 import { isAuthRoute, handleAuthRoute } from "./auth-facade";
 import { isOrgRoute, handleOrgRoute } from "./org-facade";
+import { isOAuthServerRoute, handleOAuthServerRoute } from "./oauth-facade";
 import { isProjectRoute, handleProjectRoute } from "./project-facade";
 import { isCrmRoute, handleCrmRoute } from "./crm-facade";
 import { isAuditRoute, handleAuditRoute } from "./audit-facade";
@@ -45,6 +46,8 @@ export default {
       // reads as "not found" to the single-user surface. Flip SOLO_MODE off and
       // this branch is dead, restoring the full baseline. (See ./solo-mode.ts.)
       response = notFound(requestId, url.pathname);
+    } else if (isOAuthServerRoute(url.pathname)) {
+      response = await handleOAuthServerRoute(request, env, requestId, url.pathname);
     } else if (isAuthRoute(url.pathname)) {
       response = await handleAuthRoute(request, env, requestId, url.pathname);
     } else if (isAuditRoute(url.pathname)) {

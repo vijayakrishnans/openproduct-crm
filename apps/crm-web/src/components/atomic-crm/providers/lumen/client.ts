@@ -28,6 +28,17 @@ const CUSTOM_DOMAIN_API_URLS: Record<string, string> = {
 };
 
 /**
+ * api-edge on brokecrm.cloud itself, for the MCP server address people paste
+ * into an assistant. `API_EDGE_CUSTOM_DOMAIN` in intent.yaml attaches these
+ * hostnames to api-edge (infra/terraform/cloudflare-domain). The app keeps
+ * calling the workers.dev address above until those are proven.
+ */
+const CUSTOM_DOMAIN_MCP_HOSTS: Record<string, string> = {
+  "www.brokecrm.cloud": "https://api.brokecrm.cloud",
+  "stage.brokecrm.cloud": "https://api-stage.brokecrm.cloud",
+};
+
+/**
  * Where api-edge lives. On a deployed crm-web the Worker is named like
  * api-edge's with `crm-web` in its place, on the same workers.dev subdomain,
  * so the URL follows from the page's own host; on a custom domain it comes
@@ -153,7 +164,8 @@ export function crmPath(): string {
 /** The organization's MCP endpoint, or null when not signed in (the demo). */
 export function mcpUrl(): string | null {
   const orgId = getSession()?.orgId;
-  return orgId ? `${apiBaseUrl()}/v1/organizations/${orgId}/crm/mcp` : null;
+  const host = CUSTOM_DOMAIN_MCP_HOSTS[window.location.hostname] ?? apiBaseUrl();
+  return orgId ? `${host}/v1/organizations/${orgId}/crm/mcp` : null;
 }
 
 export function orgPath(): string {

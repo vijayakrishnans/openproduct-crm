@@ -8,6 +8,8 @@
 //   2. Every host but the public one tells crawlers not to index it (stage,
 //      the workers.dev copies). The page says the same from a script, but a
 //      header also reaches crawlers that do not run scripts.
+//   3. The OAuth approval page (/oauth/authorize) may not be framed by another
+//      site, so nobody can trick a click on its Allow button.
 
 /** Hosts that only redirect, and where to. */
 export const REDIRECT_HOSTS = { "brokecrm.cloud": "www.brokecrm.cloud" };
@@ -26,9 +28,14 @@ export default {
     }
 
     const response = await env.ASSETS.fetch(request);
-    if (url.hostname === PUBLIC_HOST) return response;
+    const framed = url.pathname === "/oauth/authorize";
+    if (url.hostname === PUBLIC_HOST && !framed) return response;
     const tagged = new Response(response.body, response);
-    tagged.headers.set("x-robots-tag", "noindex");
+    if (url.hostname !== PUBLIC_HOST || framed) tagged.headers.set("x-robots-tag", "noindex");
+    if (framed) {
+      tagged.headers.set("x-frame-options", "DENY");
+      tagged.headers.set("content-security-policy", "frame-ancestors 'none'");
+    }
     return tagged;
   },
 };
