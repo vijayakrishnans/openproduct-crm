@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Check } from "lucide-react";
 import { useLogin, useNotify } from "ra-core";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -144,6 +145,55 @@ export const LumenLoginPage = () => {
             <img className="h-6 mr-2" src={darkModeLogo} alt={title} />
             {title}
           </div>
+          {/* What the visitor is about to get into. A heading of level 2: the
+              page's own heading is the form's. */}
+          <div className="relative z-20 my-auto max-w-lg py-10">
+            <h2 className="text-4xl font-semibold leading-tight tracking-tight">
+              The CRM for teams with no CRM budget.
+            </h2>
+            <p className="mt-4 text-lg text-zinc-300">
+              Your people, your pipeline and your follow-ups in one place, for the whole team.
+            </p>
+            <ul className="mt-8 space-y-3 text-zinc-200">
+              {[
+                "Free to use. No card, no trial clock.",
+                "Open source under Apache 2.0, so you can read the code or run your own.",
+                "Hosted for you. Nothing to install.",
+              ].map((point) => (
+                <li key={point} className="flex gap-3">
+                  <Check className="mt-1 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-10 overflow-hidden rounded-xl border border-white/10 shadow-2xl [@media(max-height:900px)]:hidden">
+              <img
+                src="./img/board.jpg"
+                alt="A pipeline board: cards in columns from first contact to won."
+                width={1280}
+                height={760}
+                loading="lazy"
+                className="block h-auto w-full"
+              />
+            </div>
+          </div>
+          <p className="relative z-20 text-sm text-zinc-400">
+            Built on{" "}
+            <a
+              href="https://github.com/marmelab/atomic-crm"
+              className="underline underline-offset-2 hover:text-zinc-200"
+            >
+              Atomic CRM
+            </a>
+            . The code is on{" "}
+            <a
+              href="https://github.com/vijayakrishnans/openproduct-crm"
+              className="underline underline-offset-2 hover:text-zinc-200"
+            >
+              GitHub
+            </a>
+            .
+          </p>
         </div>
         <div className="flex flex-col justify-center w-full p-4 lg:p-8">
           <div className="w-full space-y-6 lg:mx-auto lg:w-[350px]">
