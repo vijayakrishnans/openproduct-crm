@@ -22,11 +22,13 @@ departs from [design.md](design.md).
 | After M7: custom domain `brokecrm.cloud` | done | #33 |
 | After M7: prod sign-in by email | done; the owner signed in on prod, 2026-11-18 | #34 |
 | After M7: BrokeCRM name, landing page, SEO | done | #35 |
-| After M7: sign-in with Google and GitHub | done; the owner signed in on prod with both, 2026-11-19 | #36, #44, #45, #50 |
+| After M7: sign-in with Google and GitHub | done; the owner signed in on prod with both, 2026-11-19. GitHub shows its account picker each time (#53) | #36, #44, #45, #50, #53 |
 | After M7: invitation emails link to sign-in | done; not confirmed with a real email | #49 |
 | After M7: bare domain redirects to `www` | done | #39 |
 | After M7: deploy smokes fixed after the rename (prod was blocked from #36 to #40) | done | #40 |
-| After M7: terms, privacy policy, licence statement | done as drafts; not reviewed by a lawyer | |
+| After M7: terms, privacy policy, licence statement | done as drafts; not reviewed by a lawyer | #41 |
+| After M7: environment addresses shown in Orunbase | done | #46 |
+| Other sessions: organization switching and invitations (CRM-13), per-organization branding (CRM-14), OAuth for the MCP server and the API's own domain (CRM-15), faster CI (CRM-16), the MCP approval page (CRM-17), deals without an amount (CRM-18) | merged; see their pull requests | #38, #42, #43, #48, #47, #51 |
 
 ## Departures from design.md
 

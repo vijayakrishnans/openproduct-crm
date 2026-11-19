@@ -4,31 +4,37 @@ The authoritative progress record for porting Atomic CRM onto this Lumen
 product. Read it first on every resume, then `gh pr list --state all` and
 `orun baseline new … --status`. Do not redo merged work.
 
-## Summary (2026-11-18)
+## Summary (2026-11-19)
 
 The product is live as **BrokeCRM** at https://www.brokecrm.cloud (stage:
-https://stage.brokecrm.cloud). The repository, Worker names and identity
-record keep the name `openproduct-crm`.
+https://stage.brokecrm.cloud), with its API at https://api.brokecrm.cloud.
+The repository, Worker names and identity record keep the name
+`openproduct-crm`.
 
 Every milestone is merged: Phase A, CRM0, the multi-tenant profile, M0, the
 public listing, M1 (the `crm` schema), M2 (`crm-worker`, `crm-facade`), M3
 (the web app on the Lumen API), M4 (attachments, favicons, the inbound-email
 handler), M5 (MCP), M6 (events, seats, the contact limit) and M7 (the smoke
-and the docs). After M7: fixes from the owner's own use (the settings page,
-the deal board), the relicensing to Apache-2.0, the openproduct.live listing,
-the custom domain, prod sign-in by email, the BrokeCRM name with a landing
-page and SEO, and sign-in with Google and GitHub (built, not switched on).
-See "After M7" below.
+and the docs). After M7: fixes from the owner's own use, the relicensing to
+Apache-2.0, the openproduct.live listing, the custom domain, the BrokeCRM
+name with a landing page and SEO, terms and a privacy policy, and sign-in by
+email, Google and GitHub, all working on prod. See "After M7" below. Other
+sessions added organization switching and invitations, per-organization
+branding, OAuth for the MCP server, a faster CI and a fix for deals without
+an amount (CRM-13 to CRM-18); they are listed below from their task
+contracts and were not verified by this ledger's author.
 
 What is not done, and why:
 
-- **Prod sign-in works** since 2026-11-18 (email codes from
-  `no-reply@brokecrm.cloud`). The **prod smoke** still needs a prod
-  credential, **inbound email** needs Email Routing on the domain (WAITING.md).
-  **Sign-in with Google and GitHub works** since 2026-11-19.
+- The **prod smoke** needs a prod credential, and **inbound email** needs
+  Email Routing on the domain (WAITING.md).
+- The **terms and the privacy policy** are drafts with three blanks for the
+  owner (operator, contact, governing law) and no lawyer's review
+  (WAITING.md).
 - The owner saw "Something went wrong" on the deal board while dragging a
-  deal. It was **not reproduced**; the board was hardened and two real drag
-  defects were fixed, but nothing shows that screen is gone (WAITING.md).
+  deal. It was **not reproduced** here. CRM-18 (#51) later fixed that screen
+  for a deal with no amount or contacts, which may be the same cause; nobody
+  has confirmed it (WAITING.md).
 - The openproduct.live listing shows no licence, language or last commit yet,
   and is not indexed by search engines. Both are on openproduct.live's side
   (WAITING.md).
@@ -87,6 +93,21 @@ Work that followed the milestones, each its own pull request into `main`.
 | Environment addresses in `intent.yaml` | #46 | `19072a6` | `url` for prod is `https://www.brokecrm.cloud` and for stage `https://stage.brokecrm.cloud`, so the Orunbase overview shows the product's own address; the console moves to a link |
 | Invitation emails link to sign-in | #49 | `baf1749` | The email told the reader to sign in and gave no address. It now has a button and the address, from a new `APP_URL` var on `notifications-worker`. Tests cover the link and that a missing, non-https or hostile address yields none. The deploy run on `main` concluded `success`. Not confirmed with a real email |
 | Sign-in on the API's own domain | #50 | `6a02125` | Google's consent screen showed the API's workers.dev host. `OAUTH_REDIRECT_BASE_URL` and the web app's API address are now `api.brokecrm.cloud` (stage: `api-stage.brokecrm.cloud`); they move together because the sign-in's state cookie only returns to the host that set it. Merged after the owner added the new redirect URIs in Google; the owner then changed the GitHub callbacks. The deploy run concluded `success`; each start link's `redirect_uri` is on the new host on stage and prod; **the owner signed in on prod with Google and with GitHub, 2026-11-19** |
+| GitHub sign-in shows the account picker | #53 | `63efaa2` | The owner reported being signed in by GitHub "without any verification": GitHub's default for a returning, signed-in user is to redirect straight back. The authorize URL now carries `prompt=select_account` (documented by GitHub; Google's already had it). The deploy run on `main` concluded `success`; the live start links on `api.brokecrm.cloud` and `api-stage.brokecrm.cloud` carry it, 2026-11-19. The picker itself not yet confirmed by the owner |
+
+### From other sessions (not verified by this ledger's author)
+
+Taken from each change's task contract and merge commit. What each was
+checked against is in its own pull request.
+
+| What | Task | PR | Merge |
+|---|---|---|---|
+| Switch organizations from the header; see and accept an invitation after signing in with the invited email | CRM-13 | #38 | `e23e3f5` |
+| Branding (title, logos) follows the organization shown | CRM-14 | #42 | `d2d3432` |
+| MCP server: OAuth 2.1 sign-in, and the API on `api.brokecrm.cloud` / `api-stage.brokecrm.cloud` | CRM-15 | #43 | `4af7fbb` |
+| CI: each affected suite once per pull request, merges only deploy, the browser suite in minutes | CRM-16 | #48 | `74e43cf` |
+| The MCP approval page (`/oauth/authorize`) loads on the deployed web app | CRM-17 | #47 | `549fb5b` |
+| A deal with no amount or contacts opens instead of "Something went wrong" | CRM-18 | #51 | `a10f413` |
 
 ## Live URLs
 
@@ -268,6 +289,15 @@ Work that followed the milestones, each its own pull request into `main`.
 
 - 2026-11-18: OAuth client ids are read from Orunbase secrets like their
   secrets, not committed as config, so turning a provider on is one place.
+
+- 2026-11-19: sign-in with a provider returns to the API's own domain, and
+  the web app calls that same host, because the sign-in's state cookie only
+  comes back to the host that set it. Changing one without the other breaks
+  provider sign-in. The OAuth apps must list the callback on that host:
+  Google's client holds old and new, GitHub's apps hold one each.
+
+- 2026-11-19: both providers are asked for their account picker on every
+  sign-in (`prompt=select_account`), so a sign-in is never silent.
 
 - 2026-11-19: a runtime secret has to be named twice in a worker's
   `component.yaml`: in `optionalSecretEnv` (where it is looked up) and in

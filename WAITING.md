@@ -63,7 +63,13 @@ checks for before it carries on.
 - **Steps:** if it happens again, open the browser console (F12, Console)
   and copy the red error text; or note which deal was moved from which
   column to which, and whether deal stages had been changed in Settings.
-- **Unblock signal:** an error message or a sequence that reproduces it.
+- **A possible cause, since fixed:** another session's CRM-18 (#51,
+  2026-11-19) fixed the same screen for a deal that has no amount or no
+  contacts, such as one created through the API or the MCP server. If the
+  deal that was dragged was one of those, this may be closed; nobody has
+  confirmed it.
+- **Unblock signal:** an error message or a sequence that reproduces it, or
+  the owner dragging deals again without seeing it.
 
 ### The openproduct.live listing: repo facts and indexing (openproduct.live's side)
 
@@ -108,6 +114,9 @@ checks for before it carries on.
   verification (Google Cloud console, Branding).
 - **Invitation emails carry a link (2026-11-19):** #49. Not yet confirmed
   with a real email.
+- **GitHub sign-in shows the account picker (2026-11-19):** #53, after the
+  owner noticed GitHub signing them in with no screen. Not yet confirmed by
+  the owner.
 
 
 - **Prod sign-in by email (2026-11-18):** `brokecrm.cloud` was onboarded to
