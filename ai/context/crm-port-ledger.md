@@ -30,8 +30,8 @@ What is not done, and why:
 - The owner saw "Something went wrong" on the deal board while dragging a
   deal. It was **not reproduced**; the board was hardened and two real drag
   defects were fixed, but nothing shows that screen is gone (WAITING.md).
-- The openproduct.live listing shows no licence, language or last commit yet,
-  and is not indexed by search engines. Both are on openproduct.live's side
+- The openproduct.live listing (https://openproduct.live/broke-crm) is not
+  indexed by search engines yet. That is on openproduct.live's side
   (WAITING.md).
 
 ## Inputs used
@@ -76,7 +76,7 @@ Work that followed the milestones, each its own pull request into `main`.
 | Deal moves saved in order | #29 | `14524b3` | A deal moved twice before the first move was saved had its second move stored in the old column (seen in a request timeline against stage: the second `PATCH` carried no `stage`). Moves are queued; each reads the deal and its drop target from the server; the board reloads once, after the last save, and never mid-drag. `dealBoard.spec.ts` failed 2 runs in 3 against deployed stage before, and passed 3 in 3 after, 2026-11-17 |
 | `LICENSE` is plain MIT text | #30 | `b044515` | GitHub reported "Other"; a sentence after the MIT text kept it from matching. Superseded the same day by #31 |
 | Relicensed to Apache-2.0 | #31 | `88f7ab5` | `LICENSE` is the unmodified Apache text; `NOTICE` reads `Copyright 2026 vijayakrishnans and Orunbase`. GitHub's API reports `Apache-2.0` for the repository, 2026-11-17 |
-| Listed on openproduct.live | (no PR: done by the owner on Orunbase) | | https://openproduct.live/atomic-crm, slug `atomic-crm`, published 2026-11-17T08:02Z, on the home feed and the Products page. `GET https://api.openproduct.live/v1/products/atomic-crm` answers `200`. Its licence, language and last commit are still empty and `indexable` is `false` (WAITING.md) |
+| Listed on openproduct.live | (no PR: done by the owner on Orunbase) | | Published 2026-11-17T08:02Z as `atomic-crm`; renamed by the owner to https://openproduct.live/broke-crm, slug `broke-crm`, on 2026-11-19, with a tagline and pitch that credit Atomic CRM. `GET https://api.openproduct.live/v1/products/broke-crm` answers `200` with licence `Apache-2.0` and language `TypeScript`; the old slug answers `404`. `indexable` is still `false` (WAITING.md) |
 | Custom domain `brokecrm.cloud` | #33 | `b94a9f2` | Done in another session: `www.brokecrm.cloud` (prod) and `stage.brokecrm.cloud` serve the CRM web app |
 | Prod sign-in emails | #34 | `a9d680d` | Sender is `no-reply@brokecrm.cloud`; the owner onboarded the domain to Cloudflare Email Sending and signed in on prod with an emailed code, 2026-11-18 |
 | BrokeCRM name, landing page, SEO | #35 | `6da014c` | Checked in a browser on the deployed sites, 2026-11-18: prod and stage show the landing page to a visitor with no session, "Start free" leads to the sign-in form, the sitemap and preview image are served, prod has no `noindex` and stage does. The name on every screen; a static landing page at the site's root for visitors with no session (free, open source, hosted; credit to Atomic CRM; links to Orunbase and openproduct); title, description, Open Graph, structured data, sitemap; only `www.brokecrm.cloud` indexable. `landing.spec.ts` and the full browser suite green in CI |
@@ -252,6 +252,10 @@ Work that followed the milestones, each its own pull request into `main`.
 - 2026-11-17: the product keeps the slug **`atomic-crm`** on openproduct.live,
   by the owner's choice, though the repository and product are named
   OpenProduct CRM.
+
+- 2026-11-19: the openproduct.live slug is now **`broke-crm`**, matching the
+  BrokeCRM name, by the owner's choice; the listing credits Atomic CRM as its
+  inspiration and base. The landing page links to the new address.
 
 - 2026-11-18: the product is named **BrokeCRM** and lives at
   `www.brokecrm.cloud`, by the owner's choice. Only what people see changed:

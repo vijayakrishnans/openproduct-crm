@@ -77,21 +77,19 @@ checks for before it carries on.
   column to which, and whether deal stages had been changed in Settings.
 - **Unblock signal:** an error message or a sequence that reproduces it.
 
-### The openproduct.live listing: repo facts and indexing (openproduct.live's side)
+### The openproduct.live listing: indexing (openproduct.live's side)
 
-- **Why:** https://openproduct.live/atomic-crm is published, but its licence,
-  language and last commit are empty, and `indexable` is `false`.
-- **Repo facts:** the catalog shows what its own check reads from GitHub. On
-  2026-11-17 GitHub reported `Apache-2.0` and `TypeScript` for the repository
-  while the listing had none of it, so the check had not read this
-  repository yet. Nothing in this repository can trigger it.
+- **Why:** https://openproduct.live/broke-crm is published, but `indexable`
+  is `false` and the page carries `noindex`. (Its licence, language and last
+  commit are now read from GitHub: `Apache-2.0`, `TypeScript`, checked
+  2026-11-19.)
 - **Indexing:** openproduct.live's published rule (`listing.indexable`): a
   maker's first listing is not indexed until one of theirs has been reviewed
   by a person there, and the decision is made at publication and not
   revisited. So a review alone may not change this listing; publishing it
   again after the review may be needed.
-- **Unblock signal:** `GET https://api.openproduct.live/v1/products/atomic-crm`
-  shows `licence.value` `Apache-2.0` and `indexable.value` `true`.
+- **Unblock signal:** `GET https://api.openproduct.live/v1/products/broke-crm`
+  shows `indexable.value` `true`.
 
 ### Move the repository to the OpenProduct GitHub org (optional)
 
@@ -122,7 +120,8 @@ checks for before it carries on.
   on https://www.brokecrm.cloud. The agent did not send a test email itself.
 
 - **Listed on openproduct.live (2026-11-17):** the owner published it through
-  Orunbase as `atomic-crm`: https://openproduct.live/atomic-crm.
+  Orunbase as `atomic-crm`; renamed to `broke-crm` on 2026-11-19:
+  https://openproduct.live/broke-crm. The old address now answers `404`.
 
 - **Supabase databases unreachable (2026-11-17):** the owner resumed the
   paused stage and prod projects the same day; they came back under the same
