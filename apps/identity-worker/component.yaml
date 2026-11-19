@@ -131,3 +131,5 @@ spec:
     runtime: cloudflare
 # ci: re-trigger deploy (batch B — membership-dependents, 20260622T140838Z)
 # orun: redeploy 04-workers 20261116T145728Z
+
+# orun: redeploy to pick up the OAuth client ids and secrets seeded in Orunbase 20261119T000000Z
