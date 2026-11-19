@@ -83,7 +83,9 @@ Work that followed the milestones, each its own pull request into `main`.
 | Sign-in with Google and GitHub | #36 | `f3130e0` | Web app: provider buttons for whatever `GET /v1/auth/oauth/providers` lists, and the return from a provider. Identity worker: the CRM web app's origins may be returned to; client ids come from Orunbase secrets beside their secrets. `socialSignIn.spec.ts` passes against stage with the provider list and the return simulated. After the deploy, 2026-11-18: api-edge healthy on stage and prod, email sign-in still starts on stage, and `GET /v1/auth/oauth/providers` is empty on both, as expected. Not live: no provider is configured yet (WAITING.md) |
 | Bare domain redirects to `www` | #39 | `704cd4a` | Terraform attaches `brokecrm.cloud` to the prod crm-web Worker, which answers it with a `301` to `www`; every host but `www.brokecrm.cloud` sends `X-Robots-Tag: noindex`. Not live until #40: its deploy was blocked |
 | Deploy smokes fixed after the rename | #40 | `eba63d7` | The crm-web and console smokes grepped the page for the old name, so the stage smoke failed on every deploy after #35 and prod was blocked: prod's web app stayed on #35's build, #39's Terraform never ran, and prod's console kept the old name. Fixed, with a redeploy marker for `cloudflare-domain`. The deploy run on `main` concluded `success`, and on prod, 2026-11-18: `https://brokecrm.cloud/?demo` answers `301` to `https://www.brokecrm.cloud/?demo`; the sign-in page requests the provider list (`200`); the console's title is "BrokeCRM Console"; `www` has no `noindex` header and the workers.dev copy has one |
-| Terms, privacy policy, licence statement | this pull request | | `terms.html` and `privacy.html`, static pages on the site, linked from the landing page and the sign-in form; the landing page states that all of it is Apache-2.0. `landing.spec.ts` covers the links. The texts are plain-language drafts, not reviewed by a lawyer (WAITING.md) |
+| Terms, privacy policy, licence statement | #41 | `fd9933a` | `terms.html` and `privacy.html`, static pages on the site, linked from the landing page and the sign-in form; the landing page states that all of it is Apache-2.0. `landing.spec.ts` covers the links. The texts are plain-language drafts, not reviewed by a lawyer (WAITING.md) |
+| Sign-in with Google and GitHub switched on | #44, #45 | `4f2a837`, `13a45c8` | The owner created the OAuth apps and seeded the five keys per environment in Orunbase. #44 redeployed `identity-worker`, but the providers stayed empty: #36 had added the client ids to `optionalSecretEnv` and not to `runtimeSecrets`, so the deploy pushed three secrets and left the ids out. #45 lists all five. After it, 2026-11-19: `GET /v1/auth/oauth/providers` names `github` and `google` on stage and prod; both sign-in pages show both buttons; each start link answers `302` to the provider with a client id and this environment's callback URL. Not verified by the agent: the provider's own consent step and the return, which need the owner's account |
+| Environment addresses in `intent.yaml` | this pull request | | `url` for prod is `https://www.brokecrm.cloud` and for stage `https://stage.brokecrm.cloud`, so the Orunbase overview shows the product's own address; the console moves to a link |
 
 ## Live URLs
 
@@ -265,6 +267,12 @@ Work that followed the milestones, each its own pull request into `main`.
 
 - 2026-11-18: OAuth client ids are read from Orunbase secrets like their
   secrets, not committed as config, so turning a provider on is one place.
+
+- 2026-11-19: a runtime secret has to be named twice in a worker's
+  `component.yaml`: in `optionalSecretEnv` (where it is looked up) and in
+  `runtimeSecrets` (what the deploy pushes). Naming it only in the first is
+  silent: the deploy succeeds and the Worker never gets it. The deploy log's
+  `secrets-live: pushed N runtime secret(s): …` line is the check.
 
 - 2026-11-18: **a green pull request is not a deployed change.** The
   pull-request checks stop at "Verify deploy"; the smoke runs only in the
