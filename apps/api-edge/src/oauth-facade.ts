@@ -36,9 +36,15 @@ export function isMcpPath(pathname: string): boolean {
   return pathname === GENERAL_MCP_PATH || MCP_PATH_RE.test(pathname);
 }
 
-/** The per-organization MCP path the general address stands for. */
-export function mcpPathForOrg(orgId: string): string {
-  return `/v1/organizations/${orgId}/crm/mcp`;
+/**
+ * The per-organization MCP path the general address stands for, or null when
+ * the id is not an organization's. An OAuth grant carries the public id
+ * (`org_<32 hex>`); an API key's actor carries the bare UUID, which is the
+ * same id with dashes and no prefix.
+ */
+export function mcpPathForOrg(orgId: string): string | null {
+  const hex = orgId.replace(/^org_/, "").replace(/-/g, "").toLowerCase();
+  return /^[0-9a-f]{32}$/.test(hex) ? `/v1/organizations/org_${hex}/crm/mcp` : null;
 }
 
 export function isOAuthServerRoute(pathname: string): boolean {
