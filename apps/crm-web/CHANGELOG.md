@@ -1,3 +1,8 @@
+## crm-web v0.8.1 - 2026-11-19
+
+- The page that approves an MCP connection (/oauth/authorize) loads. It used to
+  spin forever: its scripts were requested from /oauth/assets/.
+
 ## crm-web v0.8.0 - 2026-11-19
 
 - Connect Claude, or another assistant that signs in, to your CRM: add the MCP

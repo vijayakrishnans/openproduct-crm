@@ -1,0 +1,15 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-17
+  title: "The MCP approval page loads in production"
+spec:
+  goal: /oauth/authorize on the deployed web app loads its scripts and shows the approval page.
+  affects:
+    - apps/crm-web/index.html
+    - apps/crm-web/CHANGELOG.md
+    - tests/crm-web-e2e/src/**
+    - tasks/CRM-17.TaskContract.yaml
+  doneWhen:
+    - a production build serves /oauth/authorize with its scripts and shows the approval page
+  gates: []
