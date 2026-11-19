@@ -81,6 +81,9 @@ Work that followed the milestones, each its own pull request into `main`.
 | Prod sign-in emails | #34 | `a9d680d` | Sender is `no-reply@brokecrm.cloud`; the owner onboarded the domain to Cloudflare Email Sending and signed in on prod with an emailed code, 2026-11-18 |
 | BrokeCRM name, landing page, SEO | #35 | `6da014c` | Checked in a browser on the deployed sites, 2026-11-18: prod and stage show the landing page to a visitor with no session, "Start free" leads to the sign-in form, the sitemap and preview image are served, prod has no `noindex` and stage does. The name on every screen; a static landing page at the site's root for visitors with no session (free, open source, hosted; credit to Atomic CRM; links to Orunbase and openproduct); title, description, Open Graph, structured data, sitemap; only `www.brokecrm.cloud` indexable. `landing.spec.ts` and the full browser suite green in CI |
 | Sign-in with Google and GitHub | #36 | `f3130e0` | Web app: provider buttons for whatever `GET /v1/auth/oauth/providers` lists, and the return from a provider. Identity worker: the CRM web app's origins may be returned to; client ids come from Orunbase secrets beside their secrets. `socialSignIn.spec.ts` passes against stage with the provider list and the return simulated. After the deploy, 2026-11-18: api-edge healthy on stage and prod, email sign-in still starts on stage, and `GET /v1/auth/oauth/providers` is empty on both, as expected. Not live: no provider is configured yet (WAITING.md) |
+| Bare domain redirects to `www` | #39 | `704cd4a` | Terraform attaches `brokecrm.cloud` to the prod crm-web Worker, which answers it with a `301` to `www`; every host but `www.brokecrm.cloud` sends `X-Robots-Tag: noindex`. Not live until #40: its deploy was blocked |
+| Deploy smokes fixed after the rename | #40 | `eba63d7` | The crm-web and console smokes grepped the page for the old name, so the stage smoke failed on every deploy after #35 and prod was blocked: prod's web app stayed on #35's build, #39's Terraform never ran, and prod's console kept the old name. Fixed, with a redeploy marker for `cloudflare-domain`. The deploy run on `main` concluded `success`, and on prod, 2026-11-18: `https://brokecrm.cloud/?demo` answers `301` to `https://www.brokecrm.cloud/?demo`; the sign-in page requests the provider list (`200`); the console's title is "BrokeCRM Console"; `www` has no `noindex` header and the workers.dev copy has one |
+| Terms, privacy policy, licence statement | this pull request | | `terms.html` and `privacy.html`, static pages on the site, linked from the landing page and the sign-in form; the landing page states that all of it is Apache-2.0. `landing.spec.ts` covers the links. The texts are plain-language drafts, not reviewed by a lawyer (WAITING.md) |
 
 ## Live URLs
 
@@ -262,6 +265,22 @@ Work that followed the milestones, each its own pull request into `main`.
 
 - 2026-11-18: OAuth client ids are read from Orunbase secrets like their
   secrets, not committed as config, so turning a provider on is one place.
+
+- 2026-11-18: **a green pull request is not a deployed change.** The
+  pull-request checks stop at "Verify deploy"; the smoke runs only in the
+  deploy on `main`. Three merges (#36, #39 and the records between) were
+  reported as deployed while prod was blocked by a failing stage smoke. After
+  every merge that deploys, read the conclusion of the run on `main` before
+  saying anything is live. A smoke that names the product must change with
+  the product's name.
+
+- 2026-11-18: the terms and the privacy policy are static pages in
+  `apps/crm-web/public`, like the landing page: readable without the app and
+  by crawlers. The privacy policy was written from what the code does (no
+  analytics, session in local storage, one short-lived OAuth cookie, database
+  in Singapore, Cloudflare and Supabase as processors). It makes three
+  promises the owner must keep: deletion on request within 30 days, 30 days'
+  notice before ending the service, and breach notice.
 
 - 2026-11-17: deal moves are saved one at a time against the server's state
   (two extra reads per move) rather than from the cards on screen. Stage

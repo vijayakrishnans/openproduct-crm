@@ -70,3 +70,5 @@ spec:
           - profile: apply
             when:
               triggerRef: github-push-main
+
+# orun: redeploy bare-domain attachment (#39; its Terraform was blocked by the crm-web smoke) 20261118T122000Z

@@ -1,10 +1,17 @@
-## crm-web v0.6.0 - 2026-11-18
+## crm-web v0.7.0 - 2026-11-19
 
 - Switch organizations from the header, or create another where your plan
   allows it.
 - Invited people see their invitation after signing in with the invited email,
   and join with one click.
 - The Users page lists pending invitations, and an admin can revoke them.
+
+## crm-web v0.6.0 - 2026-11-18
+
+- Terms of use and a privacy policy, linked from the landing page and the
+  sign-in form.
+- The landing page says plainly that all of BrokeCRM is open source under the
+  Apache 2.0 licence, with a link to the licence.
 
 ## crm-web v0.5.1 - 2026-11-18
 

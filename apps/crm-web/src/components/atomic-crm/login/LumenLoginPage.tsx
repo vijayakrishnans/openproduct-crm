@@ -194,6 +194,17 @@ export const LumenLoginPage = () => {
                 <a href="?demo" className="block text-sm text-center hover:underline">
                   Just looking? Try the demo, no account needed
                 </a>
+                <p className="text-xs text-center text-muted-foreground">
+                  By signing in you agree to the{" "}
+                  <a href="/terms.html" className="underline underline-offset-2">
+                    terms
+                  </a>{" "}
+                  and the{" "}
+                  <a href="/privacy.html" className="underline underline-offset-2">
+                    privacy policy
+                  </a>
+                  .
+                </p>
               </form>
             ) : null}
 
