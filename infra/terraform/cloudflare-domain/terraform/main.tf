@@ -132,6 +132,23 @@ variable "crmWebWorkerNamePrefix" {
   description = "Worker name prefix for crm-web; the environment is appended."
 }
 
+# api-edge's hostname on the CRM's domain, so the MCP server (and its OAuth
+# sign-in) has a brokecrm.cloud address. Arrives per-environment from
+# intent.yaml's `parameterDefaults.terraform.API_EDGE_CUSTOM_DOMAIN` (stage:
+# api-stage.brokecrm.cloud, prod: api.brokecrm.cloud). Empty attaches nothing;
+# the workers.dev hostname keeps serving either way.
+variable "API_EDGE_CUSTOM_DOMAIN" {
+  type        = string
+  default     = ""
+  description = "Custom domain for api-edge, from API_EDGE_CUSTOM_DOMAIN via TF_VAR. Empty = not attached."
+}
+
+variable "apiEdgeWorkerNamePrefix" {
+  type        = string
+  default     = "openproduct-crm-api-edge"
+  description = "Worker name prefix for api-edge; the environment is appended."
+}
+
 # --- Locals ---
 
 locals {
@@ -142,6 +159,10 @@ locals {
   crm_web_custom_domain     = var.CRM_WEB_CUSTOM_DOMAIN
   crm_web_worker_name       = "${var.crmWebWorkerNamePrefix}-${var.environment}"
   has_crm_web_custom_domain = local.crm_web_custom_domain != ""
+
+  api_edge_custom_domain     = var.API_EDGE_CUSTOM_DOMAIN
+  api_edge_worker_name       = "${var.apiEdgeWorkerNamePrefix}-${var.environment}"
+  has_api_edge_custom_domain = local.api_edge_custom_domain != ""
 }
 
 # --- Zone lookup (existing mode) ---
@@ -250,6 +271,21 @@ resource "cloudflare_workers_domain" "crm_web" {
 # apex resolves to nothing. Like the hostname above, the attachment brings
 # its own DNS record and certificate.
 
+# --- api-edge custom domain ---
+#
+# Same v4 resource and rules as crm_web above: the attachment brings its own
+# DNS record and certificate, and the zone must hold no record of that name.
+
+resource "cloudflare_workers_domain" "api_edge" {
+  count = local.has_api_edge_custom_domain ? 1 : 0
+
+  account_id  = var.cloudflare_account_id
+  zone_id     = local.zone_id
+  hostname    = local.api_edge_custom_domain
+  service     = local.api_edge_worker_name
+  environment = "production"
+}
+
 resource "cloudflare_workers_domain" "crm_web_apex" {
   count = local.crm_web_custom_domain == "www.${var.baseDomain}" ? 1 : 0
 
@@ -305,4 +341,9 @@ output "crm_web_worker_name" {
 output "crm_web_worker_custom_domain_id" {
   description = "ID of the crm-web Worker custom domain (if configured)"
   value       = local.has_crm_web_custom_domain ? cloudflare_workers_domain.crm_web[0].id : "not_configured"
+}
+
+output "api_edge_custom_domain" {
+  description = "api-edge custom domain hostname (the MCP server's address)"
+  value       = local.api_edge_custom_domain
 }

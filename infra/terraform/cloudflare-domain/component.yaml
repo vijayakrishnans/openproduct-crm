@@ -54,6 +54,7 @@ spec:
   # exist first.
   dependsOn:
     - component: crm-web
+    - component: api-edge
 
   subscribe:
     environments:

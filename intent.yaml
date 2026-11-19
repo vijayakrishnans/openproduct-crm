@@ -156,6 +156,7 @@ environments:
         repo: openproduct-crm
         CONSOLE_CUSTOM_DOMAIN: ""
         CRM_WEB_CUSTOM_DOMAIN: ""
+        API_EDGE_CUSTOM_DOMAIN: ""
     policies:
       requireApproval: "false"
     env:
@@ -183,6 +184,8 @@ environments:
         # The CRM web app's hostname; infra/terraform/cloudflare-domain attaches
         # it to openproduct-crm-crm-web-stage.
         CRM_WEB_CUSTOM_DOMAIN: stage.brokecrm.cloud
+        # api-edge's hostname, for the MCP server and its OAuth sign-in.
+        API_EDGE_CUSTOM_DOMAIN: api-stage.brokecrm.cloud
     policies:
       requireApproval: "false"
     env:
@@ -213,6 +216,8 @@ environments:
         # The CRM web app's hostname; infra/terraform/cloudflare-domain attaches
         # it to openproduct-crm-crm-web-prod.
         CRM_WEB_CUSTOM_DOMAIN: www.brokecrm.cloud
+        # api-edge's hostname, for the MCP server and its OAuth sign-in.
+        API_EDGE_CUSTOM_DOMAIN: api.brokecrm.cloud
     policies:
       requireApproval: "false"
     env:

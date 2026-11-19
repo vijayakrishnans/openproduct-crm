@@ -66,6 +66,20 @@ endpoint's delivery history.
 
 ## Connecting an assistant over MCP
 
+**With OAuth (Claude's connectors and other MCP clients that sign in):** add
+`https://api.brokecrm.cloud/v1/organizations/<org_…>/crm/mcp` (stage:
+`api-stage.brokecrm.cloud`) as a custom connector. The client discovers the
+sign-in from the 401's `WWW-Authenticate` header and
+`/.well-known/oauth-protected-resource/...`, registers itself
+(`/v1/oauth/register`), and sends the person to the CRM web app's
+`/oauth/authorize`, where they sign in and allow it. Its tokens act as that
+person, only on that organization's MCP endpoint (api-edge answers 403
+elsewhere and 401 outside the CRM); access tokens last an hour and refresh
+tokens 30 days, rotated on every use. Removing the person from the
+organization ends the access at once.
+
+**With an API key:**
+
 1. In the console, an owner or admin creates an API key for the organization
    (role `viewer` for read-only, `builder` to let the assistant write). The
    secret is shown once.

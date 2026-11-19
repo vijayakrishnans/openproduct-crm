@@ -1,3 +1,10 @@
+## crm-web v0.8.0 - 2026-11-19
+
+- Connect Claude, or another assistant that signs in, to your CRM: add the MCP
+  server address as a custom connector and approve it with your BrokeCRM
+  account. No API key needed.
+- The MCP server has a brokecrm.cloud address: `api.brokecrm.cloud`.
+
 ## crm-web v0.7.0 - 2026-11-19
 
 - Switch organizations from the header, or create another where your plan

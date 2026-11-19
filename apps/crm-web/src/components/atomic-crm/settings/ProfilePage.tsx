@@ -267,8 +267,9 @@ const ProfileForm = ({
               {translate("crm.profile.mcp.description", {
                 _: "Use this URL to connect your AI assistant to your CRM data via the Model Context Protocol (MCP).",
               })}{" "}
-              It signs in with an API key of this organization, sent as a Bearer token: an admin creates one in the
-              console, under the organization's API keys. A key with the viewer role can only read.
+              In Claude, add it as a custom connector and sign in with your BrokeCRM account when
+              asked; the assistant then works in this organization as you. Clients that cannot sign
+              in can send an API key of this organization as a Bearer token instead.
             </p>
             <CopyPaste value={mcpUrl() ?? ""} />
           </div>

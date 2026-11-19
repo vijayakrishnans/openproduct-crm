@@ -3,6 +3,7 @@ import { errorResponse, withEdgeTimings } from "./http.js";
 import { replayOrExecute } from "./idempotency.js";
 import { resolveActor } from "./resolve-actor.js";
 import { createTimings } from "@saas/contracts/timing";
+import { isMcpPath, mcpAuthChallenge } from "./oauth-facade.js";
 
 // Everything under an org's /crm goes to crm-worker, which owns the routes
 // below it (resources, search, merge, dashboard). The edge authenticates,
@@ -39,9 +40,22 @@ export async function handleCrmRoute(
 
     const timings = createTimings();
     const endTotal = timings.start("edge_total");
-    const actor = await timings.measure("edge_auth", () => resolveActor(request, env, requestId));
+    const actor = await timings.measure("edge_auth", () =>
+      resolveActor(request, env, requestId, { acceptOAuth: true }),
+    );
     if ("error" in actor) {
+      // Tell an MCP client where to sign in (RFC 9728, MCP authorization).
+      if (isMcpPath(pathname) && actor.error.status === 401) {
+        const challenged = new Response(actor.error.body, actor.error);
+        challenged.headers.set("www-authenticate", mcpAuthChallenge(request, pathname));
+        return challenged;
+      }
       return actor.error;
+    }
+    // An OAuth token was granted for one organization's MCP server, and only
+    // works there.
+    if (actor.grant && pathname !== `/v1/organizations/${actor.grant.orgId}/crm/mcp`) {
+      return errorResponse("forbidden", "This access token only works with its organization's MCP server", 403, requestId);
     }
 
     // Actor headers are set here and nowhere else: whatever a client sends
