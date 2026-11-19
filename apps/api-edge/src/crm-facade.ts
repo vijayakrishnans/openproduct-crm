@@ -58,7 +58,8 @@ export async function handleCrmRoute(
     // other.
     if (pathname === GENERAL_MCP_PATH) {
       const orgId = actor.grant?.orgId ?? actor.orgId;
-      if (!orgId) {
+      const orgPath = orgId ? mcpPathForOrg(orgId) : null;
+      if (!orgPath) {
         return errorResponse(
           "forbidden",
           "This credential is not tied to an organization. Connect with OAuth, or use an organization API key",
@@ -66,7 +67,7 @@ export async function handleCrmRoute(
           requestId,
         );
       }
-      pathname = mcpPathForOrg(orgId);
+      pathname = orgPath;
     }
     // An OAuth token was granted for one organization's MCP server, and only
     // works there.

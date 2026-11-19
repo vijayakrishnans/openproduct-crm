@@ -143,6 +143,16 @@ variable "API_EDGE_CUSTOM_DOMAIN" {
   description = "Custom domain for api-edge, from API_EDGE_CUSTOM_DOMAIN via TF_VAR. Empty = not attached."
 }
 
+# The MCP server's own hostname, a second name for api-edge: the address
+# people give an assistant is `https://<this>/mcp` (apps/api-edge's general
+# MCP path). From `parameterDefaults.terraform.MCP_CUSTOM_DOMAIN` (stage:
+# mcp-stage.brokecrm.cloud, prod: mcp.brokecrm.cloud). Empty attaches nothing.
+variable "MCP_CUSTOM_DOMAIN" {
+  type        = string
+  default     = ""
+  description = "The MCP server's custom domain on api-edge, from MCP_CUSTOM_DOMAIN via TF_VAR. Empty = not attached."
+}
+
 variable "apiEdgeWorkerNamePrefix" {
   type        = string
   default     = "openproduct-crm-api-edge"
@@ -282,6 +292,16 @@ resource "cloudflare_workers_domain" "api_edge" {
   account_id  = var.cloudflare_account_id
   zone_id     = local.zone_id
   hostname    = local.api_edge_custom_domain
+  service     = local.api_edge_worker_name
+  environment = "production"
+}
+
+resource "cloudflare_workers_domain" "mcp" {
+  count = var.MCP_CUSTOM_DOMAIN != "" ? 1 : 0
+
+  account_id  = var.cloudflare_account_id
+  zone_id     = local.zone_id
+  hostname    = var.MCP_CUSTOM_DOMAIN
   service     = local.api_edge_worker_name
   environment = "production"
 }

@@ -200,7 +200,7 @@ Postgres as the rest.
 |---|---|
 | web app | `https://www.brokecrm.cloud` (prod) and `https://stage.brokecrm.cloud`, also `https://openproduct-crm-crm-web-<env>.<subdomain>.workers.dev` (`?demo` for the in-browser demo). People see the name BrokeCRM; with no session, the root is the landing page and `/#/login` the sign-in form |
 | API | `https://openproduct-crm-api-edge-<env>.<subdomain>.workers.dev/v1/organizations/<org_…>/crm/…` |
-| MCP | the API's `/crm/mcp`, with an organization API key as Bearer token |
+| MCP | `https://mcp.brokecrm.cloud/mcp` (stage `https://mcp-stage.brokecrm.cloud/mcp`), one address for everyone; sign in with OAuth or send an organization API key as Bearer token. Also at each organization's `/crm/mcp` on the API |
 
 **Verify it** with the smoke, which signs up, creates an organization, a
 contact, a deal and a note with an attachment, searches, checks that a second

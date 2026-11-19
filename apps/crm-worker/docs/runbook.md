@@ -66,28 +66,32 @@ endpoint's delivery history.
 
 ## Connecting an assistant over MCP
 
+The MCP server has one address for everyone: `https://mcp.brokecrm.cloud/mcp`
+(stage: `https://mcp-stage.brokecrm.cloud/mcp`). It names no organization;
+the credential does. The same server also answers at
+`https://api.brokecrm.cloud/mcp` and at each organization's own path,
+`/v1/organizations/<org_…>/crm/mcp`.
+
 **With OAuth (Claude's connectors and other MCP clients that sign in):** add
-`https://api.brokecrm.cloud/v1/organizations/<org_…>/crm/mcp` (stage:
-`api-stage.brokecrm.cloud`) as a custom connector. The client discovers the
-sign-in from the 401's `WWW-Authenticate` header and
-`/.well-known/oauth-protected-resource/...`, registers itself
-(`/v1/oauth/register`), and sends the person to the CRM web app's
-`/oauth/authorize`, where they sign in and allow it. Its tokens act as that
-person, only on that organization's MCP endpoint (api-edge answers 403
-elsewhere and 401 outside the CRM); access tokens last an hour and refresh
-tokens 30 days, rotated on every use. Removing the person from the
-organization ends the access at once.
+the address as a custom connector. The client discovers the sign-in from the
+401's `WWW-Authenticate` header and `/.well-known/oauth-protected-resource/mcp`,
+registers itself (`/v1/oauth/register`), and sends the person to the CRM web
+app's `/oauth/authorize`, where they sign in, choose the organization and
+allow it. Its tokens act as that person, only on that organization's MCP
+server (api-edge answers 403 on another organization's path and 401 outside
+the CRM); access tokens last an hour and refresh tokens 30 days, rotated on
+every use. Removing the person from the organization ends the access at once.
 
 **With an API key:**
 
 1. In the console, an owner or admin creates an API key for the organization
    (role `viewer` for read-only, `builder` to let the assistant write). The
    secret is shown once.
-2. Point the MCP client at
-   `https://<api-edge host>/v1/organizations/<org_…>/crm/mcp` with the header
-   `Authorization: Bearer <the key>`. The CRM's profile page shows the URL.
-3. `tools/list` should answer thirteen tools. A `404` means the key does not
-   belong to that organization; a tool result with `forbidden` means its role
+2. Point the MCP client at `https://mcp.brokecrm.cloud/mcp` with the header
+   `Authorization: Bearer <the key>`; the key says which organization. The
+   CRM's profile page shows the URL.
+3. `tools/list` should answer thirteen tools. On an organization's own path, a `404`
+   means the key does not belong to that organization; a tool result with `forbidden` means its role
    cannot write.
 
 ## Turning inbound email on

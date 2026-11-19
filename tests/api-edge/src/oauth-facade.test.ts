@@ -173,7 +173,14 @@ describe("the general MCP address, /mcp", () => {
   const keyIdentity = () =>
     fetcher(() =>
       Response.json({
-        data: { actor: { actorType: "api_key", actorId: "key_abc", orgId: ORG } },
+        // As identity-worker answers for a key: the organization's bare UUID.
+        data: {
+          actor: {
+            actorType: "service_principal",
+            actorId: "sp_abc",
+            orgId: "da4790db-37fd-4e06-85e1-0be5fdcee96f",
+          },
+        },
       }),
     );
   /** ...and for a web session, which belongs to a person and no organization. */
