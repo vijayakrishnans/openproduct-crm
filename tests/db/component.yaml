@@ -13,6 +13,13 @@ spec:
   lifecycle: production
   owner: platform
   domain: starter-tests
+  dependsOn:
+    # A build input: a change to db reruns this suite under --changed.
+    - component: db
+      input: true
+    # The migrations live under db-migrate's path; the suite checks them too.
+    - component: db-migrate
+      input: true
   subscribe:
     environments:
       - name: dev

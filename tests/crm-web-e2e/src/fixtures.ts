@@ -12,6 +12,34 @@ type Json = Record<string, any>;
 let counter = 0;
 const unique = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(counter++).toString(36)}`;
 
+/** Requests to stage cross the internet from a CI runner, and a connection
+ *  is sometimes reset mid-flight (ECONNRESET). Writes carry an idempotency
+ *  key, so sending the same request again is safe. */
+async function fetchWithRetry(
+  http: APIRequestContext,
+  path: string,
+  options: Parameters<APIRequestContext["fetch"]>[1],
+) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await http.fetch(path, options);
+    } catch (error) {
+      const message = String((error as Error)?.message ?? error);
+      if (attempt >= 4 || !/ECONNRESET|ETIMEDOUT|ECONNREFUSED|socket hang up|EPIPE/.test(message)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+    }
+  }
+}
+
+/** Sessions the fixtures signed in through the API, by email. The page reuses
+ *  them (see signIn) instead of signing in again: stage allows 10 sign-in
+ *  requests a minute from one address, and the suite runs tests in parallel. */
+type Org = { id: string; name: string; slug: string };
+const sessions = new Map<string, { token: string; expiresAt: string; org?: Org }>();
+const orgs = new Map<string, Org>();
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 class Api {
   constructor(
     private readonly http: APIRequestContext,
@@ -22,7 +50,13 @@ class Api {
     const headers: Record<string, string> = {};
     if (this.token) headers["authorization"] = `Bearer ${this.token}`;
     if (method !== "GET") headers["idempotency-key"] = unique("e2e");
-    const response = await this.http.fetch(path, { method, headers, data: body });
+    let response = await fetchWithRetry(this.http, path, { method, headers, data: body });
+    // Rate limited (sign-in is capped per address): wait as told and try again.
+    for (let attempt = 0; response.status() === 429 && attempt < 20; attempt++) {
+      const told = Number((await response.json().catch(() => ({})))?.error?.details?.retryAfterSeconds);
+      await sleep(((Number.isFinite(told) && told > 0 ? told : 5) + 1) * 1000);
+      response = await fetchWithRetry(this.http, path, { method, headers, data: body });
+    }
     const payload = (await response.json().catch(() => ({}))) as Json;
     if (!response.ok()) {
       throw new Error(`${method} ${path} → ${response.status()} ${JSON.stringify(payload).slice(0, 300)}`);
@@ -33,7 +67,7 @@ class Api {
   async status(method: string, path: string): Promise<number> {
     const headers: Record<string, string> = {};
     if (this.token) headers["authorization"] = `Bearer ${this.token}`;
-    const response = await this.http.fetch(path, { method, headers });
+    const response = await fetchWithRetry(this.http, path, { method, headers });
     return response.status();
   }
 
@@ -48,6 +82,7 @@ class Api {
       challengeId: challenge["challengeId"],
       code,
     });
+    sessions.set(email, { token: session["token"], expiresAt: session["expiresAt"] });
     return new Api(http, session["token"]);
   }
 
@@ -83,6 +118,9 @@ export class Workspace {
     const api = await Api.signIn(http, email);
     const slug = unique("e2e");
     const { organization } = await api.call("POST", "/v1/organizations", { name: `E2E ${slug}`, slug });
+    orgs.set(organization.id, organization);
+    const session = sessions.get(email);
+    if (session) session.org = organization;
     const me = await api.call("GET", `/v1/organizations/${organization.id}/crm/sales/me`);
     const profile = await api.call("PATCH", `/v1/organizations/${organization.id}/crm/sales/${me["id"]}`, owner);
     return new Workspace(http, api, organization.id, profile as Sales);
@@ -99,6 +137,9 @@ export class Workspace {
     await mate.call("POST", `/v1/organizations/${this.orgId}/invitations/accept`, {
       token: invitation["delivery"]?.token,
     });
+    const session = sessions.get(email);
+    const org = orgs.get(this.orgId);
+    if (session && org) session.org = org;
     const me = await mate.call("GET", `${this.crm}/sales/me`);
     return (await mate.call("PATCH", `${this.crm}/sales/${me["id"]}`, teammate)) as Sales;
   }
@@ -208,15 +249,58 @@ export class Workspace {
   }
 }
 
+/** Opens the app as this person. With a session and organization from the
+ *  fixtures, the page starts signed in, in that organization; otherwise it
+ *  signs in through the form (signInWithCode). */
+export async function signIn(page: Page, email: string) {
+  const session = sessions.get(email);
+  if (!session?.org) return signInWithCode(page, email);
+  const { org, ...stored } = session;
+  await page.goto("/");
+  await page.evaluate(
+    (value) => window.localStorage.setItem("openproduct-crm.session", value),
+    JSON.stringify({ ...stored, email, orgId: org.id, orgSlug: org.slug, orgName: org.name }),
+  );
+  // With a stored session the root is the app, opened in that organization.
+  await page.reload();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible({ timeout: 60_000 });
+}
+
 /** The adapted login: email, then the code (prefilled where the API returns
  *  it), then straight into the user's only organization. */
-export async function signIn(page: Page, email: string) {
+export async function signInWithCode(page: Page, email: string) {
   // "/" is the landing page for a signed-out visitor; this is the sign-in form
   await page.goto("/#/login");
+  await submitSignInForm(page, email);
+}
+
+/** Fills the sign-in form and gets past it. Stage caps sign-in requests per
+ *  address, and tests run in parallel: when the form reports the limit, wait
+ *  the time it gives and press the button again. */
+export async function submitSignInForm(page: Page, email: string) {
   await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Send code" }).click();
+  await pressPastRateLimit(page, "Send code", async () => {
+    await page.getByLabel("Sign-in code").waitFor({ timeout: 20_000 });
+  });
   await expect(page.getByLabel("Sign-in code")).not.toHaveValue("");
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await pressPastRateLimit(page, "Sign in", async () => {
+    await page.getByLabel("Sign-in code").waitFor({ state: "hidden", timeout: 20_000 });
+  });
+}
+
+async function pressPastRateLimit(page: Page, button: string, passed: () => Promise<void>) {
+  const notices = page.getByText(/Rate limit exceeded/);
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const before = await notices.count();
+    await page.getByRole("button", { name: button }).click();
+    const outcome = await Promise.race([
+      passed().then(() => "passed" as const),
+      notices.nth(before).waitFor({ timeout: 20_000 }).then(() => "limited" as const),
+    ]).catch(() => "unknown" as const);
+    if (outcome !== "limited") return;
+    const text = (await notices.nth(before).textContent()) ?? "";
+    await page.waitForTimeout((Number(text.match(/Retry after (\d+)/)?.[1] ?? 5) + 1) * 1000);
+  }
 }
 
 // Both the desktop header and the mobile bottom bar expose navigation as links.
