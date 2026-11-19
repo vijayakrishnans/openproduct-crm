@@ -15,12 +15,13 @@ const proxy = process.env.HTTPS_PROXY;
 
 export default defineConfig({
   testDir: "./src",
-  fullyParallel: false,
+  // Every test signs up its own user and organization, so tests never share
+  // data and can run side by side. Serially the suite took ~20 minutes in CI.
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  // Every test works in an organization of its own, so they do not collide;
-  // one worker keeps the load on stage and its rate limits modest.
-  workers: 1,
+  // Four browsers at once keeps the load on stage modest.
+  workers: process.env.CI ? 4 : 2,
   reporter: "list",
   timeout: 180_000,
   expect: { timeout: 20_000 },

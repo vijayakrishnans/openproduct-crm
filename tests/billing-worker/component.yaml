@@ -14,6 +14,10 @@ spec:
   owner: platform
   domain: starter-tests
   path: tests/billing-worker
+  dependsOn:
+    # A build input: a change to billing-worker reruns this suite under --changed.
+    - component: billing-worker
+      input: true
   subscribe:
     environments:
       - name: dev

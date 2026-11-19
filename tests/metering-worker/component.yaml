@@ -14,6 +14,10 @@ spec:
   owner: platform
   domain: starter-tests
   path: tests/metering-worker
+  dependsOn:
+    # A build input: a change to metering-worker reruns this suite under --changed.
+    - component: metering-worker
+      input: true
   subscribe:
     environments:
       - name: dev

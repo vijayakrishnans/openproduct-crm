@@ -13,6 +13,10 @@ spec:
   lifecycle: production
   owner: platform
   domain: starter-tests
+  dependsOn:
+    # A build input: a change to identity-worker reruns this suite under --changed.
+    - component: identity-worker
+      input: true
   subscribe:
     environments:
       - name: dev

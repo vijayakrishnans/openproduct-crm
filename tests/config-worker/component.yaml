@@ -14,6 +14,10 @@ spec:
   owner: platform
   domain: starter-tests
   path: tests/config-worker
+  dependsOn:
+    # A build input: a change to config-worker reruns this suite under --changed.
+    - component: config-worker
+      input: true
   subscribe:
     environments:
       - name: dev

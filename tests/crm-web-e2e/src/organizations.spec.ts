@@ -1,6 +1,6 @@
 import type { Page, Route } from "@playwright/test";
 
-import { expect, signIn, test } from "./fixtures";
+import { expect, signIn, signInWithCode, test } from "./fixtures";
 
 // The sign-in is real. The organization list and the invitee's invitations are
 // answered here: this suite runs before a change reaches the API it talks to,
@@ -57,7 +57,8 @@ test("an invited person is offered the invitation after signing in", async ({ pa
     return json(route, { membership: { role: "builder" } });
   });
 
-  await signIn(page, workspace.owner.email);
+  // Through the form: the invitations are offered as the sign-in completes.
+  await signInWithCode(page, workspace.owner.email);
 
   await expect(page.getByRole("heading", { name: "You have been invited" })).toBeVisible();
   await page.getByRole("button", { name: "Join Second Org" }).click();

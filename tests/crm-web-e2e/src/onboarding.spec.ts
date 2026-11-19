@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, submitSignInForm, test } from "./fixtures";
 
 // Upstream: the first visitor creates the one account of the instance. Here
 // anyone signs in with an email code and names an organization of their own.
@@ -9,10 +9,7 @@ test("user onboarding", async ({ page, menu, dismissToast }) => {
   await expect(page).toHaveTitle(/BrokeCRM/);
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 
-  await page.getByLabel("Email").fill(`${local}@example.com`);
-  await page.getByRole("button", { name: "Send code" }).click();
-  await expect(page.getByLabel("Sign-in code")).not.toHaveValue("");
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await submitSignInForm(page, `${local}@example.com`);
 
   await expect(page.getByRole("heading", { name: "Name your organization" })).toBeVisible();
   await page.getByLabel("Organization name").fill(`Onboarding ${local}`);
