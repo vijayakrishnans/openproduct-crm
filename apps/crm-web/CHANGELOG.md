@@ -1,3 +1,8 @@
+## crm-web v0.7.1 - 2026-11-19
+
+- Switching organizations now switches the branding too. An organization that
+  never set its own title or logos shows BrokeCRM's, not the previous one's.
+
 ## crm-web v0.7.0 - 2026-11-19
 
 - Switch organizations from the header, or create another where your plan

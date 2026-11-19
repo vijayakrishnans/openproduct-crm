@@ -37,6 +37,7 @@ import {
 import type { CrmDataProvider } from "../providers/types";
 import {
   defaultCompanySectors,
+  defaultConfiguration,
   defaultCurrency,
   defaultDarkModeLogo,
   defaultDealCategories,
@@ -163,9 +164,10 @@ export const CRM = ({
         const result = await authProvider.login(params);
         try {
           const config = await dataProvider.getConfiguration();
-          if (Object.keys(config).length > 0) {
-            store.setItem(CONFIGURATION_STORE_KEY, config);
-          }
+          store.setItem(CONFIGURATION_STORE_KEY, {
+            ...defaultConfiguration,
+            ...config,
+          });
         } catch {
           // Non-critical: config will load via useConfigurationLoader
         }
@@ -180,9 +182,10 @@ export const CRM = ({
         const result = await authProvider.handleCallback(params);
         try {
           const config = await dataProvider.getConfiguration();
-          if (Object.keys(config).length > 0) {
-            store.setItem(CONFIGURATION_STORE_KEY, config);
-          }
+          store.setItem(CONFIGURATION_STORE_KEY, {
+            ...defaultConfiguration,
+            ...config,
+          });
         } catch {
           // Non-critical: config will load via useConfigurationLoader
         }

@@ -43,6 +43,34 @@ test("the header switches to another organization", async ({ page, workspace }) 
   expect((await session(page)).orgName).toBe("Second Org");
 });
 
+test("each organization shows its own branding after a switch", async ({ page, workspace }) => {
+  await signIn(page, workspace.owner.email);
+  await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
+  const current = await session(page);
+
+  // The first organization has its own title; the second never saved any.
+  await page.route(`**/v1/organizations/${current.orgId}/config/settings`, (route) =>
+    json(route, { settings: [{ id: "set_1", key: "crm.configuration", value: { title: "First Brand" } }] }),
+  );
+  await page.route(`**/v1/organizations/${other.id}/config/settings`, (route) => json(route, { settings: [] }));
+  await page.route("**/v1/organizations", (route) =>
+    route.request().method() === "GET"
+      ? json(route, {
+          organizations: [{ id: current.orgId, name: current.orgName, slug: current.orgSlug }, other],
+        })
+      : route.fallback(),
+  );
+  await page.route("**/v1/invitations", (route) => json(route, { invitations: [] }));
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1, name: "First Brand" })).toBeVisible();
+
+  await page.getByRole("button", { name: `Organization: ${current.orgName}` }).click();
+  await page.getByRole("menuitem", { name: "Second Org" }).click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "BrokeCRM" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { level: 1, name: "First Brand" })).toHaveCount(0);
+});
+
 test("an invited person is offered the invitation after signing in", async ({ page, workspace }) => {
   let accepted = false;
   const invitation = {

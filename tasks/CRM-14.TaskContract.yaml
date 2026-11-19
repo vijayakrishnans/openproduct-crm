@@ -1,0 +1,15 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-14
+  title: "Branding follows the organization"
+spec:
+  goal: After switching organizations, the CRM shows the chosen organization's title and logos, or the defaults when it has none.
+  affects:
+    - apps/crm-web/**
+    - tests/crm-web-e2e/src/**
+    - tasks/CRM-14.TaskContract.yaml
+  doneWhen:
+    - switching from an organization with custom branding to one without shows the default branding
+    - a stored configuration from one organization is never shown in another
+  gates: []

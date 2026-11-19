@@ -7,6 +7,7 @@ import {
   useConfigurationUpdater,
   type ConfigurationContextValue,
 } from "./ConfigurationContext";
+import { defaultConfiguration } from "./defaultConfiguration";
 
 export const useConfigurationLoader = () => {
   const dataProvider = useDataProvider<CrmDataProvider>();
@@ -20,8 +21,8 @@ export const useConfigurationLoader = () => {
   });
 
   useEffect(() => {
-    if (data && Object.keys(data).length > 0) {
-      updateConfiguration(data);
-    }
+    // Each organization has its own configuration. One that never saved any
+    // must show the defaults, not what the previous organization left behind.
+    if (data) updateConfiguration({ ...defaultConfiguration, ...data });
   }, [data, updateConfiguration]);
 };
