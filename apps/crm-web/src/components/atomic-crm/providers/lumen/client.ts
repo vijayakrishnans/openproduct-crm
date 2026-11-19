@@ -23,15 +23,16 @@ export type Organization = { id: string; name: string; slug: string };
  * the same ones as CORS origins. Keep the three in step.
  */
 const CUSTOM_DOMAIN_API_URLS: Record<string, string> = {
-  "www.brokecrm.cloud": "https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev",
-  "stage.brokecrm.cloud": "https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev",
+  "www.brokecrm.cloud": "https://api.brokecrm.cloud",
+  "stage.brokecrm.cloud": "https://api-stage.brokecrm.cloud",
 };
 
 /**
  * api-edge on brokecrm.cloud itself, for the MCP server address people paste
  * into an assistant. `API_EDGE_CUSTOM_DOMAIN` in intent.yaml attaches these
- * hostnames to api-edge (infra/terraform/cloudflare-domain). The app keeps
- * calling the workers.dev address above until those are proven.
+ * hostnames to api-edge (infra/terraform/cloudflare-domain). The app calls
+ * the same hosts (above): sign-in with a provider returns to this host, and
+ * its state cookie is only sent back to the host that set it.
  */
 const CUSTOM_DOMAIN_MCP_HOSTS: Record<string, string> = {
   "www.brokecrm.cloud": "https://api.brokecrm.cloud",
