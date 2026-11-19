@@ -152,7 +152,14 @@ export class Workspace {
     });
   }
 
-  async createDeal(deal: { name: string; stage: string; company_id?: number; index?: number; amount?: number }) {
+  async createDeal(deal: {
+    name: string;
+    stage: string;
+    company_id?: number;
+    index?: number;
+    amount?: number;
+    contact_ids?: number[] | null;
+  }) {
     return this.api.call<{ id: number }>("POST", `${this.crm}/deals`, {
       sales_id: this.owner.id,
       contact_ids: [],

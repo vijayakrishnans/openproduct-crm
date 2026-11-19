@@ -28,6 +28,7 @@ import type { Deal } from "../types";
 import { ContactList } from "./ContactList";
 import {
   findDealLabel,
+  formatDealAmount,
   formatDealCategories,
   formatISODateString,
   isISODateString,
@@ -116,13 +117,8 @@ const DealShowContent = () => {
                 {translate("resources.deals.fields.amount")}
               </span>
               <span className="text-sm">
-                {record.amount.toLocaleString("en-US", {
-                  notation: "compact",
-                  style: "currency",
-                  currency,
-                  currencyDisplay: "narrowSymbol",
-                  minimumSignificantDigits: 3,
-                })}
+                {formatDealAmount(record.amount, currency) ??
+                  translate("resources.deals.no_amount")}
               </span>
             </div>
 

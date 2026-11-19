@@ -63,4 +63,20 @@ test.describe("deal board", () => {
     await expect(column("Opportunity").getByRole("button", { name: /- Beta/ })).toBeVisible();
     await expect(column("In Negotiation").getByRole("button", { name: /- Orphan/ })).toBeVisible();
   });
+
+  test("a deal written without an amount or contacts opens", async ({ page, workspace }) => {
+    // What the API and the MCP server store when a client leaves them out.
+    const company = await workspace.createCompany({ name: "Lean Corp" });
+    const deal = await workspace.createDeal({ name: "No amount", stage: "opportunity", company_id: company.id, contact_ids: null });
+
+    await signIn(page, workspace.owner.email);
+    await page.goto(`/#/deals/${deal.id}/show`);
+    await expect(page.getByRole("heading", { name: "No amount" })).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("No amount", { exact: true }).last()).toBeVisible();
+    await expect(page.getByText("Something went wrong")).toHaveCount(0);
+
+    // and the company page lists it
+    await page.goto(`/#/companies/${company.id}/show`);
+    await expect(page.getByText("No amount").first()).toBeVisible({ timeout: 60_000 });
+  });
 });

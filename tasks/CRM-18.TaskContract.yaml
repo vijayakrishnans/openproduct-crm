@@ -1,0 +1,15 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-18
+  title: "A deal without an amount opens"
+spec:
+  goal: Deals written through the API or the MCP server without an amount or contacts open, and the dashboard and company pages list them.
+  affects:
+    - apps/crm-web/src/components/atomic-crm/**
+    - apps/crm-web/CHANGELOG.md
+    - tests/crm-web-e2e/src/**
+    - tasks/CRM-18.TaskContract.yaml
+  doneWhen:
+    - a deal with a null amount and null contact_ids opens on the deal page instead of "Something went wrong"
+  gates: []
