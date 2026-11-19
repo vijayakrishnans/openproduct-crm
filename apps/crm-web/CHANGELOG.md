@@ -1,3 +1,8 @@
+## crm-web v0.9.0 - 2026-11-19
+
+- The sign-in page's left side is no longer empty: it says what BrokeCRM is
+  (free, open source, hosted) and shows the deal board.
+
 ## crm-web v0.8.3 - 2026-11-19
 
 - A deal without an amount opens, and says "No amount". Deals created through

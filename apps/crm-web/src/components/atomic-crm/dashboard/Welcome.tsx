@@ -29,6 +29,10 @@ export const Welcome = () => (
         >
           shadcn-admin-kit
         </a>
+        , and deployed with{" "}
+        <a href="https://orunbase.com" className="underline hover:no-underline">
+          Orunbase
+        </a>
         . The code is at{" "}
         <a
           href="https://github.com/vijayakrishnans/openproduct-crm"
