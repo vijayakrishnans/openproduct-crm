@@ -185,6 +185,10 @@ export const LumenLoginPage = () => {
             >
               Atomic CRM
             </a>
+            , built and deployed with{" "}
+            <a href="https://orunbase.com" className="underline underline-offset-2 hover:text-zinc-200">
+              Orunbase
+            </a>
             . The code is on{" "}
             <a
               href="https://github.com/vijayakrishnans/openproduct-crm"
