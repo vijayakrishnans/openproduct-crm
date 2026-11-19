@@ -38,6 +38,11 @@ export const githubProvider: OAuthProvider = {
     url.searchParams.set("scope", SCOPE);
     url.searchParams.set("state", state);
     url.searchParams.set("allow_signup", "true");
+    // Always show GitHub's account picker, as Google's sign-in does. Without
+    // it, someone already signed in to GitHub who has approved the app before
+    // is sent straight back with no screen at all, which reads as "no
+    // verification" and gives no chance to pick another account.
+    url.searchParams.set("prompt", "select_account");
     return url.toString();
   },
 
