@@ -14,6 +14,10 @@ spec:
   owner: platform
   domain: starter-tests
   path: tests/projects-worker
+  dependsOn:
+    # A build input: a change to projects-worker reruns this suite under --changed.
+    - component: projects-worker
+      input: true
   subscribe:
     environments:
       - name: dev

@@ -13,6 +13,10 @@ spec:
   lifecycle: production
   owner: platform
   domain: starter-tests
+  dependsOn:
+    # A build input: a change to notifications-worker reruns this suite under --changed.
+    - component: notifications-worker
+      input: true
   subscribe:
     environments:
       - name: dev

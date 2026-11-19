@@ -13,14 +13,14 @@ inbound email, MCP tools and background jobs.**
 
 | | |
 |---|---|
-| State | Shipped: live as BrokeCRM at https://www.brokecrm.cloud. Open: sign-in with Google and GitHub (keys), the prod smoke (credential), inbound email (Email Routing) |
+| State | Shipped: live as BrokeCRM at https://www.brokecrm.cloud. Open: the prod smoke (credential), inbound email (Email Routing) |
 | Cluster | `CRM`, milestones CRM0, CRM-A, M0–M7 (epic `EP-7`, slug `openproduct-crm-port`) |
 | Owning components | `apps/crm-web`, `apps/crm-worker`, `apps/api-edge` (crm-facade), `packages/db` (`200_crm_core`), `tests/crm-worker`, `tests/crm-web-e2e` |
 | Builds on | `lumen baseline-v33`; Atomic CRM `aeccb98` (MIT) |
 | Changes | adds the `crm` bounded context; no change to other contexts' tables |
 | Decisions locked | see [design.md](design.md) §1 |
 | Gate | CI green on every PR; the cross-org isolation matrix from M2 on |
-| Shipped as | pull requests #10–#26; after M7, #27–#40 and the terms and privacy pages; see the ledger |
+| Shipped as | pull requests #10–#26; after M7, #27–#53; see the ledger |
 
 ## Read order
 

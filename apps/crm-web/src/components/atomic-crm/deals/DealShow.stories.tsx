@@ -14,6 +14,20 @@ const meta = {
 
 export default meta;
 
+export const WithoutAmount = () => (
+  <StoryWrapper
+    data={{
+      companies: [buildCompany()],
+      // As the API and the MCP server store a deal created without one.
+      deals: [buildDeal({ amount: null, contact_ids: null as never })],
+    }}
+  >
+    <ResourceContextProvider value="deals">
+      <DealShow open id="1" />
+    </ResourceContextProvider>
+  </StoryWrapper>
+);
+
 export const ClosingDate = ({
   expectedClosingDate = "2020-01-15",
 }: {

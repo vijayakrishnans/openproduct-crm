@@ -237,6 +237,7 @@ export const frenchCrmMessages = {
       },
       invalid_date: "Date invalide",
       no_closing_date: "Aucune date de clôture",
+      no_amount: "Aucun montant",
     },
     notes: {
       name: "Note |||| Notes",

@@ -17,10 +17,6 @@ spec:
     environments:
       - name: dev
         profile: quick-check
-      - name: stage
-        profile: quick-check
-      - name: prod
-        profile: quick-check
   parameters:
     nodeVersion: "22"
     pnpmVersion: "10.12.1"

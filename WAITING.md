@@ -5,18 +5,6 @@ checks for before it carries on.
 
 ## Open
 
-### Sign-in with Google and GitHub: one real sign-in each (owner)
-
-- **Why:** both providers are switched on (see Done). The agent checked
-  everything up to the provider's door: the buttons, and that each start link
-  redirects to Google or GitHub with a client id and the right callback. The
-  provider's own consent screen and the return need a real account.
-- **Steps:** on https://www.brokecrm.cloud/#/login, click "Continue with
-  Google", then sign out and try "Continue with GitHub". If Google says the
-  app is not verified or blocks the sign-in, the consent screen is still in
-  testing: publish it, or add the account as a test user.
-- **Unblock signal:** each one lands in the CRM, signed in.
-
 ### Terms and privacy policy: three blanks and a review (owner)
 
 - **Why:** https://www.brokecrm.cloud/terms.html and `/privacy.html` are
@@ -75,7 +63,13 @@ checks for before it carries on.
 - **Steps:** if it happens again, open the browser console (F12, Console)
   and copy the red error text; or note which deal was moved from which
   column to which, and whether deal stages had been changed in Settings.
-- **Unblock signal:** an error message or a sequence that reproduces it.
+- **A possible cause, since fixed:** another session's CRM-18 (#51,
+  2026-11-19) fixed the same screen for a deal that has no amount or no
+  contacts, such as one created through the API or the MCP server. If the
+  deal that was dragged was one of those, this may be closed; nobody has
+  confirmed it.
+- **Unblock signal:** an error message or a sequence that reproduces it, or
+  the owner dragging deals again without seeing it.
 
 ### The openproduct.live listing: indexing (openproduct.live's side)
 
@@ -110,9 +104,18 @@ checks for before it carries on.
 
 ## Done
 
-- **Sign-in with Google and GitHub switched on (2026-11-19):** the owner
-  created the OAuth apps and seeded the keys in Orunbase; #44 and #45
-  deployed them. Stage and prod list both providers and show both buttons.
+- **Sign-in with Google and GitHub works (2026-11-19):** the owner created
+  the OAuth apps and seeded the keys in Orunbase (#44, #45), sign-in moved
+  to the API's own domain (#50), and the owner signed in on prod with each
+  provider. Still the owner's, if wanted: Google shows `api.brokecrm.cloud`
+  on its consent screen; showing the name and a logo needs Google's branding
+  verification (Google Cloud console, Branding).
+- **Invitation emails carry a link (2026-11-19):** #49. Not yet confirmed
+  with a real email.
+- **GitHub sign-in shows the account picker (2026-11-19):** #53, after the
+  owner noticed GitHub signing them in with no screen. Not yet confirmed by
+  the owner.
+
 
 - **Prod sign-in by email (2026-11-18):** `brokecrm.cloud` was onboarded to
   Cloudflare Email Sending (the account is on Workers Paid), prod sends from

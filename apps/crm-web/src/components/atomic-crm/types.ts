@@ -121,7 +121,7 @@ export type Deal = {
   categories: string[];
   stage: string;
   description: string;
-  amount: number;
+  amount: number | null;
   created_at: string;
   updated_at: string;
   archived_at?: string;

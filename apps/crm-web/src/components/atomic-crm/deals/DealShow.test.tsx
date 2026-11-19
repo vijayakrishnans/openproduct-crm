@@ -1,6 +1,6 @@
 import { render } from "vitest-browser-react";
 
-import { ClosingDate } from "./DealShow.stories";
+import { ClosingDate, WithoutAmount } from "./DealShow.stories";
 
 describe("DealShow", () => {
   it("flags a past closing date", async () => {
@@ -20,6 +20,13 @@ describe("DealShow", () => {
 
     await expect.element(screen.getByText("Invalid date")).toBeVisible();
     await expect.element(screen.getByText("Past")).not.toBeInTheDocument();
+  });
+
+  it("opens a deal that has no amount and no contacts", async () => {
+    const screen = await render(<WithoutAmount />);
+
+    await expect.element(screen.getByText("Acme deal")).toBeVisible();
+    await expect.element(screen.getByText("No amount")).toBeVisible();
   });
 
   it("says when a deal has no closing date", async () => {

@@ -1,6 +1,7 @@
 import { commands } from "vitest/browser";
 
 import {
+  formatDealAmount,
   formatISODateString,
   isISODateString,
   validateClosingDate,
@@ -80,4 +81,16 @@ describe("formatISODateString", () => {
       expect(formatISODateString(value)).toBeNull();
     },
   );
+});
+
+describe("formatDealAmount", () => {
+  it("formats an amount as compact currency", () => {
+    expect(formatDealAmount(12500, "USD")).toBe("$12.5K");
+    expect(formatDealAmount(0, "USD")).toBe("$0.00");
+  });
+
+  it("returns null for a deal without an amount", () => {
+    expect(formatDealAmount(null, "USD")).toBeNull();
+    expect(formatDealAmount(undefined, "USD")).toBeNull();
+  });
 });

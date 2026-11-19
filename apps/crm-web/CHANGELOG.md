@@ -1,3 +1,19 @@
+## crm-web v0.8.3 - 2026-11-19
+
+- A deal without an amount opens, and says "No amount". Deals created through
+  the MCP server or the API without one used to show "Something went wrong",
+  and broke the dashboard's deal pipeline.
+
+## crm-web v0.8.2 - 2026-11-19
+
+- Switching organizations now switches the branding too. An organization that
+  never set its own title or logos shows BrokeCRM's, not the previous one's.
+
+## crm-web v0.8.1 - 2026-11-19
+
+- The page that approves an MCP connection (/oauth/authorize) loads. It used to
+  spin forever: its scripts were requested from /oauth/assets/.
+
 ## crm-web v0.8.0 - 2026-11-19
 
 - Connect Claude, or another assistant that signs in, to your CRM: add the MCP

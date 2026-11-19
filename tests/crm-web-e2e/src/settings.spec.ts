@@ -5,10 +5,16 @@ test.describe("settings", () => {
     await signIn(page, workspace.owner.email);
     await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
 
+    // Let the sign-in finish (it ends with a redirect to the dashboard) before
+    // opening the menu, or the redirect can land after the Settings click.
+    await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible({ timeout: 60_000 });
+    await page.waitForLoadState("networkidle");
     // The user menu is the avatar, the last button of the header.
     await page.getByRole("navigation").first().getByRole("button").last().click();
     // Saving is refused until the form has the deals it checks stages against.
-    const dealsLoaded = page.waitForResponse((r) => /\/crm\/deals\?.*perPage=1000/.test(r.url()));
+    const dealsLoaded = page.waitForResponse((r) => /\/crm\/deals\?.*perPage=1000/.test(r.url()), {
+      timeout: 60_000,
+    });
     await page.getByRole("menuitem", { name: "Settings" }).click();
     await dealsLoaded;
 
