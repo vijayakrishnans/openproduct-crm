@@ -136,16 +136,28 @@ automation:
         environments: inputs.environment
         autopush: false
 
+# CI SCOPE (after orun-cloud's rules; the pinned catalog has no `skip`
+# profile, so the same effect comes from activation and subscriptions):
+#   - dev runs on pull requests only. A merge to main deploys stage and prod
+#     and does not re-verify in dev what its pull request verified; the browser
+#     suite alone cost ~20 minutes on every merge.
+#   - Shared packages (packages/*) deploy nowhere: they have a dev lane and no
+#     stage or prod lane. Workers name them as build inputs (`input: true`), so
+#     a package change still replans every worker that bundles it.
+#   - Every test suite names what it tests as a build input, so a change to a
+#     worker, or to crm-web, reruns its suite under --changed.
+#   - dev lanes never wait on each other (dependencyMode: advisory).
 environments:
   dev:
     description: Verify-only. Pull requests plan and verify here; nothing is deployed, so there is no door.
     # dev only ever verifies (no component deploys to it), so nothing in it
     # has to wait for anything: every dev job starts the moment a runner does.
     dependencyMode: advisory
+    # Pull requests only. A merge to main deploys stage and prod; it does not
+    # re-verify in dev what the pull request already verified (CI SCOPE below).
     activation:
       triggerRefs:
         - github-pull-request
-        - github-push-main
         - local-development
     parameterDefaults:
       terraform:

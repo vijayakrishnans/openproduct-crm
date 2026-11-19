@@ -13,6 +13,10 @@ spec:
   lifecycle: production
   owner: platform
   domain: starter-tests
+  dependsOn:
+    # A build input: a change to membership-worker reruns this suite under --changed.
+    - component: membership-worker
+      input: true
   subscribe:
     environments:
       - name: dev

@@ -1,0 +1,21 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-16
+  title: "CI: scope lanes like orun-cloud, and a browser suite in minutes"
+spec:
+  goal: Pull requests run each affected suite once, merges only deploy, and the browser suite finishes in a few minutes instead of twenty.
+  affects:
+    - intent.yaml
+    - apps/*/component.yaml
+    - packages/*/component.yaml
+    - infra/db-migrate/component.yaml
+    - tests/*/component.yaml
+    - tests/crm-web-e2e/playwright.config.ts
+    - tests/crm-web-e2e/src/**
+    - tasks/CRM-16.TaskContract.yaml
+  doneWhen:
+    - a merge to main plans no dev lanes
+    - a change to a worker or to crm-web plans its test suite on the pull request
+    - the browser suite runs in parallel and passes in under five minutes
+  gates: []

@@ -1,10 +1,11 @@
-import { expect, signIn, test } from "./fixtures";
+import { expect, signIn, signInWithCode, test } from "./fixtures";
 
 // Replaces upstream's signup.spec ("only the first user can sign up"): an
 // instance is no longer one team. Anyone may sign in; what they reach is
 // decided by their organization.
 test("a returning member lands in their organization without being asked", async ({ page, workspace }) => {
-  await signIn(page, workspace.owner.email);
+  // The one test that signs in through the form; the others reuse a session.
+  await signInWithCode(page, workspace.owner.email);
   await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Name your organization" })).toBeHidden();
 });

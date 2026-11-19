@@ -13,6 +13,10 @@ spec:
   lifecycle: production
   owner: platform
   domain: starter-tests
+  dependsOn:
+    # A build input: a change to policy-engine reruns this suite under --changed.
+    - component: policy-engine
+      input: true
   subscribe:
     environments:
       - name: dev

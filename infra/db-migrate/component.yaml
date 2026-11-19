@@ -22,6 +22,7 @@ spec:
 
   dependsOn:
     - component: db
+      input: true
     # Migrations read the Supabase connection from the orun secrets the
     # `supabase` component lease-publishes post-apply.
     - component: supabase
