@@ -24,9 +24,8 @@ What is not done, and why:
 
 - **Prod sign-in works** since 2026-11-18 (email codes from
   `no-reply@brokecrm.cloud`). The **prod smoke** still needs a prod
-  credential, **sign-in with Google and GitHub** needs the owner's OAuth
-  apps and their keys in Orunbase secrets, and **inbound email** needs Email
-  Routing on the domain (WAITING.md).
+  credential, **inbound email** needs Email Routing on the domain (WAITING.md).
+  **Sign-in with Google and GitHub works** since 2026-11-19.
 - The owner saw "Something went wrong" on the deal board while dragging a
   deal. It was **not reproduced**; the board was hardened and two real drag
   defects were fixed, but nothing shows that screen is gone (WAITING.md).
@@ -86,6 +85,8 @@ Work that followed the milestones, each its own pull request into `main`.
 | Terms, privacy policy, licence statement | #41 | `fd9933a` | `terms.html` and `privacy.html`, static pages on the site, linked from the landing page and the sign-in form; the landing page states that all of it is Apache-2.0. `landing.spec.ts` covers the links. The texts are plain-language drafts, not reviewed by a lawyer (WAITING.md) |
 | Sign-in with Google and GitHub switched on | #44, #45 | `4f2a837`, `13a45c8` | The owner created the OAuth apps and seeded the five keys per environment in Orunbase. #44 redeployed `identity-worker`, but the providers stayed empty: #36 had added the client ids to `optionalSecretEnv` and not to `runtimeSecrets`, so the deploy pushed three secrets and left the ids out. #45 lists all five. After it, 2026-11-19: `GET /v1/auth/oauth/providers` names `github` and `google` on stage and prod; both sign-in pages show both buttons; each start link answers `302` to the provider with a client id and this environment's callback URL. Not verified by the agent: the provider's own consent step and the return, which need the owner's account |
 | Environment addresses in `intent.yaml` | #46 | `19072a6` | `url` for prod is `https://www.brokecrm.cloud` and for stage `https://stage.brokecrm.cloud`, so the Orunbase overview shows the product's own address; the console moves to a link |
+| Invitation emails link to sign-in | #49 | `baf1749` | The email told the reader to sign in and gave no address. It now has a button and the address, from a new `APP_URL` var on `notifications-worker`. Tests cover the link and that a missing, non-https or hostile address yields none. The deploy run on `main` concluded `success`. Not confirmed with a real email |
+| Sign-in on the API's own domain | #50 | `6a02125` | Google's consent screen showed the API's workers.dev host. `OAUTH_REDIRECT_BASE_URL` and the web app's API address are now `api.brokecrm.cloud` (stage: `api-stage.brokecrm.cloud`); they move together because the sign-in's state cookie only returns to the host that set it. Merged after the owner added the new redirect URIs in Google; the owner then changed the GitHub callbacks. The deploy run concluded `success`; each start link's `redirect_uri` is on the new host on stage and prod; **the owner signed in on prod with Google and with GitHub, 2026-11-19** |
 
 ## Live URLs
 

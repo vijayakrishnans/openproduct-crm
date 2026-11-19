@@ -5,18 +5,6 @@ checks for before it carries on.
 
 ## Open
 
-### Sign-in with Google and GitHub: one real sign-in each (owner)
-
-- **Why:** both providers are switched on (see Done). The agent checked
-  everything up to the provider's door: the buttons, and that each start link
-  redirects to Google or GitHub with a client id and the right callback. The
-  provider's own consent screen and the return need a real account.
-- **Steps:** on https://www.brokecrm.cloud/#/login, click "Continue with
-  Google", then sign out and try "Continue with GitHub". If Google says the
-  app is not verified or blocks the sign-in, the consent screen is still in
-  testing: publish it, or add the account as a test user.
-- **Unblock signal:** each one lands in the CRM, signed in.
-
 ### Terms and privacy policy: three blanks and a review (owner)
 
 - **Why:** https://www.brokecrm.cloud/terms.html and `/privacy.html` are
@@ -112,9 +100,15 @@ checks for before it carries on.
 
 ## Done
 
-- **Sign-in with Google and GitHub switched on (2026-11-19):** the owner
-  created the OAuth apps and seeded the keys in Orunbase; #44 and #45
-  deployed them. Stage and prod list both providers and show both buttons.
+- **Sign-in with Google and GitHub works (2026-11-19):** the owner created
+  the OAuth apps and seeded the keys in Orunbase (#44, #45), sign-in moved
+  to the API's own domain (#50), and the owner signed in on prod with each
+  provider. Still the owner's, if wanted: Google shows `api.brokecrm.cloud`
+  on its consent screen; showing the name and a logo needs Google's branding
+  verification (Google Cloud console, Branding).
+- **Invitation emails carry a link (2026-11-19):** #49. Not yet confirmed
+  with a real email.
+
 
 - **Prod sign-in by email (2026-11-18):** `brokecrm.cloud` was onboarded to
   Cloudflare Email Sending (the account is on Workers Paid), prod sends from
