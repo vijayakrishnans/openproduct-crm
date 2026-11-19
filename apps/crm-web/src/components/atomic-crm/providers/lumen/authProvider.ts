@@ -18,6 +18,9 @@ import {
 const CURRENT_SALE_CACHE_KEY = "RaStore.auth.current_sale";
 /** Where react-query's persister keeps its default cache. */
 const QUERY_CACHE_KEY = "REACT_QUERY_OFFLINE_CACHE";
+/** Where the CRM's store keeps the organization's branding and pipeline
+ *  settings (ra-core's localStorageStore, app key "CRM"). */
+const CONFIGURATION_CACHE_KEY = "RaStoreCRM.app.configuration";
 
 type CurrentSale = {
   id: number;
@@ -192,10 +195,12 @@ export function selectOrganization(org: Organization): void {
   const session = getSession();
   if (!session) throw new Error("Not signed in");
   clearSaleCache();
-  // Query results are saved to localStorage for offline use (see CRM.tsx).
-  // They belong to the organization they were read from.
+  // Query results are saved to localStorage for offline use (see CRM.tsx), and
+  // the store keeps the branding. Both belong to the organization they were
+  // read from.
   try {
     window.localStorage.removeItem(QUERY_CACHE_KEY);
+    window.localStorage.removeItem(CONFIGURATION_CACHE_KEY);
   } catch {
     // No storage, so nothing was saved.
   }
