@@ -233,6 +233,7 @@ export const englishCrmMessages = {
       },
       invalid_date: "Invalid date",
       no_closing_date: "No closing date",
+      no_amount: "No amount",
     },
     notes: {
       name: "Note |||| Notes",

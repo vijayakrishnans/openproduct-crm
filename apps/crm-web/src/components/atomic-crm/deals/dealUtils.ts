@@ -7,6 +7,25 @@ export const findDealLabel = (dealStages: DealStage[], dealValue: string) => {
   return dealStage?.label;
 };
 
+/**
+ * A deal's amount as compact currency ("$12.5K"), or null when the deal has
+ * none: the column is nullable, and deals written through the API or the MCP
+ * server often leave it out.
+ */
+export const formatDealAmount = (
+  amount: number | null | undefined,
+  currency: string,
+): string | null =>
+  typeof amount === "number" && Number.isFinite(amount)
+    ? amount.toLocaleString("en-US", {
+        notation: "compact",
+        style: "currency",
+        currency,
+        currencyDisplay: "narrowSymbol",
+        minimumSignificantDigits: 3,
+      })
+    : null;
+
 export const formatDealCategories = (
   dealCategories: LabeledValue[],
   categories: string[] | null | undefined,

@@ -1,3 +1,9 @@
+## crm-web v0.8.3 - 2026-11-19
+
+- A deal without an amount opens, and says "No amount". Deals created through
+  the MCP server or the API without one used to show "Something went wrong",
+  and broke the dashboard's deal pipeline.
+
 ## crm-web v0.8.2 - 2026-11-19
 
 - Switching organizations now switches the branding too. An organization that
