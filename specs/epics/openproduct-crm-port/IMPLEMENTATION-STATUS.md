@@ -18,7 +18,7 @@ departs from [design.md](design.md).
 | After M7: settings page fix | done | #27 |
 | After M7: deal board fixes and drag test | done; the crash the owner saw was not reproduced | #28, #29 |
 | After M7: licence | Apache-2.0 with a `NOTICE` | #30, #31 |
-| After M7: openproduct.live listing | published as `atomic-crm`; not indexed, repo facts not read yet | |
+| After M7: openproduct.live listing | published as `broke-crm` (renamed from `atomic-crm`, 2026-11-19); repo facts read; not indexed yet | |
 | After M7: custom domain `brokecrm.cloud` | done | #33 |
 | After M7: prod sign-in by email | done; the owner signed in on prod, 2026-11-18 | #34 |
 | After M7: BrokeCRM name, landing page, SEO | done | #35 |
