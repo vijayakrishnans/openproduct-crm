@@ -37,9 +37,7 @@ describe("CRM migration (200_crm_core)", () => {
       expect(BOUNDED_CONTEXTS).toContain("crm");
     });
 
-    it("is the only crm migration and the manifest tail", () => {
-      const ids = manifest.migrations.map((m) => m.id);
-      expect(ids[ids.length - 1]).toBe("200_crm_core");
+    it("is the only crm migration", () => {
       expect(
         manifest.migrations.filter((m) => m.context === "crm").map((m) => m.id),
       ).toEqual(["200_crm_core"]);

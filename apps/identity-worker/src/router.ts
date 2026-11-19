@@ -1,3 +1,9 @@
+import {
+  handleOAuthAuthorize,
+  handleOAuthClientInfo,
+  handleOAuthRegister,
+  handleOAuthToken,
+} from "./oauth-server/handlers.js";
 import type { Env } from "./env.js";
 import { handleHealth } from "./handlers/health.js";
 import { handleLoginStart } from "./handlers/login-start.js";
@@ -15,6 +21,7 @@ import { errorResponse, notFound, methodNotAllowed } from "./http.js";
 
 const ORG_API_KEYS_RE = /^\/v1\/organizations\/[^/]+\/api-keys$/;
 const ORG_API_KEY_ID_RE = /^\/v1\/organizations\/[^/]+\/api-keys\/[^/]+$/;
+const OAUTH_CLIENT_RE = /^\/v1\/oauth\/clients\/(oac_[A-Za-z0-9_-]{1,64})$/;
 const OAUTH_START_RE = /^\/v1\/auth\/oauth\/[^/]+\/start$/;
 const OAUTH_CALLBACK_RE = /^\/v1\/auth\/oauth\/[^/]+\/callback$/;
 import { generateRequestId } from "./ids.js";
@@ -85,6 +92,25 @@ export async function route(request: Request, env: Env): Promise<Response> {
     if (OAUTH_CALLBACK_RE.test(url.pathname)) {
       if (request.method !== "GET") return methodNotAllowed(requestId);
       return handleOAuthCallback(request, env, requestId);
+    }
+
+    // OAuth authorization server for MCP clients (see oauth-server/handlers.ts)
+    if (url.pathname === "/v1/oauth/register") {
+      if (request.method !== "POST") return methodNotAllowed(requestId);
+      return handleOAuthRegister(request, env, requestId);
+    }
+    if (url.pathname === "/v1/oauth/token") {
+      if (request.method !== "POST") return methodNotAllowed(requestId);
+      return handleOAuthToken(request, env, requestId);
+    }
+    if (url.pathname === "/v1/oauth/authorize") {
+      if (request.method !== "POST") return methodNotAllowed(requestId);
+      return handleOAuthAuthorize(request, env, requestId);
+    }
+    const oauthClient = url.pathname.match(OAUTH_CLIENT_RE);
+    if (oauthClient) {
+      if (request.method !== "GET") return methodNotAllowed(requestId);
+      return handleOAuthClientInfo(request, env, requestId, oauthClient[1]!);
     }
 
     // API-key admin routes (forwarded from api-edge)

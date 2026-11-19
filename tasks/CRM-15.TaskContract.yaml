@@ -1,0 +1,27 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-15
+  title: "MCP server: OAuth sign-in and a brokecrm.cloud address"
+spec:
+  goal: An MCP client such as Claude's custom connectors can connect to an organization's CRM by signing the person in with OAuth 2.1, at an address on brokecrm.cloud.
+  affects:
+    - apps/identity-worker/src/**
+    - apps/api-edge/src/**
+    - apps/crm-web/**
+    - apps/crm-worker/docs/runbook.md
+    - packages/db/src/manifest.ts
+    - packages/db/src/migrations/210_identity_oauth_server/**
+    - infra/terraform/cloudflare-domain/**
+    - intent.yaml
+    - tests/identity-worker/src/**
+    - tests/api-edge/src/**
+    - tests/db/src/crm-migration.test.ts
+    - tests/crm-web-e2e/src/**
+    - tasks/CRM-15.TaskContract.yaml
+  doneWhen:
+    - the MCP endpoint answers 401 with a WWW-Authenticate header pointing at its protected-resource metadata
+    - a client can register, send the person to /oauth/authorize, and exchange the code with PKCE for tokens
+    - an OAuth token works only on its organization's MCP endpoint and stops working when the person leaves the organization
+    - api.brokecrm.cloud (prod) and api-stage.brokecrm.cloud (stage) serve api-edge, and the CRM shows the MCP address on that host
+  gates: []

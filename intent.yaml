@@ -156,6 +156,7 @@ environments:
         repo: openproduct-crm
         CONSOLE_CUSTOM_DOMAIN: ""
         CRM_WEB_CUSTOM_DOMAIN: ""
+        API_EDGE_CUSTOM_DOMAIN: ""
     policies:
       requireApproval: "false"
     env:
@@ -163,8 +164,11 @@ environments:
 
   stage:
     description: The fleet, the API edge and the console, deployed on every merge to main before prod.
-    url: https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev
+    # The address people use: the CRM web app on its own domain. The console
+    # stays one click away in the links.
+    url: https://stage.brokecrm.cloud
     links:
+      - { title: Console, url: https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev }
       - { title: API, url: https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev }
       - { title: Health, url: https://openproduct-crm-api-edge-stage.vijayakrishnan12994.workers.dev/health }
     activation:
@@ -183,6 +187,8 @@ environments:
         # The CRM web app's hostname; infra/terraform/cloudflare-domain attaches
         # it to openproduct-crm-crm-web-stage.
         CRM_WEB_CUSTOM_DOMAIN: stage.brokecrm.cloud
+        # api-edge's hostname, for the MCP server and its OAuth sign-in.
+        API_EDGE_CUSTOM_DOMAIN: api-stage.brokecrm.cloud
     policies:
       requireApproval: "false"
     env:
@@ -190,8 +196,11 @@ environments:
 
   prod:
     description: Where customers are. Deploys after stage converges on the same commit.
-    url: https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev
+    # The address people use: the CRM web app on its own domain. The console
+    # stays one click away in the links.
+    url: https://www.brokecrm.cloud
     links:
+      - { title: Console, url: https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev }
       - { title: API, url: https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev }
       - { title: Health, url: https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev/health }
     activation:
@@ -213,6 +222,8 @@ environments:
         # The CRM web app's hostname; infra/terraform/cloudflare-domain attaches
         # it to openproduct-crm-crm-web-prod.
         CRM_WEB_CUSTOM_DOMAIN: www.brokecrm.cloud
+        # api-edge's hostname, for the MCP server and its OAuth sign-in.
+        API_EDGE_CUSTOM_DOMAIN: api.brokecrm.cloud
     policies:
       requireApproval: "false"
     env:

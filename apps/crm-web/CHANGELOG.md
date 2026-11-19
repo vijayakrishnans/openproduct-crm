@@ -1,7 +1,14 @@
-## crm-web v0.7.1 - 2026-11-19
+## crm-web v0.8.1 - 2026-11-19
 
 - Switching organizations now switches the branding too. An organization that
   never set its own title or logos shows BrokeCRM's, not the previous one's.
+
+## crm-web v0.8.0 - 2026-11-19
+
+- Connect Claude, or another assistant that signs in, to your CRM: add the MCP
+  server address as a custom connector and approve it with your BrokeCRM
+  account. No API key needed.
+- The MCP server has a brokecrm.cloud address: `api.brokecrm.cloud`.
 
 ## crm-web v0.7.0 - 2026-11-19
 

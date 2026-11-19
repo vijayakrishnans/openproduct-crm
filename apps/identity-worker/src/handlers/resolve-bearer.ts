@@ -4,6 +4,8 @@ import { createIdentityRepository } from "@saas/db/identity";
 import { createAuthService } from "../services/auth.js";
 import { successResponse, errorResponse, extractBearerToken, withTimings } from "../http.js";
 import { createTimings } from "@saas/contracts/timing";
+import { resolveOAuthAccessToken } from "../oauth-server/handlers.js";
+import { createOAuthStore } from "../oauth-server/store.js";
 
 export async function handleResolveBearer(request: Request, env: Env, requestId: string): Promise<Response> {
   const token = extractBearerToken(request);
@@ -22,6 +24,33 @@ export async function handleResolveBearer(request: Request, env: Env, requestId:
   const endTotal = timings.start("total");
   const route = "identity.resolve";
   try {
+    // An OAuth access token (an MCP client acting for a person) resolves to
+    // that person, with the one organization it was granted for. api-edge
+    // only accepts it on that organization's CRM.
+    const oauth = await timings.measure("resolve", () =>
+      resolveOAuthAccessToken(token, createOAuthStore(executor), new Date()),
+    );
+    if (oauth) {
+      endTotal();
+      if ("error" in oauth) {
+        return withTimings(errorResponse("unauthenticated", "Invalid or expired access token", 401, requestId), requestId, route, timings);
+      }
+      return withTimings(successResponse(
+        {
+          actor: {
+            actorType: "user",
+            actorId: oauth.actorId,
+            email: oauth.email,
+            ...(oauth.displayName !== null && { displayName: oauth.displayName }),
+          },
+          grant: { kind: "oauth", orgId: oauth.orgId, scope: oauth.scope },
+          user: { id: oauth.actorId, email: oauth.email, displayName: oauth.displayName },
+        },
+        requestId,
+        200,
+      ), requestId, route, timings);
+    }
+
     const repo = createIdentityRepository(executor);
     const auth = createAuthService({ repo, now: () => new Date() });
     const result = await timings.measure("resolve", () => auth.resolveBearer(token));

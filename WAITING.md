@@ -5,37 +5,17 @@ checks for before it carries on.
 
 ## Open
 
-### Sign-in with Google and GitHub: create the OAuth apps and add their keys (owner)
+### Sign-in with Google and GitHub: one real sign-in each (owner)
 
-- **Why:** the code is in place and the buttons appear on the sign-in page by
-  themselves, but only for a provider whose keys exist. On 2026-11-18
-  `GET /v1/auth/oauth/providers` answered an empty list on stage and prod.
-  (The client ids that used to sit in the identity worker's config came with
-  the baseline and belonged to someone else's OAuth apps; they are gone.)
-- **Steps:**
-  1. **GitHub:** Settings → Developer settings → OAuth Apps → New OAuth App,
-     once per environment (GitHub allows one callback URL per app).
-     Homepage `https://www.brokecrm.cloud` (stage: `https://stage.brokecrm.cloud`).
-     Authorization callback URL:
-     `https://openproduct-crm-api-edge-prod.vijayakrishnan12994.workers.dev/v1/auth/oauth/github/callback`
-     (stage: the same with `-stage`). Generate a client secret.
-  2. **Google:** Google Cloud console → APIs & Services → Credentials →
-     Create credentials → OAuth client ID → Web application. Authorized
-     redirect URIs: the two URLs above with `google` in place of `github`
-     (one client can hold both). The consent screen needs the app name, a
-     support email and the `email` and `profile` scopes; publish it, or only
-     listed test users can sign in.
-  3. **Orunbase secrets**, for each of `stage` and `prod`
-     (`orun secrets set <KEY> --org ws_9JAJMRHA --env <env>`, or the
-     Orunbase UI): `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`,
-     `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, and
-     `OAUTH_STATE_SECRET` (any random string of 16 or more characters, for
-     example the output of `openssl rand -hex 32`).
-  4. Redeploy `identity-worker` so it picks the secrets up: say so, and the
-     agent merges a one-line redeploy marker.
-- **Unblock signal:** `GET <api>/v1/auth/oauth/providers` lists `github` and
-  `google`, and "Continue with Google" on https://www.brokecrm.cloud/#/login
-  signs a person in.
+- **Why:** both providers are switched on (see Done). The agent checked
+  everything up to the provider's door: the buttons, and that each start link
+  redirects to Google or GitHub with a client id and the right callback. The
+  provider's own consent screen and the return need a real account.
+- **Steps:** on https://www.brokecrm.cloud/#/login, click "Continue with
+  Google", then sign out and try "Continue with GitHub". If Google says the
+  app is not verified or blocks the sign-in, the consent screen is still in
+  testing: publish it, or add the account as a test user.
+- **Unblock signal:** each one lands in the CRM, signed in.
 
 ### Terms and privacy policy: three blanks and a review (owner)
 
@@ -131,6 +111,10 @@ checks for before it carries on.
   and every organization starts on the free tier.
 
 ## Done
+
+- **Sign-in with Google and GitHub switched on (2026-11-19):** the owner
+  created the OAuth apps and seeded the keys in Orunbase; #44 and #45
+  deployed them. Stage and prod list both providers and show both buttons.
 
 - **Prod sign-in by email (2026-11-18):** `brokecrm.cloud` was onboarded to
   Cloudflare Email Sending (the account is on Workers Paid), prod sends from
