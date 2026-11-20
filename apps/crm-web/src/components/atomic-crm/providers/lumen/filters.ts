@@ -3,16 +3,41 @@
 // crm-worker takes plain JSON values, so they are translated here, in one
 // place, and the components stay as they are.
 
-function parseList(literal: string, open: string, close: string): string[] {
+// Items are separated by commas outside double quotes. A quoted item may hold
+// commas, parentheses and braces, with `\"` for a quote and `\\` for a
+// backslash, as PostgREST reads them (and as the CSV import writes them).
+export function parseList(literal: string, open: string, close: string): string[] {
   let body = literal.trim();
   if (body.startsWith(open) && body.endsWith(close)) body = body.slice(1, -1);
   if (body.trim() === "") return [];
-  return body.split(",").map((item) => {
-    const trimmed = item.trim();
-    return trimmed.startsWith('"') && trimmed.endsWith('"')
-      ? trimmed.slice(1, -1).replace(/\\"/g, '"')
-      : trimmed;
-  });
+  const items: string[] = [];
+  let current = "";
+  let quoted = false; // the current item started with a quote
+  let inQuotes = false;
+  for (let i = 0; i < body.length; i++) {
+    const char = body[i]!;
+    if (inQuotes) {
+      if (char === "\\" && i + 1 < body.length) {
+        current += body[++i];
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        current += char;
+      }
+    } else if (char === '"' && current.trim() === "") {
+      current = "";
+      quoted = true;
+      inQuotes = true;
+    } else if (char === ",") {
+      items.push(quoted ? current : current.trim());
+      current = "";
+      quoted = false;
+    } else if (!quoted) {
+      current += char;
+    }
+  }
+  items.push(quoted ? current : current.trim());
+  return items;
 }
 
 function toArray(value: unknown, open: string, close: string): unknown[] {

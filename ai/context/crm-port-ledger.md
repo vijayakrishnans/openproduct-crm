@@ -55,7 +55,7 @@ What is not done, and why:
 | Product name | BrokeCRM for people (since 2026-11-18); `OpenProduct CRM` in the repository's identity record |
 | workers.dev subdomain | `vijayakrishnan12994` |
 | Lumen | `baseline-v33` (`4cacc01`) |
-| Atomic CRM | `aeccb98` (MIT) |
+| Atomic CRM | `aeccb98` (MIT), app fixes ported up to `832b07a` (2026-11-20) |
 | orun | v2.96.0 |
 | Epic | `EP-7` `openproduct-crm-port` (cluster `CRM`) |
 

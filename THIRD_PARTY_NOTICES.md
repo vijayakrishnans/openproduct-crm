@@ -5,7 +5,8 @@ licence; this file reproduces the notices those licences require.
 
 ## Atomic CRM
 
-- Source: https://github.com/marmelab/atomic-crm, commit `aeccb98`
+- Source: https://github.com/marmelab/atomic-crm, commit `aeccb98`, with the
+  app fixes from upstream up to `832b07a` (2026-11-18, v2.0.0) ported
 - Used in: `apps/crm-web` (the web app, its demo data generator and the
   vendored Shadcn Admin Kit components under `src/components/admin`)
 - Changes: renamed to OpenProduct CRM, telemetry removed, wired into this
