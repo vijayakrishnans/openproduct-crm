@@ -1,3 +1,20 @@
+## crm-web v0.11.0 - 2026-11-20
+
+Fixes from Atomic CRM upstream (up to `832b07a`, its v2.0.0):
+
+- A company website with a long domain ending (`.photography`, `.consulting`)
+  is accepted. Endings were capped at five letters.
+- A deal's contacts show as plain names in the contacts field, not the tall
+  list entry with avatar and title.
+- Importing a CSV with a company name containing a quote, backslash or comma
+  finds the existing company instead of creating a duplicate. BrokeCRM's own
+  API adapter also split such names on every comma; it now reads them whole.
+
+And one BrokeCRM fix in the same area:
+
+- The demo's dashboard shows its Welcome card. It checked a build flag that
+  BrokeCRM's build never set.
+
 ## crm-web v0.10.1 - 2026-11-20
 
 - On phones, the demo's "Want it for real?" card sits above the bottom menu
