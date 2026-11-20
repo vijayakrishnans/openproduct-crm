@@ -6,6 +6,7 @@ export interface Settings {
   autoApproveReads: boolean;
   mcpReadOnly: boolean;
   lastRepo: string;
+  welcomed: boolean;
 }
 
 const KEY = "orun-work.settings.v1";
@@ -15,6 +16,7 @@ const DEFAULTS: Settings = {
   autoApproveReads: true,
   mcpReadOnly: false,
   lastRepo: "",
+  welcomed: false,
 };
 
 export function loadSettings(): Settings {

@@ -28,6 +28,12 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: desktop/orun-work/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Build the bundled orun
+        shell: bash
+        run: scripts/build-orun.sh x86_64-pc-windows-msvc
       - uses: dtolnay/rust-toolchain@stable
       - uses: swatinem/rust-cache@v2
         with:
@@ -41,6 +47,6 @@ jobs:
           projectPath: desktop/orun-work
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'orun-work-v__VERSION__' }}
           releaseName: Orun Work v__VERSION__
-          releaseBody: Windows installers for Orun Work. Needs the orun CLI on PATH (https://orun.dev/docs/start/installation/).
+          releaseBody: Windows installers for Orun Work. orun is bundled; nothing else to install.
           releaseDraft: true
           prerelease: false

@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AgentView, type ChatItem } from "./components/AgentView";
-import { ApprovalDialog, SettingsDialog } from "./components/Dialogs";
+import { ApprovalDialog, SettingsDialog, WelcomeDialog } from "./components/Dialogs";
+import { Linkify } from "./components/Linkify";
 import { GraphView } from "./components/GraphView";
 import { Inspector } from "./components/Inspector";
 import { SceneDock } from "./components/SceneDock";
@@ -115,24 +116,33 @@ export function App() {
     } catch (err) {
       setMcpState("error");
       out(`MCP: ${err instanceof Error ? err.message : String(err)}`, "err");
-      out("Is orun installed and on PATH? Run `orun mcp doctor` in the console below.", "err");
+      out("Run `mcp doctor` in the console below to see why.", "err");
       setBottomTab("mcp");
     }
   }, [repo?.root, settings.mcpReadOnly, out]);
 
-  // start-up: env key, last repo (or the demo), then the MCP server
+  // Orunbase sign-in, through the bundled orun.
+  const [auth, setAuth] = useState<"unknown" | "in" | "out" | "signing-in">("unknown");
+  const [authLines, setAuthLines] = useState<string[]>([]);
+  const authRun = useRef<RunHandle | null>(null);
+  const checkAuth = useCallback(async () => {
+    const code = await runOrun(["auth", "status", "--offline"], undefined, () => undefined).done;
+    setAuth(code === 0 ? "in" : "out");
+    return code === 0;
+  }, []);
+
+  // start-up: env key, sign-in state, last repo (or the demo); the MCP
+  // server starts once that settles and restarts when the repository changes.
+  const [booted, setBooted] = useState(false);
   useEffect(() => {
     void apiKeyFromEnv().then(setEnvKey).catch(() => undefined);
+    void checkAuth();
     const last = loadSettings().lastRepo;
-    if (last || !isTauri) void openRepo(isTauri ? last : undefined);
+    void (last || !isTauri ? openRepo(isTauri ? last : undefined) : Promise.resolve()).finally(() => setBooted(true));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const autoConnected = useRef(false);
   useEffect(() => {
-    if (repo && !autoConnected.current) {
-      autoConnected.current = true;
-      void connectMcp();
-    }
-  }, [repo, connectMcp]);
+    if (booted) void connectMcp();
+  }, [booted, repo?.root]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => void mcpRef.current?.stop(), []);
 
   const runCmd = useCallback(
@@ -149,6 +159,30 @@ export function App() {
     },
     [run, repo?.root, out],
   );
+
+  const signIn = useCallback(() => {
+    if (authRun.current) return;
+    setAuth("signing-in");
+    setAuthLines([]);
+    const args = ["auth", "login", ...(repo ? [] : ["--no-link"])];
+    out(`$ orun ${args.join(" ")}`, "info");
+    const h = runOrun(args, repo?.root, (line, stream) => {
+      out(line, stream);
+      if (line.trim()) setAuthLines((l) => [...l.slice(-30), line]);
+    });
+    authRun.current = h;
+    void h.done.then(async (code) => {
+      authRun.current = null;
+      out(`exit ${code ?? "(stopped)"}`, code === 0 ? "info" : "err");
+      if (await checkAuth()) void connectMcp();
+    });
+  }, [repo, out, checkAuth, connectMcp]);
+
+  const signOut = useCallback(async () => {
+    await runOrun(["auth", "logout"], undefined, (l, st) => out(l, st)).done;
+    await checkAuth();
+    void connectMcp();
+  }, [out, checkAuth, connectMcp]);
 
   const callTool = useCallback(async (name: string, args: Record<string, unknown>) => {
     if (!mcpRef.current || mcpRef.current.closed) throw new Error("MCP is not connected");
@@ -269,7 +303,12 @@ export function App() {
         </Menu>
         <Menu label="Orunbase">
           <button onClick={connectMcp}>{mcpState === "on" ? "Reconnect MCP server" : "Connect MCP server"}</button>
-          <button disabled={!!run} onClick={() => runCmd(["auth", "login"])}>Sign in (orun auth login)</button>
+          {auth === "in" ? (
+            <button onClick={signOut}>Sign out</button>
+          ) : (
+            <button disabled={auth === "signing-in"} onClick={signIn}>Sign in…</button>
+          )}
+          <button disabled={!!run} onClick={() => runCmd(["auth", "status"])}>Sign-in status</button>
           <hr />
           <button disabled={!!run} onClick={() => runCmd(["workspace", ...(repo?.workspace ? [repo.workspace] : [])])}>Workspace</button>
           <button disabled={!!run} onClick={() => runCmd(["integrations", "list", ...ws])}>Integrations</button>
@@ -368,7 +407,7 @@ export function App() {
             (bottomTab === "output" ? output : mcpLog).map((l, i) => (
               <div key={i} className={l.kind}>
                 <time>{new Date(l.at).toLocaleTimeString()}</time>
-                {l.text}
+                <Linkify text={l.text} />
               </div>
             ))}
         </div>
@@ -395,6 +434,11 @@ export function App() {
           <i className={`led ${mcpState === "on" ? "on" : mcpState === "starting" ? "busy" : mcpState === "error" ? "off" : ""}`} />
           MCP {mcpState === "on" ? `${serverName} · ${tools.length} tools` : mcpState}
         </span>
+        <span>
+          <i className={`led ${auth === "in" ? "on" : auth === "signing-in" ? "busy" : auth === "out" ? "off" : ""}`} />
+          Orunbase {auth === "in" ? "signed in" : auth === "signing-in" ? "signing in…" : auth === "out" ? "" : "…"}
+          {auth === "out" && <button className="linkish" onClick={signIn}>sign in</button>}
+        </span>
         <span>{repo ? `${repo.name} · ${repo.workspace ?? "no workspace"}` : "no repository"}</span>
         {run && <span><i className="led busy" />running orun…</span>}
         <span className="right">
@@ -412,6 +456,30 @@ export function App() {
             saveSettings(s);
             setShowSettings(false);
           }}
+        />
+      )}
+      {(isTauri || location.search.includes("welcome")) && !settings.welcomed && (
+        <WelcomeDialog
+          auth={auth}
+          authLines={authLines}
+          repoName={repo?.name ?? null}
+          hasKey={!!apiKey}
+          onSignIn={signIn}
+          onOpenRepo={() => openRepo()}
+          onSaveKey={(apiKey) =>
+            setSettings((s) => {
+              const next = { ...s, apiKey };
+              saveSettings(next);
+              return next;
+            })
+          }
+          onClose={() =>
+            setSettings((s) => {
+              const next = { ...s, welcomed: true };
+              saveSettings(next);
+              return next;
+            })
+          }
         />
       )}
       {approval && (

@@ -1,0 +1,76 @@
+diff --git a/cmd/orun/command_run_background.go b/cmd/orun/command_run_background.go
+index 4874969..49b2cd8 100644
+--- a/cmd/orun/command_run_background.go
++++ b/cmd/orun/command_run_background.go
+@@ -6,7 +6,6 @@ import (
+ 	"os/exec"
+ 	"path/filepath"
+ 	"strings"
+-	"syscall"
+ 
+ 	"github.com/sourceplane/orun/internal/ui"
+ )
+@@ -54,7 +53,7 @@ func startBackgroundRun(execID string, color bool) error {
+ 		"ORUN_EXEC_ID="+execID,
+ 		"ORUN_NO_COLOR=1",
+ 	)
+-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
++	detachBackground(cmd)
+ 
+ 	if err := cmd.Start(); err != nil {
+ 		logFile.Close()
+diff --git a/cmd/orun/command_run_background_unix.go b/cmd/orun/command_run_background_unix.go
+new file mode 100644
+index 0000000..5268237
+--- /dev/null
++++ b/cmd/orun/command_run_background_unix.go
+@@ -0,0 +1,13 @@
++//go:build !windows
++
++package main
++
++import (
++	"os/exec"
++	"syscall"
++)
++
++// detachBackground puts a background run in its own process group.
++func detachBackground(cmd *exec.Cmd) {
++	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
++}
+diff --git a/cmd/orun/command_run_background_windows.go b/cmd/orun/command_run_background_windows.go
+new file mode 100644
+index 0000000..f3940f0
+--- /dev/null
++++ b/cmd/orun/command_run_background_windows.go
+@@ -0,0 +1,16 @@
++//go:build windows
++
++package main
++
++import (
++	"os/exec"
++	"syscall"
++)
++
++// detachBackground starts a background run in a new process group, without
++// a console window.
++func detachBackground(cmd *exec.Cmd) {
++	const createNewProcessGroup = 0x00000200
++	const createNoWindow = 0x08000000
++	cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: createNewProcessGroup | createNoWindow}
++}
+diff --git a/internal/cliauth/backend.go b/internal/cliauth/backend.go
+index 5bc5a3c..69037a6 100644
+--- a/internal/cliauth/backend.go
++++ b/internal/cliauth/backend.go
+@@ -965,7 +965,8 @@ func OpenBrowser(target string) error {
+ 	case "darwin":
+ 		cmd = execCommand("open", target)
+ 	case "windows":
+-		cmd = execCommand("cmd", "/c", "start", target)
++		// cmd /c start would cut the URL at its first &.
++		cmd = execCommand("rundll32", "url.dll,FileProtocolHandler", target)
+ 	default:
+ 		cmd = execCommand("xdg-open", target)
+ 	}

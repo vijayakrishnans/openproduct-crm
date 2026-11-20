@@ -26,11 +26,14 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "msi"],
+    "targets": [
+      "nsis",
+      "msi"
+    ],
     "publisher": "Orun Work contributors",
     "category": "DeveloperTool",
     "shortDescription": "A desktop editor and agent for Orunbase",
-    "longDescription": "Orun Work opens an orun repository as a component graph, runs the orun CLI, connects to orun's MCP server and puts a Claude agent beside it that operates Orunbase with your approval.",
+    "longDescription": "Orun Work opens an orun repository as a component graph, runs orun (bundled, nothing else to install), connects to orun's MCP server and puts a Claude agent beside it that operates Orunbase with your approval.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -39,7 +42,12 @@
       "icons/icon.ico"
     ],
     "windows": {
-      "nsis": { "installMode": "currentUser" }
-    }
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    },
+    "externalBin": [
+      "binaries/orun"
+    ]
   }
 }

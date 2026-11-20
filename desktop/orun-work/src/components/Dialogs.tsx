@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Linkify } from "./Linkify";
 import type { Effort } from "../lib/agent";
 import type { Settings } from "../lib/settings";
 
@@ -60,6 +61,82 @@ export function ApprovalDialog({ tool, input, onAnswer }: { tool: string; input:
         <div className="foot">
           <button className="icon-btn" onClick={() => onAnswer(false)}>Decline</button>
           <button className="icon-btn primary" autoFocus onClick={() => onAnswer(true)}>Allow</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface WelcomeProps {
+  auth: "unknown" | "in" | "out" | "signing-in";
+  authLines: string[];
+  repoName: string | null;
+  hasKey: boolean;
+  onSignIn: () => void;
+  onOpenRepo: () => void;
+  onSaveKey: (key: string) => void;
+  onClose: () => void;
+}
+
+/** First run: everything the app needs, from inside the app. */
+export function WelcomeDialog({ auth, authLines, repoName, hasKey, onSignIn, onOpenRepo, onSaveKey, onClose }: WelcomeProps) {
+  const [key, setKey] = useState("");
+  const step = (done: boolean, n: number) => <span className={`step ${done ? "done" : ""}`}>{done ? "✓" : n}</span>;
+  return (
+    <div className="scrim">
+      <div className="dialog wide" role="dialog" aria-label="Welcome">
+        <h3>Welcome to Orun Work</h3>
+        <div className="body">
+          <p>orun comes with the app, so there is nothing else to install. Three steps, all optional:</p>
+
+          <div className="welcome-step">
+            {step(auth === "in", 1)}
+            <div>
+              <b>Sign in to Orunbase</b>
+              <div className="muted">Opens your browser to approve this computer. Needed for workspaces, runs, secrets and the MCP tools.</div>
+              {auth === "in" ? (
+                <div className="ok">Signed in.</div>
+              ) : (
+                <button className="icon-btn primary" disabled={auth === "signing-in"} onClick={onSignIn}>
+                  {auth === "signing-in" ? "Waiting for the browser…" : "Sign in"}
+                </button>
+              )}
+              {auth === "signing-in" && authLines.length > 0 && (
+                <pre className="block">{authLines.map((l, i) => <div key={i}><Linkify text={l} /></div>)}</pre>
+              )}
+            </div>
+          </div>
+
+          <div className="welcome-step">
+            {step(!!repoName, 2)}
+            <div>
+              <b>Open a repository</b>
+              <div className="muted">A folder with an intent.yaml, for the graph and for planning. Skip it to work with Orunbase only.</div>
+              {repoName ? <div className="ok">{repoName}</div> : <button className="icon-btn" onClick={onOpenRepo}>Open folder…</button>}
+            </div>
+          </div>
+
+          <div className="welcome-step">
+            {step(hasKey, 3)}
+            <div>
+              <b>Turn on the agent</b>
+              <div className="muted">
+                The agent runs on Claude and needs your own Anthropic API key (console.anthropic.com → API keys).
+                Everything else works without one.
+              </div>
+              {hasKey ? (
+                <div className="ok">Key saved.</div>
+              ) : (
+                <div className="row">
+                  <input type="password" placeholder="sk-ant-…" value={key} onChange={(e) => setKey(e.target.value.trim())} aria-label="Anthropic API key" />
+                  <button className="icon-btn" disabled={!key} onClick={() => onSaveKey(key)}>Save</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="foot">
+          <button className="icon-btn primary" onClick={onClose}>{auth === "in" ? "Start" : "Skip for now"}</button>
         </div>
       </div>
     </div>

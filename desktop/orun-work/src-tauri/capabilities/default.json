@@ -1,25 +1,44 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "What the editor window may do. It can start one program, orun, with any arguments; read files (never write them); open a folder picker; and make HTTPS requests to the Anthropic API.",
-  "windows": ["main"],
+  "description": "What the editor window may do. It can start one program, the orun bundled with the app, with any arguments; read files (never write them); open a folder picker; make HTTPS requests to the Anthropic API; and open links in the browser.",
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "dialog:allow-open",
     "fs:allow-read-dir",
     "fs:allow-read-text-file",
     "fs:allow-exists",
-    { "identifier": "fs:scope", "allow": [{ "path": "**" }] },
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
     "shell:allow-open",
     "shell:allow-kill",
     "shell:allow-stdin-write",
     {
       "identifier": "shell:allow-spawn",
-      "allow": [{ "name": "orun", "cmd": "orun", "args": true }]
+      "allow": [
+        {
+          "name": "binaries/orun",
+          "sidecar": true,
+          "args": true
+        }
+      ]
     },
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://api.anthropic.com/*" }]
+      "allow": [
+        {
+          "url": "https://api.anthropic.com/*"
+        }
+      ]
     }
   ]
 }

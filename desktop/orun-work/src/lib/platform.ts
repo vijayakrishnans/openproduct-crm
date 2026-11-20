@@ -20,11 +20,18 @@ export interface Proc {
   kill(): Promise<void>;
 }
 
-/** Spawn the orun binary (the only program the capability file allows). */
+/**
+ * Spawn orun. The app ships its own orun (a Tauri sidecar, bundled in the
+ * installer), so nothing has to be installed or on PATH. It is the only
+ * program the capability file allows.
+ */
 export async function spawnOrun(args: string[], opts: SpawnOptions): Promise<Proc> {
   if (!isTauri) return demo.spawnOrun(args, opts);
   const { Command } = await import("@tauri-apps/plugin-shell");
-  const command = Command.create("orun", args, opts.cwd ? { cwd: opts.cwd } : {});
+  const command = Command.sidecar("binaries/orun", args, {
+    ...(opts.cwd ? { cwd: opts.cwd } : {}),
+    env: { ORUN_NO_COLOR: "1", NO_COLOR: "1" },
+  });
   command.stdout.on("data", (line: string) => opts.onStdout(line.replace(/\r?\n$/, "")));
   command.stderr.on("data", (line: string) => opts.onStderr(line.replace(/\r?\n$/, "")));
   command.on("close", (payload: { code: number | null }) => opts.onClose(payload.code));

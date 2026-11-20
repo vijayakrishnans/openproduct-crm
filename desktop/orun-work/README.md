@@ -24,7 +24,7 @@ the way opencode works on code.
 
 ## How it talks to Orunbase
 
-Orun Work has no Orunbase client of its own. It starts `orun mcp serve` (the
+Orun Work has no Orunbase client of its own. It starts its bundled `orun mcp serve` (the
 local MCP server orun ships, newline-delimited JSON-RPC over stdio) in the
 open repository and runs `orun` commands there, so it acts as whoever is
 signed in with `orun auth login`, with that login's permissions. Turn on
@@ -40,15 +40,21 @@ says when that happens.
 
 ## Requirements
 
-- Windows 10 or 11 (WebView2 ships with both).
-- [orun](https://orun.dev/docs/start/installation/) on `PATH`, signed in
-  (`orun auth login`).
-- An Anthropic API key for the agent. Everything else works without one.
+Only the installer. It carries its own orun (v2.96.0, built for Windows by
+`scripts/build-orun.sh`, since orun publishes macOS and Linux binaries
+only), and the first-run screen signs you in to Orunbase from inside the
+app. WebView2 ships with Windows 10 and 11; if it is missing, the installer
+fetches it.
+
+The one thing the app cannot carry is a key for the agent: it runs on
+Claude with your own Anthropic API key, pasted on the first-run screen or in
+Settings. Everything else works without one.
 
 ## Develop
 
 ```bash
 npm install
+scripts/build-orun.sh "$(rustc -vV | sed -n 's/host: //p')"   # the bundled orun, for tauri dev
 npm run dev          # the editor in a browser, with demo data (no orun needed)
 npm run tauri dev    # the real desktop app
 npm test
@@ -62,13 +68,15 @@ with `node scripts/snapshot-demo.mjs <path-to-an-orun-repo>`.
 
 Push a tag `orun-work-v<version>` (matching `version` in
 `src-tauri/tauri.conf.json`), or run the *orun-work release* workflow by
-hand. It builds the NSIS `.exe` and the `.msi` on a Windows runner and
-attaches them to a draft GitHub release.
+hand. It builds orun for Windows, then the NSIS `.exe` and the `.msi` on a
+Windows runner, and attaches them to a draft GitHub release. From Linux:
+`scripts/build-orun.sh x86_64-pc-windows-gnu && npx tauri build --target
+x86_64-pc-windows-gnu --bundles nsis` (needs `nsis` and `mingw-w64`).
 
 ## Permissions
 
 `src-tauri/capabilities/default.json` is the whole list: start one program,
-`orun`, with any arguments; read files and folders (never write); a folder
+the bundled `orun`, with any arguments; read files and folders (never write); a folder
 picker; HTTPS to `api.anthropic.com`; open links in the browser.
 
 ## Screenshots
