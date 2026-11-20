@@ -1,3 +1,8 @@
+## crm-web v0.10.1 - 2026-11-20
+
+- On phones, the demo's "Want it for real?" card sits above the bottom menu
+  instead of covering it, and is shorter.
+
 ## crm-web v0.10.0 - 2026-11-20
 
 - Try the demo as your own CRM: the landing page's "Make it yours" form takes

@@ -17,7 +17,9 @@ export const ContactCard = ({ brandName }: { brandName?: string }) => {
   return (
     <aside
       aria-label="Get this CRM for your team"
-      className="fixed bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-lg border bg-card text-card-foreground shadow-lg p-4 text-sm"
+      // On phones the app has a bottom menu (3.5rem, with a + button that
+      // rises above it): the card sits clear of it, and is shorter.
+      className="fixed bottom-20 md:bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-lg border bg-card text-card-foreground shadow-lg p-3 md:p-4 text-sm"
     >
       <button
         type="button"
@@ -32,12 +34,12 @@ export const ContactCard = ({ brandName }: { brandName?: string }) => {
           ? `Want ${brandName} for real?`
           : "Want it with your own name, logo and colours?"}
       </p>
-      <p className="text-muted-foreground mb-3">
+      <p className="hidden md:block text-muted-foreground mb-3">
         {brandName
           ? "This is BrokeCRM wearing your brand, on made-up data. We can set it up for your team."
           : "BrokeCRM can wear your brand. Try it in the demo, then ask us to set it up for your team."}
       </p>
-      <p className="mb-3">
+      <p className="mb-2 md:mb-3">
         Write to{" "}
         {CONTACT_EMAILS.map((email, i) => (
           <span key={email}>
