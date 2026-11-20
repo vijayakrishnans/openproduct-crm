@@ -1,0 +1,46 @@
+# Builds the Orun Work desktop app (desktop/orun-work) for Windows and
+# attaches the installers to a GitHub release.
+#
+# Deliberately separate from ci.yml: the desktop app is not an orun component
+# (no component.yaml, outside intent.yaml's discovery roots), so `orun plan`
+# never plans it and this workflow never touches the CRM's deploys. It runs
+# only on an `orun-work-v*` tag or by hand.
+name: orun-work release
+
+on:
+  push:
+    tags: ["orun-work-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop/orun-work
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/orun-work/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/orun-work/src-tauri -> target
+      - run: npm ci
+      - run: npm test
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop/orun-work
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'orun-work-v__VERSION__' }}
+          releaseName: Orun Work v__VERSION__
+          releaseBody: Windows installers for Orun Work. Needs the orun CLI on PATH (https://orun.dev/docs/start/installation/).
+          releaseDraft: true
+          prerelease: false
