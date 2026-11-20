@@ -39,6 +39,24 @@ test.describe("landing page", () => {
     await expect(page.getByText("No analytics, advertising or tracking scripts", { exact: false })).toBeVisible();
   });
 
+  test("a visitor opens the demo with their own name and colour, and can ask for it", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Make it yours" }).first().click();
+    // an anchor on the page, not an app route: the landing page stays
+    await expect(page.getByRole("heading", { level: 2, name: "See it as your own CRM" })).toBeVisible();
+
+    await page.getByLabel("Name").fill("Acme CRM");
+    await page.getByLabel("Colour").fill("#ff6600");
+    await page.getByRole("button", { name: "Open my demo" }).click();
+
+    await expect(page).toHaveURL(/\?demo&color=%23ff6600&name=Acme%20CRM/);
+    await expect(page).toHaveTitle("Acme CRM · demo");
+    await expect(page.getByRole("heading", { level: 1, name: "Acme CRM" })).toBeVisible();
+    const card = page.getByRole("complementary", { name: "Get this CRM for your team" });
+    await expect(card.getByRole("link", { name: "vijayakrishnan.kartha@orunbase.com" })).toHaveAttribute("href", /^mailto:/);
+    await expect(card.getByRole("link", { name: "vijayakrishnan12994@gmail.com" })).toHaveAttribute("href", /^mailto:/);
+  });
+
   test("the sign-in form links to both", async ({ page }) => {
     await page.goto("/#/login");
     await expect(page.getByRole("link", { name: "terms", exact: true })).toHaveAttribute("href", "/terms.html");

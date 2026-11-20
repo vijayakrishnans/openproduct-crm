@@ -27,7 +27,10 @@ const mount = () => {
 // the app is not started: unauthenticated, it would redirect to the sign-in
 // form. It starts when the visitor follows a link into the app (#/login).
 const root = document.documentElement;
-const isRoute = () => !["", "#", "#/"].includes(window.location.hash);
+// An app route is "#/…"; "#brand", "#features" and the like are places on
+// the landing page, and following one must not start the app.
+const isRoute = () =>
+  window.location.hash.startsWith("#/") && window.location.hash !== "#/";
 const isOAuthReturn = new URLSearchParams(window.location.search).has("signin");
 if (window.location.pathname === "/oauth/authorize") {
   // An MCP client (Claude, for one) asks this person to approve access.
