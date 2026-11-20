@@ -4,10 +4,11 @@ The authoritative progress record for porting Atomic CRM onto this Lumen
 product. Read it first on every resume, then `gh pr list --state all` and
 `orun baseline new … --status`. Do not redo merged work.
 
-## Summary (2026-11-19)
+## Summary (2026-11-20)
 
 The product is live as **BrokeCRM** at https://www.brokecrm.cloud (stage:
-https://stage.brokecrm.cloud), with its API at https://api.brokecrm.cloud.
+https://stage.brokecrm.cloud), with its API at https://api.brokecrm.cloud
+and its MCP server at https://mcp.brokecrm.cloud/mcp.
 The repository, Worker names and identity record keep the name
 `openproduct-crm`.
 
@@ -18,10 +19,12 @@ handler), M5 (MCP), M6 (events, seats, the contact limit) and M7 (the smoke
 and the docs). After M7: fixes from the owner's own use, the relicensing to
 Apache-2.0, the openproduct.live listing, the custom domain, the BrokeCRM
 name with a landing page and SEO, terms and a privacy policy, and sign-in by
-email, Google and GitHub, all working on prod. See "After M7" below. Other
+email, Google and GitHub, all working on prod, and one MCP address for
+everyone (`mcp.brokecrm.cloud/mcp`). See "After M7" below. Other
 sessions added organization switching and invitations, per-organization
 branding, OAuth for the MCP server, a faster CI and a fix for deals without
-an amount (CRM-13 to CRM-18); they are listed below from their task
+an amount (CRM-13 to CRM-18), and later the listing's new address (#55)
+and a "Make it yours" demo with a Contact section (#59); they are listed below from their task
 contracts and were not verified by this ledger's author.
 
 What is not done, and why:
@@ -35,6 +38,9 @@ What is not done, and why:
   deal. It was **not reproduced** here. CRM-18 (#51) later fixed that screen
   for a deal with no amount or contacts, which may be the same cause; nobody
   has confirmed it (WAITING.md).
+- The MCP server's **OAuth sign-in from a real assistant on prod** has not
+  been walked through here; discovery, client registration and API keys
+  are checked ("After M7").
 - The openproduct.live listing (https://openproduct.live/broke-crm) is not
   indexed by search engines yet. That is on openproduct.live's side
   (WAITING.md).
@@ -94,6 +100,10 @@ Work that followed the milestones, each its own pull request into `main`.
 | Invitation emails link to sign-in | #49 | `baf1749` | The email told the reader to sign in and gave no address. It now has a button and the address, from a new `APP_URL` var on `notifications-worker`. Tests cover the link and that a missing, non-https or hostile address yields none. The deploy run on `main` concluded `success`. Not confirmed with a real email |
 | Sign-in on the API's own domain | #50 | `6a02125` | Google's consent screen showed the API's workers.dev host. `OAUTH_REDIRECT_BASE_URL` and the web app's API address are now `api.brokecrm.cloud` (stage: `api-stage.brokecrm.cloud`); they move together because the sign-in's state cookie only returns to the host that set it. Merged after the owner added the new redirect URIs in Google; the owner then changed the GitHub callbacks. The deploy run concluded `success`; each start link's `redirect_uri` is on the new host on stage and prod; **the owner signed in on prod with Google and with GitHub, 2026-11-19** |
 | GitHub sign-in shows the account picker | #53 | `63efaa2` | The owner reported being signed in by GitHub "without any verification": GitHub's default for a returning, signed-in user is to redirect straight back. The authorize URL now carries `prompt=select_account` (documented by GitHub; Google's already had it). The deploy run on `main` concluded `success`; the live start links on `api.brokecrm.cloud` and `api-stage.brokecrm.cloud` carry it, 2026-11-19. The picker itself not yet confirmed by the owner |
+| The sign-in page's left side says what BrokeCRM is; Orunbase is credited beside Atomic CRM | #56 | `4c2b82c` | The owner asked for something on the empty left panel, and for Orunbase to be named wherever Atomic CRM is. The panel has the product's line, three points, the deal board picture (dropped on short screens) and the credit; the landing page, terms and demo card name Orunbase too. The deploy run on `main` concluded `success` and the credit is on https://www.brokecrm.cloud. |
+| MCP server checked on request | (no PR) | | 2026-11-19, on stage with real API keys: 28 of 28 checks (initialize, 13 tools, create/update/search, a viewer key is read-only, another organization's key is refused). On prod only the unauthenticated discovery was checked. |
+| One MCP address for everyone: `/mcp` | #57 | `8d2775f` | The owner asked for "my own mcp like orunbases or cloudflares". `/mcp` on api-edge names no organization: an OAuth token carries the one chosen on the approval page, an API key belongs to one, and the edge rewrites to that organization's path and checks as before. A web session gets 403. identity-worker and the approval page needed no change. **Defect:** an API key's actor carries the organization's bare UUID, so keys got 404 on `/mcp` on stage and prod until #58, about 15 minutes; the test had used a made-up actor shape. |
+| `mcp.brokecrm.cloud` (stage `mcp-stage.brokecrm.cloud`) | #58 | `4de66be` | `MCP_CUSTOM_DOMAIN` in `intent.yaml` attaches a second hostname to api-edge; the profile page shows `https://mcp.brokecrm.cloud/mcp`; the fix for keys is in the same PR. After the deploy run on `main` (`success`): on stage, with a throwaway organization and key, 10 of 10 (401 with the metadata pointer, protected-resource and authorization-server metadata, client registration, initialize, 13 tools, a company created in the key's organization, a session refused); on prod, the 5 unauthenticated ones; the per-organization path re-run, 28 of 28. On 2026-11-20 a connector named Brokecrm, set up by the owner with an API key, was attached to the build session and its `dashboard` tool answered; which environment it points at was not checked. |
 
 ### From other sessions (not verified by this ledger's author)
 
@@ -108,6 +118,8 @@ checked against is in its own pull request.
 | CI: each affected suite once per pull request, merges only deploy, the browser suite in minutes | CRM-16 | #48 | `74e43cf` |
 | The MCP approval page (`/oauth/authorize`) loads on the deployed web app | CRM-17 | #47 | `549fb5b` |
 | A deal with no amount or contacts opens instead of "Something went wrong" | CRM-18 | #51 | `a10f413` |
+| The landing page's openproduct.live link uses the `broke-crm` slug | | #55 | `1e8d431` |
+| "Make it yours": the demo with your own name, colour and logo; a contact card in the demo and a Contact section on the landing page; a 512 px logo for the listing | | #59 | `21812be` |
 
 ## Live URLs
 
@@ -117,6 +129,8 @@ checked against is in its own pull request.
 | console | https://openproduct-crm-web-console-next-stage.vijayakrishnan12994.workers.dev | https://openproduct-crm-web-console-next-prod.vijayakrishnan12994.workers.dev |
 | crm-web (M0) | https://openproduct-crm-crm-web-stage.vijayakrishnan12994.workers.dev | https://openproduct-crm-crm-web-prod.vijayakrishnan12994.workers.dev |
 | BrokeCRM, the custom domain (crm-web) | https://stage.brokecrm.cloud | https://www.brokecrm.cloud |
+| API (api-edge) | https://api-stage.brokecrm.cloud | https://api.brokecrm.cloud |
+| MCP server (api-edge) | https://mcp-stage.brokecrm.cloud/mcp | https://mcp.brokecrm.cloud/mcp |
 
 ## Decisions
 
@@ -302,6 +316,16 @@ checked against is in its own pull request.
 
 - 2026-11-19: both providers are asked for their account picker on every
   sign-in (`prompt=select_account`), so a sign-in is never silent.
+
+- 2026-11-19: the MCP server has **one address for everyone**,
+  `https://mcp.brokecrm.cloud/mcp`. The credential names the organization,
+  not the URL; the per-organization paths stay. The hostname is a second
+  name for api-edge, not a new Worker, so the whole API also answers there.
+
+- 2026-11-19: a test of a route that reads the actor must use the shape
+  identity-worker really answers with. An OAuth grant carries `org_<hex>`;
+  an API key's actor carries the bare UUID. A made-up fixture hid this
+  until stage (#57, fixed in #58).
 
 - 2026-11-19: a runtime secret has to be named twice in a worker's
   `component.yaml`: in `optionalSecretEnv` (where it is looked up) and in

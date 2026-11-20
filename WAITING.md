@@ -104,6 +104,12 @@ checks for before it carries on.
 
 ## Done
 
+- **The MCP server has one address (2026-11-19):** #57, #58.
+  `https://mcp.brokecrm.cloud/mcp` (stage `mcp-stage.brokecrm.cloud`).
+  Checked with API keys on stage and without a credential on prod. Still
+  worth doing once: add it as a connector in an assistant on prod, sign in
+  with OAuth and choose the organization.
+
 - **Sign-in with Google and GitHub works (2026-11-19):** the owner created
   the OAuth apps and seeded the keys in Orunbase (#44, #45), sign-in moved
   to the API's own domain (#50), and the owner signed in on prod with each

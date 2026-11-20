@@ -28,6 +28,8 @@ departs from [design.md](design.md).
 | After M7: deploy smokes fixed after the rename (prod was blocked from #36 to #40) | done | #40 |
 | After M7: terms, privacy policy, licence statement | done as drafts; not reviewed by a lawyer | #41 |
 | After M7: environment addresses shown in Orunbase | done | #46 |
+| After M7: sign-in page's left panel; Orunbase credited beside Atomic CRM | done | #56 |
+| After M7: one MCP address, `https://mcp.brokecrm.cloud/mcp` | done; checked with API keys on stage and without a credential on prod. OAuth from a real assistant on prod not walked through | #57, #58 |
 | Other sessions: organization switching and invitations (CRM-13), per-organization branding (CRM-14), OAuth for the MCP server and the API's own domain (CRM-15), faster CI (CRM-16), the MCP approval page (CRM-17), deals without an amount (CRM-18) | merged; see their pull requests | #38, #42, #43, #48, #47, #51 |
 
 ## Departures from design.md
@@ -73,7 +75,8 @@ departs from [design.md](design.md).
   provider's webhook secret instead.
 - No notification emails yet (M4): upstream sends none besides auth mail,
   which identity-worker already owns.
-- MCP is served by crm-worker at `/crm/mcp`, not by a separate Worker (M5),
+- MCP is served by crm-worker at `/crm/mcp`, not by a separate Worker (M5;
+  since #57/#58 also reached at `mcp.brokecrm.cloud/mcp`, through api-edge),
   and has thirteen task-shaped tools rather than one per table operation.
 - Event names are `crm.`-prefixed (M6): `crm.contact.created`,
   `crm.deal.stage_changed`, `crm.deal.won`, `crm.note.created`.
