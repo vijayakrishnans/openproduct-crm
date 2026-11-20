@@ -1,3 +1,15 @@
+## crm-web v0.10.0 - 2026-11-20
+
+- Try the demo as your own CRM: the landing page's "Make it yours" form takes
+  a name, a colour and a logo, and the demo opens wearing them. Nothing is
+  uploaded. A link like `/?demo&name=Acme%20CRM&color=%23ff6600` does the
+  same, so it can be sent to someone.
+- The demo has a card for anyone who wants it for their team, with the two
+  addresses to write to. The landing page has a Contact section, and its top
+  links are now "Make it yours" and "Contact".
+- The landing page's in-page links (Make it yours, Contact) scroll to their
+  section. Following one used to start the app and show the sign-in form.
+
 ## crm-web v0.9.0 - 2026-11-19
 
 - The sign-in page's left side is no longer empty: it says what BrokeCRM is
