@@ -36,7 +36,7 @@ type Step =
  * it, then pick the organization to work in (or name a new one).
  */
 export const LumenLoginPage = () => {
-  const { darkModeLogo, title } = useConfigurationContext();
+  const { darkModeLogo, lightModeLogo, title } = useConfigurationContext();
   const login = useLogin();
   const notify = useNotify();
   const [step, setStep] = useState<Step>({ name: "email" });
@@ -141,10 +141,16 @@ export const LumenLoginPage = () => {
       <div className="relative grid w-full lg:grid-cols-2">
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
           <div className="absolute inset-0 bg-zinc-900" />
-          <div className="relative z-20 flex items-center text-lg font-medium">
-            <img className="h-6 mr-2" src={darkModeLogo} alt={title} />
+          {/* Back to the landing page: without the route in the address, a
+              visitor with no session gets the landing page (index.html). */}
+          <a
+            href="/"
+            aria-label={`${title} home`}
+            className="relative z-20 flex w-fit items-center text-lg font-medium hover:opacity-80"
+          >
+            <img className="h-6 mr-2" src={darkModeLogo} alt="" />
             {title}
-          </div>
+          </a>
           {/* What the visitor is about to get into. A heading of level 2: the
               page's own heading is the form's. */}
           <div className="relative z-20 my-auto max-w-lg py-10">
@@ -201,6 +207,14 @@ export const LumenLoginPage = () => {
         </div>
         <div className="flex flex-col justify-center w-full p-4 lg:p-8">
           <div className="w-full space-y-6 lg:mx-auto lg:w-[350px]">
+            {/* On narrow screens the left panel, and its logo, are hidden. */}
+            <a
+              href="/"
+              className="flex items-center justify-center text-lg font-medium hover:opacity-80 lg:hidden"
+            >
+              <img className="h-6 mr-2" src={lightModeLogo} alt="" />
+              {title}
+            </a>
             {step.name === "email" ? (
               <form className="space-y-6" onSubmit={submitEmail}>
                 <div className="text-center space-y-2">

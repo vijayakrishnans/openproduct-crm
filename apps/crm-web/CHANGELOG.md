@@ -1,3 +1,11 @@
+## crm-web v0.12.0 - 2026-11-21
+
+- The landing page's "See it as your own CRM" form is gone, with the demo's
+  borrowed name, colour and logo. "Try the demo" opens the plain demo; the
+  demo's contact card and the landing page's Contact section stay.
+- The logo on the sign-in page leads back to the landing page, on wide and
+  narrow screens.
+
 ## crm-web v0.11.0 - 2026-11-20
 
 Fixes from Atomic CRM upstream (up to `832b07a`, its v2.0.0):
