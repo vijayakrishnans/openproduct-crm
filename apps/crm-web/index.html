@@ -81,7 +81,7 @@
           session = window.localStorage.getItem("openproduct-crm.session");
         } catch (e) {}
         var hash = window.location.hash;
-        // An app route is "#/…"; "#brand" and the like are places on this page.
+        // An app route is "#/…"; "#features" and the like are places on this page.
         var routed = hash.indexOf("#/") === 0 && hash !== "#/";
         var app = !!session || window.location.search !== "" || routed;
         document.documentElement.setAttribute("data-mode", app ? "app" : "landing");
@@ -294,121 +294,6 @@
         text-decoration: underline;
         text-underline-offset: 3px;
       }
-      .lp-brand-box {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 22px;
-        align-items: start;
-      }
-      .lp-form {
-        display: grid;
-        gap: 14px;
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 20px;
-      }
-      .lp-form label {
-        display: grid;
-        gap: 6px;
-        font-weight: 600;
-        font-size: 15px;
-      }
-      .lp-form small {
-        font-weight: 400;
-        color: var(--muted);
-      }
-      .lp-form input[type="text"],
-      .lp-form input[type="file"] {
-        font: inherit;
-        font-weight: 400;
-        color: inherit;
-        background: var(--bg);
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 9px 11px;
-        min-width: 0;
-      }
-      .lp-form input[type="color"] {
-        width: 64px;
-        height: 40px;
-        padding: 2px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--bg);
-      }
-      .lp-form button.lp-btn {
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .lp-form-error {
-        margin: 0;
-        color: #c0392b;
-        font-size: 14.5px;
-      }
-      .lp-preview {
-        --brand: #1f6f4a;
-        --brand-ink: #ffffff;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        overflow: hidden;
-        background: #ffffff;
-        color: #17181c;
-        box-shadow: 0 18px 50px -28px rgba(0, 0, 0, 0.45);
-      }
-      .lp-preview-bar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 14px;
-        background: #f4f4f5;
-        font-size: 15px;
-        flex-wrap: wrap;
-      }
-      .lp-preview-bar svg,
-      .lp-preview-bar img {
-        width: 24px;
-        height: 24px;
-        object-fit: contain;
-      }
-      .lp-preview-bar strong {
-        margin-right: auto;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 180px;
-      }
-      .lp-preview-tabs {
-        display: flex;
-        gap: 12px;
-        font-size: 13px;
-        color: #5d6068;
-      }
-      .lp-preview-tabs .lp-on {
-        color: #17181c;
-        box-shadow: 0 2px 0 var(--brand);
-      }
-      .lp-preview-body {
-        padding: 16px 14px 20px;
-        display: grid;
-        gap: 10px;
-      }
-      .lp-preview-btn {
-        justify-self: end;
-        background: var(--brand);
-        color: var(--brand-ink);
-        border-radius: 8px;
-        padding: 6px 12px;
-        font-size: 13px;
-        font-weight: 600;
-      }
-      .lp-preview-card {
-        height: 44px;
-        border: 1px solid #e4e3dc;
-        border-left: 4px solid var(--brand);
-        border-radius: 8px;
-      }
       .lp-contact {
         list-style: none;
         padding: 0;
@@ -556,7 +441,6 @@
             </svg>
             BrokeCRM
           </a>
-          <a class="lp-link lp-hide-sm" href="#brand">Make it yours</a>
           <a class="lp-link lp-hide-sm" href="#contact">Contact</a>
           <a class="lp-link lp-hide-sm" href="https://github.com/vijayakrishnans/openproduct-crm">GitHub</a>
           <a class="lp-btn" href="#/login">Sign in</a>
@@ -572,11 +456,11 @@
             </p>
             <div class="lp-cta">
               <a class="lp-btn lp-primary" href="#/login">Start free</a>
-              <a class="lp-btn" href="#brand">Try it with your brand</a>
+              <a class="lp-btn" href="/?demo">Try the demo</a>
             </div>
             <p class="lp-fine">
               No card, no trial clock. Sign in with your email and you are in. The demo runs in your
-              browser on made-up data, with your name, logo and colours if you like.
+              browser on made-up data.
             </p>
           </section>
 
@@ -588,52 +472,6 @@
               alt="The BrokeCRM deal board: deals as cards in columns from Opportunity to Won, each with its company and amount."
             />
           </div>
-
-          <section class="lp-section" id="brand">
-            <h2>See it as your own CRM</h2>
-            <p class="lp-lede">
-              Give the demo your name, logo and colour, and it stops being BrokeCRM. Everything stays in
-              your browser: nothing you enter here is uploaded or kept.
-            </p>
-            <div class="lp-brand-box">
-              <form class="lp-form" id="brand-form" method="get" action="/">
-                <input type="hidden" name="demo" value="" />
-                <label>
-                  <span>Name</span>
-                  <input type="text" name="name" id="brand-name" maxlength="40" placeholder="Acme CRM" autocomplete="organization" />
-                </label>
-                <label>
-                  <span>Colour</span>
-                  <input type="color" name="color" id="brand-color" value="#1f6f4a" />
-                </label>
-                <label>
-                  <span>Logo <small>(optional, an image up to 512 KB)</small></span>
-                  <input type="file" id="brand-logo" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" />
-                </label>
-                <p class="lp-form-error" id="brand-error" role="alert" hidden></p>
-                <div class="lp-cta">
-                  <button type="submit" class="lp-btn lp-primary">Open my demo</button>
-                  <a class="lp-btn" href="/?demo" id="brand-plain">Plain demo</a>
-                </div>
-              </form>
-              <div class="lp-preview" aria-hidden="true">
-                <div class="lp-preview-bar">
-                  <img id="brand-preview-logo" alt="" hidden />
-                  <svg id="brand-preview-mark" viewBox="0 0 800 800" fill="none">
-                    <rect x="60" y="60" width="680" height="680" rx="160" stroke="currentColor" stroke-width="56" />
-                    <circle cx="330" cy="400" r="150" stroke="currentColor" stroke-width="56" />
-                    <circle cx="470" cy="400" r="150" stroke="currentColor" stroke-width="56" />
-                  </svg>
-                  <strong id="brand-preview-name">Acme CRM</strong>
-                  <span class="lp-preview-tabs"><span>Dashboard</span><span>Contacts</span><span class="lp-on" id="brand-preview-tab">Deals</span></span>
-                </div>
-                <div class="lp-preview-body">
-                  <span class="lp-preview-btn" id="brand-preview-btn">+ New Deal</span>
-                  <span class="lp-preview-card"></span><span class="lp-preview-card"></span>
-                </div>
-              </div>
-            </div>
-          </section>
 
           <section class="lp-section" id="features">
             <h2>What you get</h2>
@@ -712,8 +550,8 @@
           <section class="lp-section" id="contact">
             <h2>Want it for your team?</h2>
             <p class="lp-lede">
-              Liked it with your brand on it? We can set BrokeCRM up for your team with your name, logo and
-              colours. Tell us who you are and what you sell.
+              We can set BrokeCRM up for your team, with your own name, logo and colours if you like.
+              Tell us who you are and what you sell.
             </p>
             <ul class="lp-contact">
               <li><a href="mailto:vijayakrishnan.kartha@orunbase.com?subject=BrokeCRM%20for%20our%20team">vijayakrishnan.kartha@orunbase.com</a></li>
@@ -738,82 +576,6 @@
         <div class="loader">Loading...</div>
       </div>
     </div>
-    <script>
-      // "Make it yours": a live preview while typing, then the demo with the
-      // brand. Name and colour travel in the address; an uploaded logo can
-      // only travel through sessionStorage (demo/brand.ts reads both).
-      (function () {
-        var form = document.getElementById("brand-form");
-        if (!form) return;
-        var nameInput = document.getElementById("brand-name");
-        var colorInput = document.getElementById("brand-color");
-        var logoInput = document.getElementById("brand-logo");
-        var error = document.getElementById("brand-error");
-        var preview = document.querySelector(".lp-preview");
-        var previewName = document.getElementById("brand-preview-name");
-        var previewLogo = document.getElementById("brand-preview-logo");
-        var previewMark = document.getElementById("brand-preview-mark");
-        var logoData = null;
-
-        function ink(hex) {
-          var c = [1, 3, 5].map(function (i) {
-            var v = parseInt(hex.slice(i, i + 2), 16) / 255;
-            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-          });
-          return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] > 0.4 ? "#111111" : "#ffffff";
-        }
-        function update() {
-          previewName.textContent = nameInput.value.trim() || "Acme CRM";
-          preview.style.setProperty("--brand", colorInput.value);
-          preview.style.setProperty("--brand-ink", ink(colorInput.value));
-        }
-        function fail(message) {
-          error.textContent = message;
-          error.hidden = !message;
-        }
-        document.getElementById("brand-plain").addEventListener("click", function () {
-          try {
-            window.sessionStorage.removeItem("brokecrm.demo-brand");
-          } catch (e) {}
-        });
-        nameInput.addEventListener("input", update);
-        colorInput.addEventListener("input", update);
-        logoInput.addEventListener("change", function () {
-          fail("");
-          logoData = null;
-          previewLogo.hidden = true;
-          previewMark.style.display = "";
-          var file = logoInput.files && logoInput.files[0];
-          if (!file) return;
-          if (file.size > 512 * 1024) {
-            logoInput.value = "";
-            return fail("That logo is over 512 KB. Try a smaller image.");
-          }
-          var reader = new FileReader();
-          reader.onload = function () {
-            logoData = String(reader.result);
-            previewLogo.src = logoData;
-            previewLogo.hidden = false;
-            previewMark.style.display = "none";
-          };
-          reader.readAsDataURL(file);
-        });
-        form.addEventListener("submit", function (event) {
-          event.preventDefault();
-          var name = nameInput.value.trim().slice(0, 40);
-          var brand = { name: name, color: colorInput.value, logo: logoData };
-          try {
-            window.sessionStorage.setItem("brokecrm.demo-brand", JSON.stringify(brand));
-          } catch (e) {
-            if (logoData) return fail("Your browser would not keep the logo. Try a smaller image.");
-          }
-          var query = "?demo&color=" + encodeURIComponent(colorInput.value);
-          if (name) query += "&name=" + encodeURIComponent(name);
-          window.location.href = "/" + query;
-        });
-        update();
-      })();
-    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <script type="module" src="<%= mainScript %>"></script>
   </body>

@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-// The demo's way out: whoever likes what they see can ask for it with their
-// own name, logo and colours, or go back and try another brand.
+// The demo's way out: whoever likes what they see can ask for it for their
+// team.
 export const CONTACT_EMAILS = [
   "vijayakrishnan.kartha@orunbase.com",
   "vijayakrishnan12994@gmail.com",
 ];
 
-export const ContactCard = ({ brandName }: { brandName?: string }) => {
+export const ContactCard = () => {
   const [open, setOpen] = useState(true);
   if (!open) return null;
-  const subject = encodeURIComponent(
-    brandName ? `${brandName}: a CRM for our team` : "BrokeCRM for our team",
-  );
+  const subject = encodeURIComponent("BrokeCRM for our team");
   return (
     <aside
       aria-label="Get this CRM for your team"
@@ -30,16 +28,13 @@ export const ContactCard = ({ brandName }: { brandName?: string }) => {
         <X className="size-4" />
       </button>
       <p className="font-semibold mb-1 pr-6">
-        {brandName
-          ? `Want ${brandName} for real?`
-          : "Want it with your own name, logo and colours?"}
+        Want this for your team?
       </p>
       <p className="hidden md:block text-muted-foreground mb-3">
-        {brandName
-          ? "This is BrokeCRM wearing your brand, on made-up data. We can set it up for your team."
-          : "BrokeCRM can wear your brand. Try it in the demo, then ask us to set it up for your team."}
+        This is BrokeCRM on made-up data. We can set it up for your team, with
+        your own name, logo and colours if you like.
       </p>
-      <p className="mb-2 md:mb-3">
+      <p>
         Write to{" "}
         {CONTACT_EMAILS.map((email, i) => (
           <span key={email}>
@@ -54,12 +49,6 @@ export const ContactCard = ({ brandName }: { brandName?: string }) => {
         ))}
         .
       </p>
-      <a
-        href="/#brand"
-        className="inline-block rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium no-underline"
-      >
-        {brandName ? "Try another brand" : "Make it yours"}
-      </a>
     </aside>
   );
 };

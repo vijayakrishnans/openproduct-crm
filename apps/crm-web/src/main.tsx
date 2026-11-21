@@ -27,7 +27,7 @@ const mount = () => {
 // the app is not started: unauthenticated, it would redirect to the sign-in
 // form. It starts when the visitor follows a link into the app (#/login).
 const root = document.documentElement;
-// An app route is "#/…"; "#brand", "#features" and the like are places on
+// An app route is "#/…"; "#features", "#contact" and the like are places on
 // the landing page, and following one must not start the app.
 const isRoute = () =>
   window.location.hash.startsWith("#/") && window.location.hash !== "#/";
