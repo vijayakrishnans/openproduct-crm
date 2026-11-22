@@ -49,7 +49,8 @@ test.describe("landing page", () => {
     await page.goto("/?demo");
     const card = page.getByRole("complementary", { name: "Get this CRM for your team" });
     await expect(card.getByRole("link", { name: "vijayakrishnan.kartha@orunbase.com" })).toHaveAttribute("href", /^mailto:/);
-    await expect(card.getByRole("link", { name: "vijayakrishnan12994@gmail.com" })).toHaveAttribute("href", /^mailto:/);
+    await expect(card.getByRole("link", { name: "support@brokecrm.cloud" })).toHaveAttribute("href", /^mailto:/);
+    await expect(card.getByText("gmail.com")).toHaveCount(0);
   });
 
   test("the logo on the sign-in page leads back to the landing page", async ({ page }) => {
