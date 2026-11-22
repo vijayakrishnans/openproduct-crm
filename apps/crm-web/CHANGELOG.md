@@ -1,3 +1,8 @@
+## crm-web v0.12.1 - 2026-11-22
+
+- The contact addresses on the landing page and the demo's card are
+  support@brokecrm.cloud and the Orunbase address; the Gmail address is gone.
+
 ## crm-web v0.12.0 - 2026-11-21
 
 - The landing page's "See it as your own CRM" form is gone, with the demo's

@@ -4,8 +4,8 @@ import { X } from "lucide-react";
 // The demo's way out: whoever likes what they see can ask for it for their
 // team.
 export const CONTACT_EMAILS = [
+  "support@brokecrm.cloud",
   "vijayakrishnan.kartha@orunbase.com",
-  "vijayakrishnan12994@gmail.com",
 ];
 
 export const ContactCard = () => {
