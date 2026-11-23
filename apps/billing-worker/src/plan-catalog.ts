@@ -62,6 +62,10 @@ export const DEFAULT_PLAN_CODE = "free";
  * even though the D5 table proposed 2 — raising the table value, never lowering
  * the live one. Keep `free`'s values >= the PR-#209 stopgap for the same reason.
  *
+ * `free` is BrokeCRM's forever-free plan: 25 seats and 10,000 contacts per
+ * organization (CRM-19; migration 220 raised the rows already written). No
+ * plan grants fewer seats than `free`, so `pro` is 25 too.
+ *
  * `priceAmountCents` is a nominal display price only; a payment provider is the
  * source of truth once the provider adapter (billing-provider-abstraction) is
  * wired. `enterprise` is sold via "contact sales", so it has no self-serve price
@@ -80,11 +84,11 @@ export const PLAN_CATALOG: PlanDefinition[] = [
     entitlements: [
       { entitlementKey: "limit.projects", valueType: "quantity", enabled: true, limitValue: 3 },
       { entitlementKey: "limit.environments", valueType: "quantity", enabled: true, limitValue: 3 },
-      { entitlementKey: "limit.members", valueType: "quantity", enabled: true, limitValue: 5 },
+      { entitlementKey: "limit.members", valueType: "quantity", enabled: true, limitValue: 25 },
       { entitlementKey: "feature.custom_domains", valueType: "boolean", enabled: false, limitValue: null },
       { entitlementKey: "feature.multi_org", valueType: "boolean", enabled: false, limitValue: null },
       { entitlementKey: "limit.organizations", valueType: "quantity", enabled: true, limitValue: 1 },
-      { entitlementKey: "limit.crm_contacts", valueType: "quantity", enabled: true, limitValue: 500 },
+      { entitlementKey: "limit.crm_contacts", valueType: "quantity", enabled: true, limitValue: 10000 },
     ],
   },
   {
@@ -98,7 +102,7 @@ export const PLAN_CATALOG: PlanDefinition[] = [
     entitlements: [
       { entitlementKey: "limit.projects", valueType: "quantity", enabled: true, limitValue: 25 },
       { entitlementKey: "limit.environments", valueType: "quantity", enabled: true, limitValue: 3 },
-      { entitlementKey: "limit.members", valueType: "quantity", enabled: true, limitValue: 20 },
+      { entitlementKey: "limit.members", valueType: "quantity", enabled: true, limitValue: 25 },
       { entitlementKey: "feature.custom_domains", valueType: "boolean", enabled: true, limitValue: null },
       { entitlementKey: "feature.multi_org", valueType: "boolean", enabled: false, limitValue: null },
       { entitlementKey: "limit.organizations", valueType: "quantity", enabled: true, limitValue: 1 },
