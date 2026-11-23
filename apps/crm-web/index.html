@@ -31,16 +31,16 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./appIcon/180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="./appIcon/192.png" />
     <link rel="apple-touch-icon" sizes="1024x1024" href="./appIcon/1024.png" />
-    <title>BrokeCRM — the free, open-source CRM, hosted for you</title>
+    <title>BrokeCRM — the free-forever, open-source CRM, managed for you</title>
     <meta
       name="description"
-      content="BrokeCRM is a free, open-source CRM hosted for you: contacts, companies, a deal pipeline, notes with files and tasks for your whole team. No card, no trial."
+      content="BrokeCRM is a free-forever, open-source CRM managed for you: contacts, companies, a deal pipeline, notes and tasks for your whole team, and an MCP server for your AI assistant. No card, no trial."
     />
     <link rel="canonical" href="https://www.brokecrm.cloud/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BrokeCRM" />
     <meta property="og:url" content="https://www.brokecrm.cloud/" />
-    <meta property="og:title" content="BrokeCRM — the free, open-source CRM, hosted for you" />
+    <meta property="og:title" content="BrokeCRM — the free-forever, open-source CRM, managed for you" />
     <meta
       property="og:description"
       content="Contacts, companies, a deal pipeline, notes and tasks for your whole team. Free, open source, and hosted. No card, no trial."
@@ -49,7 +49,7 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="BrokeCRM — the free, open-source CRM, hosted for you" />
+    <meta name="twitter:title" content="BrokeCRM — the free-forever, open-source CRM, managed for you" />
     <meta
       name="twitter:description"
       content="Contacts, companies, a deal pipeline, notes and tasks for your whole team. Free, open source, and hosted."
@@ -122,23 +122,23 @@
                 "name": "Is BrokeCRM really free?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. There is nothing to buy and no card to enter. The free plan holds 500 contacts per organization today."
+                  "text": "Yes. There is nothing to buy and no card to enter. The free plan holds 10,000 contacts and 25 seats per organization, and an invitation counts as a seat until it is accepted."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who hosts BrokeCRM?",
+                "name": "What keeps BrokeCRM free?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "We do, on Cloudflare, deployed with Orunbase. You sign in and use it; there is nothing to install."
+                  "text": "We run it on Cloudflare, where a product this size is cheap to keep up, and donations cover the rest. If we ever stopped hosting, the code is yours to run."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Can I run my own copy of BrokeCRM?",
+                "name": "How do I host BrokeCRM on my own Cloudflare?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. The whole product is in one public repository under the Apache 2.0 licence, with the steps to deploy it."
+                  "text": "Fork the public repository, create a workspace on Orunbase and connect your GitHub fork, your Cloudflare account and your Supabase organization to it, point intent.yaml at your workspace and your workers.dev subdomain, and merge to main. The pipeline creates the databases in your Supabase and deploys the workers to your Cloudflare, stage first, then production."
                 }
               },
               {
@@ -207,6 +207,10 @@
         --line: #e4e3dc;
         --accent: #1f6f4a;
         --accent-ink: #ffffff;
+        --tint: #eaf2ec;
+        --ph: #c2451f;
+        --serif: "Iowan Old Style", "Palatino Linotype", Palatino, ui-serif, Georgia, serif;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         background: var(--bg);
         color: var(--ink);
         font-family:
@@ -224,26 +228,103 @@
           --line: #2c2e33;
           --accent: #5fd39b;
           --accent-ink: #0c1f15;
+          --tint: #16241c;
+          --ph: #ff7a52;
         }
       }
       #landing * {
         box-sizing: border-box;
       }
+      #landing h1,
+      #landing h2,
+      #landing h3,
+      #landing p,
+      #landing ul,
+      #landing ol,
+      #landing dl,
+      #landing dd {
+        margin: 0;
+      }
+      #landing h1,
+      #landing h2 {
+        text-wrap: balance;
+      }
       #landing a {
         color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
       }
-      .lp-wrap {
+      #landing a:focus-visible,
+      #landing button:focus-visible,
+      #landing summary:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      #landing code {
+        font-family: var(--mono);
+      }
+      #landing .lp-wrap {
         max-width: 1080px;
         margin: 0 auto;
-        padding: 0 20px;
+        padding: 0 24px;
       }
-      .lp-nav {
+
+      /* Product Hunt launch strip */
+      #landing .lp-ph {
+        background: var(--tint);
+        border-bottom: 1px solid var(--line);
+        font-size: 15px;
+      }
+      #landing .lp-ph[hidden] {
+        display: none;
+      }
+      #landing .lp-ph .lp-wrap {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 12px;
+        padding-top: 9px;
+        padding-bottom: 9px;
+      }
+      #landing .lp-ph-mark {
+        flex: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--ph);
+        color: #fff;
+        font-weight: 700;
+        font-size: 13px;
+        display: grid;
+        place-items: center;
+      }
+      #landing .lp-ph p {
+        min-width: 0;
+        margin-right: auto;
+      }
+      #landing .lp-ph a {
+        font-weight: 600;
+      }
+      #landing .lp-ph button {
+        flex: none;
+        border: 0;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 20px;
+        line-height: 1;
+        padding: 4px 6px;
+        cursor: pointer;
+      }
+
+      /* Nav, buttons */
+      #landing .lp-nav {
+        display: flex;
+        align-items: center;
+        gap: 22px;
         padding: 18px 0;
       }
-      .lp-brand {
+      #landing .lp-brand {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -253,19 +334,27 @@
         text-decoration: none;
         margin-right: auto;
       }
-      .lp-brand svg {
+      #landing .lp-brand svg {
         width: 28px;
         height: 28px;
       }
-      .lp-nav a.lp-link {
+      #landing .lp-link {
         text-decoration: none;
         color: var(--muted);
         font-size: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
       }
-      .lp-nav a.lp-link:hover {
+      #landing .lp-link:hover {
         color: var(--ink);
       }
-      .lp-btn {
+      #landing .lp-link svg {
+        width: 17px;
+        height: 17px;
+        fill: currentColor;
+      }
+      #landing .lp-btn {
         display: inline-block;
         padding: 11px 18px;
         border-radius: 10px;
@@ -275,135 +364,568 @@
         font-weight: 600;
         font-size: 16px;
       }
-      .lp-btn.lp-primary {
+      #landing .lp-btn.lp-primary {
         background: var(--accent);
         border-color: var(--accent);
-        color: var(--accent-ink) !important;
+        color: var(--accent-ink);
       }
-      .lp-btn:focus-visible,
-      #landing a:focus-visible {
-        outline: 3px solid var(--accent);
-        outline-offset: 2px;
+      #landing .lp-btn.lp-small {
+        padding: 8px 14px;
+        font-size: 15px;
       }
-      .lp-hero {
-        padding: 56px 0 28px;
-        max-width: 760px;
-      }
-      .lp-tag {
-        display: inline-block;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--accent);
-        margin-bottom: 14px;
-      }
-      .lp-hero h1 {
-        font-size: clamp(36px, 6vw, 60px);
-        line-height: 1.05;
-        letter-spacing: -0.03em;
-        margin: 0 0 18px;
-      }
-      .lp-hero p {
-        font-size: clamp(18px, 2.2vw, 21px);
-        color: var(--muted);
-        margin: 0 0 26px;
-        max-width: 640px;
-      }
-      .lp-cta {
+      #landing .lp-cta {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
         align-items: center;
       }
-      .lp-hero p.lp-fine {
+      #landing .lp-tag {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      #landing .lp-fine {
         font-size: 14.5px;
         color: var(--muted);
-        margin: 16px 0 0;
       }
-      .lp-shot {
-        margin: 28px 0 8px;
+
+      /* Hero */
+      #landing .lp-hero {
+        padding: 52px 0 30px;
+        max-width: 720px;
+        display: grid;
+        gap: 20px;
+      }
+      #landing .lp-hero h1 {
+        font-weight: 700;
+        font-size: clamp(36px, 6vw, 60px);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+      #landing .lp-lede {
+        font-size: clamp(18px, 2.2vw, 21px);
+        color: var(--muted);
+        max-width: 600px;
+      }
+      #landing .lp-lede a {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      #landing .lp-limits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 36px;
+        margin-top: 6px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      #landing .lp-limits dt {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+      }
+      #landing .lp-limits dd {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      #landing .lp-shot {
+        margin-top: 14px;
         border: 1px solid var(--line);
         border-radius: 14px;
         overflow: hidden;
         background: var(--panel);
         box-shadow: 0 18px 50px -28px rgba(0, 0, 0, 0.45);
       }
-      .lp-shot img {
+      #landing .lp-shot img {
         display: block;
         width: 100%;
         height: auto;
       }
-      .lp-section {
-        padding: 44px 0;
-        border-top: 1px solid var(--line);
+
+      #landing .lp-section {
+        padding: 56px 0;
       }
-      .lp-section h2 {
+      #landing .lp-section h2 {
         font-size: clamp(24px, 3.4vw, 32px);
+        font-weight: 700;
         letter-spacing: -0.02em;
         line-height: 1.15;
-        margin: 0 0 8px;
       }
-      .lp-section > p.lp-lede {
+      #landing .lp-sec-lede {
         color: var(--muted);
-        margin: 0 0 26px;
-        max-width: 640px;
+        max-width: 620px;
+        margin-top: 8px;
       }
-      .lp-grid {
+
+      /* MCP: the assistant at work */
+      #landing .lp-mcp {
+        padding-bottom: 0;
+      }
+      #landing .lp-mcp-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px 48px;
+        align-items: start;
+      }
+      @media (min-width: 820px) {
+        #landing .lp-mcp-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      #landing .lp-mcp-copy {
+        display: grid;
+        gap: 16px;
+        min-width: 0;
+      }
+      #landing .lp-mcp-copy > p {
+        color: var(--muted);
+      }
+      #landing .lp-url {
+        display: flex;
+        align-items: stretch;
+        border: 1px solid var(--accent);
+        border-radius: 10px;
+        background: var(--panel);
+        overflow: hidden;
+      }
+      #landing .lp-url code {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        padding: 12px 14px;
+        font-size: 13.5px;
+        line-height: 1.45;
+      }
+      #landing .lp-url button {
+        flex: none;
+        border: 0;
+        border-left: 1px solid var(--line);
+        background: var(--tint);
+        color: var(--ink);
+        font: inherit;
+        font-size: 14.5px;
+        font-weight: 600;
+        padding: 0 16px;
+        cursor: pointer;
+      }
+      #landing .lp-chatwrap {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+      #landing .lp-chat {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+        min-width: 0;
+        font-size: 15px;
+        box-shadow: 0 18px 50px -34px rgba(0, 0, 0, 0.45);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #landing .lp-chat-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      #landing .lp-chat-head b {
+        margin-right: auto;
+      }
+      #landing .lp-chat-head span {
+        color: var(--muted);
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #landing .lp-chat-head span::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      #landing .lp-chat-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 14px 20px 0;
+      }
+      #landing .lp-chat-tabs:empty {
+        display: none;
+      }
+      #landing .lp-chat-tabs button {
+        border: 1px solid var(--line);
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+      #landing .lp-chat-tabs button[aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--ink);
+        background: var(--tint);
+      }
+      #landing .lp-chat-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 330px;
+      }
+      #landing .lp-msg-user {
+        align-self: flex-end;
+        max-width: 88%;
+        background: var(--tint);
+        border-radius: 14px 14px 4px 14px;
+        padding: 9px 13px;
+      }
+      #landing .lp-calls {
+        display: grid;
+        gap: 5px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        padding-left: 2px;
+      }
+      #landing .lp-call {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        min-width: 0;
+      }
+      #landing .lp-call i {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        align-self: center;
+        display: grid;
+        place-items: center;
+        color: var(--accent);
+        font-style: normal;
+        font-size: 11px;
+        line-height: 1;
+      }
+      #landing .lp-call i::before {
+        content: "";
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: 1.5px solid var(--line);
+        border-top-color: var(--accent);
+        animation: lp-spin 0.7s linear infinite;
+      }
+      #landing .lp-call.lp-done i::before {
+        content: "✓";
+        width: auto;
+        height: auto;
+        border: 0;
+        animation: none;
+      }
+      #landing .lp-call b {
+        flex: none;
+        font-weight: 600;
+      }
+      #landing .lp-call span {
+        color: var(--muted);
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      #landing .lp-msg-bot {
+        max-width: 92%;
+        min-height: 1.5em;
+      }
+      #landing .lp-in {
+        animation: lp-rise 0.35s ease both;
+      }
+      @keyframes lp-rise {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+      }
+      @keyframes lp-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #landing .lp-chat-input {
+        margin: 0 20px 16px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      #landing .lp-clients {
+        list-style: none;
+        padding: 12px 20px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+        font-size: 13px;
+      }
+      #landing .lp-clients li {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+      }
+      #landing .lp-clients .lp-lead {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      #landing .lp-clients i {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        display: grid;
+        place-items: center;
+        font-style: normal;
+        font-size: 11px;
+        line-height: 1;
+        font-family: var(--mono);
+        background: var(--ink);
+        color: var(--bg);
+      }
+      #landing .lp-clients i.lp-g1 {
+        background: var(--ph);
+        color: #fff;
+        font-size: 13px;
+      }
+
+      /* The commitment */
+      #landing .lp-pledge {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: clamp(24px, 5vw, 48px);
+        box-shadow:
+          0 1px 0 var(--line),
+          0 24px 60px -40px rgba(0, 0, 0, 0.4);
+      }
+      #landing .lp-pledge-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 16px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--ink);
+      }
+      #landing .lp-pledge-head h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: clamp(28px, 4.4vw, 40px);
+        margin-right: auto;
+      }
+      #landing .lp-pledge-head span {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--muted);
+      }
+      #landing .lp-clauses {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        column-gap: 44px;
+      }
+      #landing .lp-clauses li {
+        padding: 22px 0;
+        border-bottom: 1px solid var(--line);
+        min-width: 0;
+      }
+      #landing .lp-clauses h3 {
+        font-family: var(--serif);
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.25;
+        margin-bottom: 6px;
+      }
+      #landing .lp-clauses p {
+        color: var(--muted);
+        font-size: 16px;
+      }
+      #landing .lp-pledge-foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 20px;
+        padding-top: 22px;
+        font-size: 14.5px;
+        color: var(--muted);
+      }
+      #landing .lp-sig {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 20px;
+        color: var(--ink);
+        margin-right: auto;
+      }
+      #landing .lp-pledge-foot code {
+        font-size: 13px;
+      }
+
+      /* Support */
+      #landing .lp-support {
+        background: var(--tint);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      #landing .lp-support .lp-wrap {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 32px 56px;
+        align-items: start;
+      }
+      #landing .lp-support h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: clamp(28px, 4vw, 38px);
+      }
+      #landing .lp-support-body {
+        display: grid;
+        gap: 18px;
+        min-width: 0;
+      }
+      #landing .lp-support-body p {
+        color: var(--muted);
+      }
+      #landing .lp-ways {
+        list-style: none;
+        padding: 0;
+        min-width: 0;
+      }
+      #landing .lp-ways li {
+        border-top: 1px solid var(--line);
+      }
+      #landing .lp-ways li:last-child {
+        border-bottom: 1px solid var(--line);
+      }
+      #landing .lp-ways a {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        padding: 14px 0;
+        text-decoration: none;
+      }
+      #landing .lp-ways b {
+        flex: none;
+        width: 96px;
+        font-size: 15.5px;
+      }
+      #landing .lp-ways span {
+        color: var(--muted);
+        font-size: 15.5px;
+        min-width: 0;
+        margin-right: auto;
+      }
+      #landing .lp-ways i {
+        font-style: normal;
+        color: var(--accent);
+      }
+
+      /* Open */
+      #landing .lp-open {
+        list-style: none;
+        padding: 0;
+        margin-top: 28px;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 14px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
       }
-      .lp-grid li {
-        background: var(--panel);
+      #landing .lp-open a {
+        display: grid;
+        gap: 4px;
+        height: 100%;
+        padding: 18px;
         border: 1px solid var(--line);
         border-radius: 12px;
-        padding: 18px;
+        background: var(--panel);
+        text-decoration: none;
+        min-width: 0;
       }
-      .lp-grid h3 {
+      #landing .lp-open a:hover {
+        border-color: var(--accent);
+      }
+      #landing .lp-open b {
         font-size: 17px;
-        margin: 0 0 6px;
       }
-      .lp-grid p {
-        margin: 0;
+      #landing .lp-open span {
         color: var(--muted);
-        font-size: 15.5px;
+        font-size: 15px;
       }
-      .lp-faq dt {
-        font-weight: 600;
-        margin-top: 18px;
+      #landing .lp-open code {
+        font-size: 12.5px;
+        color: var(--accent);
+        overflow-wrap: anywhere;
+        margin-top: 6px;
       }
-      .lp-faq dd {
-        margin: 4px 0 0;
-        color: var(--muted);
+
+      /* Questions, contact, footer */
+      #landing .lp-faq {
+        margin-top: 20px;
         max-width: 720px;
       }
-      .lp-credits a,
-      .lp-lede a,
-      .lp-grid p a,
-      .lp-faq a {
-        text-decoration: underline;
-        text-underline-offset: 3px;
+      #landing .lp-faq details {
+        border-bottom: 1px solid var(--line);
       }
-      .lp-contact {
+      #landing .lp-faq summary {
+        cursor: pointer;
+        font-weight: 600;
+        padding: 16px 0;
+      }
+      #landing .lp-faq details p {
+        color: var(--muted);
+        padding-bottom: 18px;
+      }
+      #landing .lp-faq ol {
+        list-style: decimal;
+        margin-bottom: 14px;
+        padding-left: 22px;
+        color: var(--muted);
+        display: grid;
+        gap: 8px;
+      }
+      #landing .lp-faq p + ol {
+        margin-top: -6px;
+      }
+      #landing .lp-faq ol b {
+        color: var(--ink);
+      }
+      #landing .lp-faq code {
+        font-size: 0.88em;
+      }
+      #landing .lp-rule {
+        border-top: 1px solid var(--line);
+      }
+      #landing .lp-contact {
         list-style: none;
         padding: 0;
-        margin: 0;
+        margin-top: 20px;
         display: flex;
         flex-wrap: wrap;
         gap: 10px 24px;
         font-size: 18px;
         font-weight: 600;
       }
-      .lp-contact a {
-        text-decoration: underline;
-        text-underline-offset: 3px;
+      #landing .lp-contact a {
         word-break: break-all;
       }
-      .lp-foot {
+      #landing .lp-foot {
         border-top: 1px solid var(--line);
         padding: 26px 0 40px;
         color: var(--muted);
@@ -412,15 +934,33 @@
         flex-wrap: wrap;
         gap: 8px 22px;
       }
-      .lp-foot span {
+      #landing .lp-foot span {
         margin-right: auto;
       }
-      @media (max-width: 560px) {
-        .lp-nav a.lp-link.lp-hide-sm {
+      @media (max-width: 760px) {
+        #landing .lp-nav {
+          gap: 14px;
+        }
+        #landing .lp-hide-sm {
           display: none;
         }
-        .lp-hero {
+        #landing .lp-hero {
           padding-top: 30px;
+        }
+        #landing .lp-section {
+          padding: 40px 0;
+        }
+        #landing .lp-mcp {
+          padding-bottom: 0;
+        }
+        #landing .lp-chat-body {
+          min-height: 400px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #landing .lp-in,
+        #landing .lp-call i::before {
+          animation: none;
         }
       }
 
@@ -525,6 +1065,17 @@
   </head>
   <body>
     <div id="landing">
+      <div class="lp-ph" id="lp-ph">
+        <div class="lp-wrap">
+          <span class="lp-ph-mark" aria-hidden="true">P</span>
+          <p>
+            BrokeCRM is launching on Product Hunt today.
+            <a href="https://www.producthunt.com/">Come say hello and tell us what you think&nbsp;→</a>
+          </p>
+          <button type="button" id="lp-ph-close" aria-label="Hide this announcement">×</button>
+        </div>
+      </div>
+
       <div class="lp-wrap">
         <header class="lp-nav">
           <a class="lp-brand" href="/" aria-label="BrokeCRM home">
@@ -535,27 +1086,43 @@
             </svg>
             BrokeCRM
           </a>
+          <a class="lp-link" href="https://github.com/vijayakrishnans/openproduct-crm">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
+          <a class="lp-link lp-hide-sm" href="#mcp">MCP</a>
+          <a class="lp-link lp-hide-sm" href="https://openproduct.live/broke-crm">openproduct</a>
+          <a class="lp-link lp-hide-sm" href="#support">Donate</a>
           <a class="lp-link lp-hide-sm" href="#contact">Contact</a>
-          <a class="lp-link lp-hide-sm" href="https://github.com/vijayakrishnans/openproduct-crm">GitHub</a>
-          <a class="lp-btn" href="#/login">Sign in</a>
+          <a class="lp-btn lp-small" href="#/login">Sign in</a>
         </header>
+      </div>
 
-        <main>
+      <main>
+        <div class="lp-wrap">
           <section class="lp-hero">
-            <span class="lp-tag">Free · Open source · Hosted</span>
+            <span class="lp-tag">Agentic CRM · Free forever · An <a href="https://openproduct.live/broke-crm">openproduct</a></span>
             <h1>The CRM for teams with no CRM budget.</h1>
-            <p>
-              BrokeCRM keeps your contacts, companies, deals, notes and tasks in one place, for your
-              whole team. It is free, the code is open, and we host it for you.
+            <p class="lp-lede">
+              A modern, agentic CRM: your team works in the app, and your AI assistant works beside
+              them over <a href="#mcp">MCP</a>. Free forever and managed by us.
+            </p>
+            <p class="lp-lede">
+              BrokeCRM is an <a href="https://openproduct.live/broke-crm">openproduct</a>: the code,
+              the roadmap, the tasks and every deploy are open for anyone to see.
             </p>
             <div class="lp-cta">
-              <a class="lp-btn lp-primary" href="#/login">Start free</a>
+              <a class="lp-btn lp-primary" href="#/login">Free forever</a>
               <a class="lp-btn" href="/?demo">Try the demo</a>
             </div>
             <p class="lp-fine">
-              No card, no trial clock. Sign in with your email and you are in. The demo runs in your
-              browser on made-up data.
+              Sign in with Google, GitHub or your email. The demo runs in your browser on made-up data.
             </p>
+            <dl class="lp-limits" aria-label="What the free plan includes">
+              <div><dt>10,000</dt><dd>contacts per organization</dd></div>
+              <div><dt>25</dt><dd>seats per organization</dd></div>
+              <div><dt>$0</dt><dd>forever, no card</dd></div>
+            </dl>
           </section>
 
           <div class="lp-shot">
@@ -566,89 +1133,215 @@
               alt="The BrokeCRM deal board: deals as cards in columns from Opportunity to Won, each with its company and amount."
             />
           </div>
+        </div>
 
-          <section class="lp-section" id="features">
-            <h2>What you get</h2>
-            <p class="lp-lede">The parts of a CRM a small team uses every day, and nothing to configure first.</p>
-            <ul class="lp-grid">
+        <section class="lp-section lp-mcp" id="mcp">
+          <div class="lp-wrap lp-mcp-grid">
+            <div class="lp-mcp-copy">
+              <span class="lp-tag">Built for AI agents</span>
+              <h2>Your assistant can run the CRM, not only read it.</h2>
+              <p>
+                Add one address to Claude or any MCP client, sign in and choose your organization.
+                Your assistant can then search, log notes, open deals and set follow-ups.
+              </p>
+              <div class="lp-url">
+                <code id="lp-mcp-url">https://mcp.brokecrm.cloud/mcp</code>
+                <button type="button" id="lp-mcp-copy">Copy</button>
+              </div>
+              <p class="lp-fine">
+                Thirteen typed tools, read-only or read and write. No free-form SQL, and no tool can
+                delete. <a href="/crm-for-ai-agents.html">How to connect an assistant</a>.
+              </p>
+            </div>
+            <div class="lp-chatwrap">
+              <div class="lp-chat">
+                <div class="lp-chat-head"><b>Your assistant</b><span>BrokeCRM connected</span></div>
+                <div class="lp-chat-tabs" id="lp-chat-tabs" aria-label="Example conversations"></div>
+                <div class="lp-chat-body" id="lp-chat-body">
+                  <div class="lp-msg-user">I just met Priya from Northwind. Add her, open a deal for the pilot, and remind me on Friday.</div>
+                  <div class="lp-calls">
+                    <div class="lp-call lp-done"><i></i><b>search</b><span>"Northwind"</span></div>
+                    <div class="lp-call lp-done"><i></i><b>create_contact</b><span>Priya Raman</span></div>
+                    <div class="lp-call lp-done"><i></i><b>create_deal</b><span>Northwind pilot</span></div>
+                    <div class="lp-call lp-done"><i></i><b>create_task</b><span>Follow up · Friday</span></div>
+                  </div>
+                  <div class="lp-msg-bot">Done. Priya is saved under Northwind, the pilot deal is in Opportunity, and your follow-up is due Friday.</div>
+                </div>
+                <div class="lp-chat-input" aria-hidden="true">Ask about your CRM…</div>
+                <ul class="lp-clients" aria-label="Assistants that can connect">
+                  <li class="lp-lead">Works with</li>
+                  <li><i class="lp-g1" aria-hidden="true">✳</i>Claude</li>
+                  <li><i aria-hidden="true">&gt;_</i>Codex</li>
+                  <li><i aria-hidden="true">➤</i>Cursor</li>
+                  <li class="lp-lead">and any MCP client</li>
+                </ul>
+              </div>
+              <p class="lp-fine">Example conversations on made-up data. The tool calls are the real ones.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="lp-section" id="commitment">
+          <div class="lp-wrap">
+            <div class="lp-pledge">
+              <div class="lp-pledge-head">
+                <h2>Our commitment</h2>
+                <span>Made 23 November 2026</span>
+              </div>
+              <ul class="lp-clauses">
+                <li>
+                  <h3>The CRM we manage is free, forever.</h3>
+                  <p>No trial and no card. Nothing you use today moves behind a price later.</p>
+                </li>
+                <li>
+                  <h3>Your data is yours.</h3>
+                  <p>Export it at any time. We do not sell data, show ads or run tracking scripts.</p>
+                </li>
+                <li>
+                  <h3>The code stays open.</h3>
+                  <p>Apache-2.0, all of it. If we ever stopped hosting, you could run the same product yourself.</p>
+                </li>
+                <li>
+                  <h3>Everything about it is open.</h3>
+                  <p>
+                    Every task, pull request and deploy is public in the
+                    <a href="https://openproduct.live/broke-crm/workspace">workspace</a>.
+                  </p>
+                </li>
+              </ul>
+              <div class="lp-pledge-foot">
+                <span class="lp-sig">The BrokeCRM crew</span>
+                <span>
+                  Kept in the repository as
+                  <a href="https://github.com/vijayakrishnans/openproduct-crm/blob/main/COMMITMENT.md"><code>COMMITMENT.md</code></a>.
+                  Changing a word takes a public pull request.
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lp-section lp-support" id="support">
+          <div class="lp-wrap">
+            <div class="lp-support-body">
+              <h2>Free for you. Kept going by people who chip in.</h2>
+              <p>
+                Nobody has to pay, and paying unlocks nothing. Your contribution is what keeps us
+                improving the platform: it covers hosting first, then the time to build what you ask for.
+              </p>
+              <div class="lp-cta">
+                <a class="lp-btn lp-primary" href="https://www.patreon.com/c/Atomicflee">Support us on Patreon</a>
+              </div>
+            </div>
+            <ul class="lp-ways">
+              <li><a href="https://github.com/vijayakrishnans/openproduct-crm"><b>Star it</b><span>Helps other broke teams find us.</span><i aria-hidden="true">→</i></a></li>
+              <li><a href="https://github.com/vijayakrishnans/openproduct-crm/issues"><b>Report it</b><span>A bug or a missing feature, as an issue.</span><i aria-hidden="true">→</i></a></li>
+              <li><a href="https://openproduct.live/broke-crm/workspace"><b>Build it</b><span>Pick up an open task from the workspace.</span><i aria-hidden="true">→</i></a></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="lp-section" id="open">
+          <div class="lp-wrap">
+            <h2>An openproduct: everything about it is open</h2>
+            <p class="lp-sec-lede">
+              <a href="/open-source-crm.html">Open source</a> shows you the code. An openproduct shows
+              you the rest too: what we plan, what we are working on, and what shipped. Three places to look.
+            </p>
+            <ul class="lp-open">
               <li>
-                <h3>A deal pipeline</h3>
-                <p>Drag deals from stage to stage on a board. Rename the stages to match how you sell.</p>
+                <a href="https://github.com/vijayakrishnans/openproduct-crm">
+                  <b>The code</b><span>The app, the API and everything that runs them.</span>
+                  <code>github.com/vijayakrishnans/openproduct-crm</code>
+                </a>
               </li>
               <li>
-                <h3>Contacts and companies</h3>
-                <p>Everyone you talk to, who they work for, and every note and deal attached to them.</p>
+                <a href="https://openproduct.live/broke-crm">
+                  <b>The listing</b><span>Updates, releases and the crew, on openproduct.</span>
+                  <code>openproduct.live/broke-crm</code>
+                </a>
               </li>
               <li>
-                <h3>Notes with files</h3>
-                <p>Write down what was said and attach the proposal. It stays with the contact or the deal.</p>
-              </li>
-              <li>
-                <h3>Tasks</h3>
-                <p>Follow-ups with a due date, so the next call does not depend on anyone's memory.</p>
-              </li>
-              <li>
-                <h3>Your whole team</h3>
-                <p>Invite colleagues to your organization. Each organization's data is kept apart from every other.</p>
-              </li>
-              <li>
-                <h3>Import, export, search</h3>
-                <p>Bring contacts in from a CSV, take everything out again, and find anything from one search box.</p>
-              </li>
-              <li>
-                <h3>Ready for AI agents</h3>
-                <p>An MCP server lets your AI assistant read and update the CRM as you. <a href="/crm-for-ai-agents.html">How it works</a>.</p>
-              </li>
-              <li>
-                <h3>An API and webhooks</h3>
-                <p>Everything the app does goes through a public API, and changes can notify your other tools.</p>
+                <a href="https://openproduct.live/broke-crm/workspace">
+                  <b>The workspace</b><span>Tasks, pull requests and deploys as they happen.</span>
+                  <code>openproduct.live/broke-crm/workspace</code>
+                </a>
               </li>
             </ul>
-          </section>
+          </div>
+        </section>
 
-          <section class="lp-section" id="open">
-            <h2>Free, and open all the way down</h2>
-            <p class="lp-lede">
-              All of BrokeCRM is <a href="/open-source-crm.html">open source under the Apache 2.0 licence</a>: the app, the API and
-              everything that runs them. Use the <a href="/free-crm.html">free hosted version</a> here, or read the code and run your own.
-            </p>
-            <dl class="lp-faq">
-              <dt>Is it really free?</dt>
-              <dd>
-                Yes. There is nothing to buy and no card to enter. The free plan holds 500 contacts per
-                organization today.
-              </dd>
-              <dt>Who hosts it?</dt>
-              <dd>
-                We do, on Cloudflare, deployed with <a href="https://orunbase.com">Orunbase</a>. You sign in and use it; there is nothing to install.
-              </dd>
-              <dt>Can I run my own copy?</dt>
-              <dd>
-                Yes. The whole product is in <a href="https://github.com/vijayakrishnans/openproduct-crm">one public repository</a>, with the
-                steps to deploy it.
-              </dd>
-              <dt>Can an AI assistant use it?</dt>
-              <dd>
-                Yes. BrokeCRM has an MCP server, so Claude and other assistants can read and update your
-                CRM as you. <a href="/crm-for-ai-agents.html">See how to connect one</a>.
-              </dd>
-              <dt>Where does it come from?</dt>
-              <dd class="lp-credits">
-                The app is built on <a href="https://github.com/marmelab/atomic-crm">Atomic CRM</a> by Marmelab,
-                an open-source CRM under the MIT licence. BrokeCRM adds accounts for teams, hosting, an API and
-                the MCP server, and is built and deployed with <a href="https://orunbase.com">Orunbase</a>. It
-                is a separate product, not Atomic CRM and not a Marmelab product. It is listed as an open
-                build on <a href="https://openproduct.live/broke-crm">openproduct</a>.
-              </dd>
-            </dl>
-            <div class="lp-cta" style="margin-top: 28px">
-              <a class="lp-btn lp-primary" href="#/login">Start free</a>
+        <section class="lp-section" id="faq" style="padding-top: 0">
+          <div class="lp-wrap">
+            <h2>Fair questions</h2>
+            <div class="lp-faq">
+              <details>
+                <summary>Is it really free?</summary>
+                <p>
+                  Yes. There is nothing to buy and no card to enter. The
+                  <a href="/free-crm.html">free plan</a> holds 10,000 contacts and 25 seats per
+                  organization, and an invitation counts as a seat until it is accepted. Those limits
+                  keep hosting costs sane.
+                </p>
+              </details>
+              <details>
+                <summary>What keeps it free?</summary>
+                <p>
+                  We run it on Cloudflare, where a product this size is cheap to keep up, and
+                  <a href="#support">donations</a> cover the rest. If we ever stopped hosting, the
+                  code is yours to run.
+                </p>
+              </details>
+              <details>
+                <summary>How do I host it on my own Cloudflare?</summary>
+                <p>
+                  You run the same product we run, on accounts you own. You need a Cloudflare account,
+                  a Supabase organization and a workspace on <a href="https://orunbase.com">Orunbase</a>,
+                  which does the deploying.
+                </p>
+                <ol>
+                  <li><b>Fork the repository.</b> Everything is in <a href="https://github.com/vijayakrishnans/openproduct-crm">one public repository</a>: the app, the API, the database migrations and the infrastructure.</li>
+                  <li><b>Create a workspace on Orunbase</b> and connect three things to it: your GitHub fork, your Cloudflare account and your Supabase organization.</li>
+                  <li><b>Point the fork at your workspace.</b> Edit <code>intent.yaml</code> to name your workspace and your Cloudflare <code>workers.dev</code> subdomain.</li>
+                  <li><b>Merge to <code>main</code>.</b> The pipeline creates the Postgres databases in your Supabase, deploys the workers to your Cloudflare, and brings up stage first, then production.</li>
+                </ol>
+                <p>
+                  No Cloudflare or Supabase key is stored in the repository or in GitHub: each run gets
+                  a short-lived credential from your connections. Your copy answers on
+                  <code>workers.dev</code> from the first deploy, and you can add your own domain later. The
+                  <a href="https://github.com/vijayakrishnans/openproduct-crm/blob/main/ai/context/operations.md">runbook</a>
+                  has every step.
+                </p>
+              </details>
+              <details>
+                <summary>Can an AI assistant use it?</summary>
+                <p>
+                  Yes. BrokeCRM has an MCP server at <code>https://mcp.brokecrm.cloud/mcp</code>, so
+                  Claude and other assistants can read and update your CRM as you.
+                  <a href="/crm-for-ai-agents.html">See how to connect one</a>.
+                </p>
+              </details>
+              <details>
+                <summary>Where does it come from?</summary>
+                <p>
+                  The app is built on <a href="https://github.com/marmelab/atomic-crm">Atomic CRM</a> by Marmelab,
+                  an open-source CRM under the MIT licence. BrokeCRM adds accounts for teams, hosting, an API and
+                  the MCP server, and is built and deployed with <a href="https://orunbase.com">Orunbase</a>. It
+                  is a separate product, not Atomic CRM and not a Marmelab product.
+                </p>
+              </details>
+            </div>
+            <div class="lp-cta" style="margin-top: 32px">
+              <a class="lp-btn lp-primary" href="#/login">Free forever</a>
               <a class="lp-btn" href="https://github.com/vijayakrishnans/openproduct-crm">Read the code</a>
             </div>
-          </section>
-          <section class="lp-section" id="contact">
+          </div>
+        </section>
+
+        <section class="lp-section lp-rule" id="contact">
+          <div class="lp-wrap">
             <h2>Want it for your team?</h2>
-            <p class="lp-lede">
+            <p class="lp-sec-lede">
               We can set BrokeCRM up for your team, with your own name, logo and colours if you like.
               Tell us who you are and what you sell.
             </p>
@@ -656,22 +1349,170 @@
               <li><a href="mailto:support@brokecrm.cloud?subject=BrokeCRM%20for%20our%20team">support@brokecrm.cloud</a></li>
               <li><a href="mailto:vijayakrishnan.kartha@orunbase.com?subject=BrokeCRM%20for%20our%20team">vijayakrishnan.kartha@orunbase.com</a></li>
             </ul>
-          </section>
-        </main>
+          </div>
+        </section>
+      </main>
 
+      <div class="lp-wrap">
         <footer class="lp-foot">
-          <span>BrokeCRM · fully open source under the <a href="https://github.com/vijayakrishnans/openproduct-crm/blob/main/LICENSE">Apache-2.0 licence</a> · built on Atomic CRM, with Orunbase</span>
+          <span>BrokeCRM · free forever · fully open source under the <a href="https://github.com/vijayakrishnans/openproduct-crm/blob/main/LICENSE">Apache-2.0 licence</a> · built on Atomic CRM, with Orunbase</span>
           <a href="/free-crm.html">Free CRM for small teams</a>
           <a href="/open-source-crm.html">Open-source CRM</a>
           <a href="/crm-for-ai-agents.html">CRM for AI agents</a>
           <a href="/terms.html">Terms</a>
           <a href="/privacy.html">Privacy</a>
           <a href="https://github.com/vijayakrishnans/openproduct-crm">GitHub</a>
+          <a href="https://www.patreon.com/c/Atomicflee">Patreon</a>
           <a href="https://orunbase.com">Orunbase</a>
           <a href="https://openproduct.live">openproduct</a>
           <a href="https://github.com/marmelab/atomic-crm">Atomic CRM</a>
         </footer>
       </div>
+
+      <script>
+        // The landing page's three small behaviours. None is needed to read it.
+        (function () {
+          if (document.documentElement.getAttribute("data-mode") !== "landing") return;
+          var strip = document.getElementById("lp-ph");
+          document.getElementById("lp-ph-close").addEventListener("click", function () {
+            strip.hidden = true;
+          });
+
+          var code = document.getElementById("lp-mcp-url");
+          document.getElementById("lp-mcp-copy").addEventListener("click", function () {
+            var btn = this;
+            function select() {
+              var range = document.createRange();
+              range.selectNodeContents(code);
+              var sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+              btn.textContent = "Selected";
+            }
+            try {
+              navigator.clipboard.writeText(code.textContent).then(function () {
+                btn.textContent = "Copied";
+              }, select);
+            } catch (e) {
+              select();
+            }
+          });
+
+          // Example conversations: made-up data, the MCP server's real tool names.
+          var chats = [
+            {
+              label: "Add a lead",
+              user: "I just met Priya from Northwind. Add her, open a deal for the pilot, and remind me on Friday.",
+              calls: [["search", '"Northwind"'], ["create_contact", "Priya Raman"], ["create_deal", "Northwind pilot"], ["create_task", "Follow up · Friday"]],
+              reply: "Done. Priya is saved under Northwind, the pilot deal is in Opportunity, and your follow-up is due Friday.",
+            },
+            {
+              label: "Check the pipeline",
+              user: "What does my pipeline look like this week?",
+              calls: [["dashboard", "this week"], ["list", "deals · stage = Proposal"]],
+              reply: "You have 14 open deals. Three are in Proposal, and the Acme renewal has had no activity for 9 days. Want a task to chase it?",
+            },
+            {
+              label: "Log a call",
+              user: "The Acme call went well. Log it and move the deal to Negotiation.",
+              calls: [["search", '"Acme"'], ["add_note", "Call went well, sending terms"], ["update_deal", "stage → Negotiation"], ["complete_task", "Call Acme"]],
+              reply: "Logged the note on Acme, moved the renewal to Negotiation and ticked off the call task.",
+            },
+          ];
+          var body = document.getElementById("lp-chat-body");
+          var tabs = document.getElementById("lp-chat-tabs");
+          var still = !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          var run = 0;
+          function el(tag, cls, text) {
+            var e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (text) e.textContent = text;
+            return e;
+          }
+          function wait(ms) {
+            return new Promise(function (resolve) {
+              setTimeout(resolve, ms);
+            });
+          }
+          function mark(i) {
+            for (var k = 0; k < tabs.children.length; k++) {
+              tabs.children[k].setAttribute("aria-pressed", k === i ? "true" : "false");
+            }
+          }
+          function callRow(c, done) {
+            var row = el("div", "lp-call" + (done ? " lp-done" : ""));
+            row.appendChild(el("i"));
+            row.appendChild(el("b", "", c[0]));
+            row.appendChild(el("span", "", c[1]));
+            return row;
+          }
+          function show(i) {
+            run++;
+            mark(i);
+            body.textContent = "";
+            var c = chats[i];
+            var list = el("div", "lp-calls");
+            body.appendChild(el("div", "lp-msg-user", c.user));
+            c.calls.forEach(function (x) {
+              list.appendChild(callRow(x, true));
+            });
+            body.appendChild(list);
+            body.appendChild(el("div", "lp-msg-bot", c.reply));
+          }
+          // The app removes the landing page when it starts; stop with it.
+          function gone(me) {
+            return me !== run || !body.isConnected;
+          }
+          async function play(i) {
+            var me = ++run;
+            var c = chats[i];
+            mark(i);
+            body.textContent = "";
+            body.appendChild(el("div", "lp-msg-user lp-in", c.user));
+            await wait(700);
+            if (gone(me)) return;
+            var list = el("div", "lp-calls");
+            body.appendChild(list);
+            for (var k = 0; k < c.calls.length; k++) {
+              var row = callRow(c.calls[k], false);
+              row.classList.add("lp-in");
+              list.appendChild(row);
+              await wait(650);
+              if (gone(me)) return;
+              row.classList.add("lp-done");
+            }
+            await wait(300);
+            if (gone(me)) return;
+            var bot = el("div", "lp-msg-bot lp-in");
+            body.appendChild(bot);
+            var words = c.reply.split(" ");
+            for (var w = 0; w < words.length; w++) {
+              bot.textContent += (w ? " " : "") + words[w];
+              await wait(45);
+              if (gone(me)) return;
+            }
+            await wait(5000);
+            if (gone(me)) return;
+            play((i + 1) % chats.length);
+          }
+          chats.forEach(function (c, i) {
+            var b = el("button", "", c.label);
+            b.type = "button";
+            b.addEventListener("click", function () {
+              if (still) show(i);
+              else play(i);
+            });
+            tabs.appendChild(b);
+          });
+          mark(0);
+          if (!still) {
+            var first = run;
+            setTimeout(function () {
+              if (first === run && body.isConnected) play(1);
+            }, 5000);
+          }
+        })();
+      </script>
     </div>
     <div id="root">
       <div class="loader-container">
