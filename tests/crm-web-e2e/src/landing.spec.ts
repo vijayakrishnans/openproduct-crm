@@ -88,6 +88,20 @@ test.describe("landing page", () => {
     }
   });
 
+  test("logging out of the demo leads back to the landing page", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/?demo");
+    await page.getByRole("complementary", { name: "Get this CRM for your team" }).getByRole("button", { name: "Close" }).click();
+    // The user menu is the avatar, the last button of the header.
+    await page.getByRole("navigation").first().getByRole("button").last().click();
+    await page.getByRole("menuitem", { name: /log ?out/i }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "The CRM for teams with no CRM budget." })).toBeVisible();
+    await expect(page).toHaveURL(/\/$/);
+    // and the demo opens again, signed in
+    await page.goto("/?demo");
+    await expect(page.getByRole("link", { name: "Deals" }).first()).toBeVisible();
+  });
+
   test("the sign-in form links to both", async ({ page }) => {
     await page.goto("/#/login");
     await expect(page.getByRole("link", { name: "terms", exact: true })).toHaveAttribute("href", "/terms.html");

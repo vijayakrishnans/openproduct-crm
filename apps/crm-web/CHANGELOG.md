@@ -22,6 +22,11 @@ The landing page says what BrokeCRM commits to:
 - The feature grid is gone; "Start free" on the landing page reads
   "Free forever".
 
+## crm-web v0.13.1 - 2026-11-23
+
+- Logging out of the demo leads back to the landing page; it showed a
+  sign-in form for accounts the demo does not have.
+
 ## crm-web v0.13.0 - 2026-11-23
 
 Search:
