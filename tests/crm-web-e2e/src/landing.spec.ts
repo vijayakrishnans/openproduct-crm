@@ -8,7 +8,7 @@ test.describe("landing page", () => {
     await expect(page).toHaveTitle(/BrokeCRM/);
     // the credits and the links the page owes
     await expect(page.getByRole("link", { name: "Atomic CRM" }).first()).toHaveAttribute("href", "https://github.com/marmelab/atomic-crm");
-    await expect(page.getByRole("link", { name: "Orunbase" }).first()).toHaveAttribute("href", "https://orunbase.com");
+    await expect(page.getByRole("link", { name: "Orunbase", exact: true }).first()).toHaveAttribute("href", "https://orunbase.com");
     await expect(page.getByRole("link", { name: "openproduct" }).first()).toHaveAttribute("href", /openproduct\.live/);
     await expect(page.getByRole("link", { name: "Apache-2.0 licence" })).toHaveAttribute("href", /\/LICENSE$/);
     // the app has not started behind it
