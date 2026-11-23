@@ -61,6 +61,25 @@ test.describe("landing page", () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
+  test("the landing page leads to the pages a search can land on, and its structured data parses", async ({ page }) => {
+    await page.goto("/");
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const types = blocks.flatMap((b) => (JSON.parse(b)["@graph"] as { "@type": string }[]).map((n) => n["@type"]));
+    expect(types).toEqual(expect.arrayContaining(["SoftwareApplication", "Organization", "FAQPage"]));
+
+    for (const [name, heading] of [
+      ["Free CRM for small teams", "A free CRM for small teams"],
+      ["Open-source CRM", "An open-source CRM, all the way down"],
+      ["CRM for AI agents", "A CRM your AI assistant can work in"],
+    ] as const) {
+      await page.goto("/");
+      await page.getByRole("contentinfo").getByRole("link", { name, exact: true }).click();
+      await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /^https:\/\/www\.brokecrm\.cloud\/[a-z-]+$/);
+      JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? "");
+    }
+  });
+
   test("the sign-in form links to both", async ({ page }) => {
     await page.goto("/#/login");
     await expect(page.getByRole("link", { name: "terms", exact: true })).toHaveAttribute("href", "/terms.html");

@@ -2,7 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.brokecrm.cloud/</loc>
+    <lastmod>2026-11-23</lastmod>
     <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.brokecrm.cloud/free-crm</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://www.brokecrm.cloud/open-source-crm</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://www.brokecrm.cloud/crm-for-ai-agents</loc>
+    <lastmod>2026-11-23</lastmod>
   </url>
   <url>
     <loc>https://www.brokecrm.cloud/terms</loc>

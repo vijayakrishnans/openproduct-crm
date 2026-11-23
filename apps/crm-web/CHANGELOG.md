@@ -1,3 +1,14 @@
+## crm-web v0.13.0 - 2026-11-23
+
+Search:
+
+- Three pages a search can land on: `/free-crm`, `/open-source-crm` and
+  `/crm-for-ai-agents`, each with its own title, description, canonical
+  address and structured data. The landing page links to them and the
+  sitemap lists them.
+- The landing page's structured data describes the product, the organization
+  and the questions it answers; a question about AI assistants is added.
+
 ## crm-web v0.12.1 - 2026-11-22
 
 - The contact addresses on the landing page and the demo's card are

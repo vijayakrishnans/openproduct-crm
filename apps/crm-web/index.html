@@ -58,16 +58,108 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "BrokeCRM",
-        "url": "https://www.brokecrm.cloud/",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "A free, open-source CRM hosted for you: contacts, companies, a deal pipeline, notes with files and tasks for your whole team.",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "license": "https://www.apache.org/licenses/LICENSE-2.0",
-        "isBasedOn": "https://github.com/marmelab/atomic-crm",
-        "codeRepository": "https://github.com/vijayakrishnans/openproduct-crm"
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://www.brokecrm.cloud/#app",
+            "name": "BrokeCRM",
+            "url": "https://www.brokecrm.cloud/",
+            "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "CRM",
+            "operatingSystem": "Web",
+            "description": "A free, open-source CRM hosted for you: contacts, companies, a deal pipeline, notes with files and tasks for your whole team.",
+            "image": "https://www.brokecrm.cloud/img/og.jpg",
+            "screenshot": "https://www.brokecrm.cloud/img/board.jpg",
+            "featureList": [
+              "Deal pipeline board",
+              "Contacts and companies",
+              "Notes with file attachments",
+              "Tasks",
+              "Team organizations",
+              "CSV import and export",
+              "Search",
+              "MCP server for AI assistants",
+              "Public API and webhooks"
+            ],
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "license": "https://www.apache.org/licenses/LICENSE-2.0",
+            "isBasedOn": "https://github.com/marmelab/atomic-crm",
+            "codeRepository": "https://github.com/vijayakrishnans/openproduct-crm",
+            "publisher": {
+              "@id": "https://www.brokecrm.cloud/#org"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.brokecrm.cloud/#org",
+            "name": "BrokeCRM",
+            "url": "https://www.brokecrm.cloud/",
+            "logo": "https://www.brokecrm.cloud/img/brokecrm-logo-512.png",
+            "email": "support@brokecrm.cloud",
+            "sameAs": [
+              "https://github.com/vijayakrishnans/openproduct-crm",
+              "https://openproduct.live/broke-crm"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.brokecrm.cloud/#site",
+            "name": "BrokeCRM",
+            "url": "https://www.brokecrm.cloud/",
+            "publisher": {
+              "@id": "https://www.brokecrm.cloud/#org"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is BrokeCRM really free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. There is nothing to buy and no card to enter. The free plan holds 500 contacts per organization today."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Who hosts BrokeCRM?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "We do, on Cloudflare, deployed with Orunbase. You sign in and use it; there is nothing to install."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I run my own copy of BrokeCRM?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The whole product is in one public repository under the Apache 2.0 licence, with the steps to deploy it."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where does BrokeCRM come from?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The app is built on Atomic CRM by Marmelab, an open-source CRM under the MIT licence. BrokeCRM adds accounts for teams, hosting, an API and an MCP server, and is built and deployed with Orunbase. It is a separate product, not Atomic CRM and not a Marmelab product."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can an AI assistant use BrokeCRM?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. BrokeCRM has an MCP server at https://mcp.brokecrm.cloud/mcp, so Claude and other assistants can read and update the CRM as you."
+                }
+              }
+            ]
+          }
+        ]
       }
     </script>
     <script>
@@ -290,6 +382,8 @@
         max-width: 720px;
       }
       .lp-credits a,
+      .lp-lede a,
+      .lp-grid p a,
       .lp-faq a {
         text-decoration: underline;
         text-underline-offset: 3px;
@@ -503,7 +597,7 @@
               </li>
               <li>
                 <h3>Ready for AI agents</h3>
-                <p>An MCP server lets your AI assistant read and update the CRM with an API key you control.</p>
+                <p>An MCP server lets your AI assistant read and update the CRM as you. <a href="/crm-for-ai-agents.html">How it works</a>.</p>
               </li>
               <li>
                 <h3>An API and webhooks</h3>
@@ -515,8 +609,8 @@
           <section class="lp-section" id="open">
             <h2>Free, and open all the way down</h2>
             <p class="lp-lede">
-              All of BrokeCRM is open source under the Apache 2.0 licence: the app, the API and
-              everything that runs them. Use the hosted version here, or read the code and run your own.
+              All of BrokeCRM is <a href="/open-source-crm.html">open source under the Apache 2.0 licence</a>: the app, the API and
+              everything that runs them. Use the <a href="/free-crm.html">free hosted version</a> here, or read the code and run your own.
             </p>
             <dl class="lp-faq">
               <dt>Is it really free?</dt>
@@ -532,6 +626,11 @@
               <dd>
                 Yes. The whole product is in <a href="https://github.com/vijayakrishnans/openproduct-crm">one public repository</a>, with the
                 steps to deploy it.
+              </dd>
+              <dt>Can an AI assistant use it?</dt>
+              <dd>
+                Yes. BrokeCRM has an MCP server, so Claude and other assistants can read and update your
+                CRM as you. <a href="/crm-for-ai-agents.html">See how to connect one</a>.
               </dd>
               <dt>Where does it come from?</dt>
               <dd class="lp-credits">
@@ -562,6 +661,9 @@
 
         <footer class="lp-foot">
           <span>BrokeCRM · fully open source under the <a href="https://github.com/vijayakrishnans/openproduct-crm/blob/main/LICENSE">Apache-2.0 licence</a> · built on Atomic CRM, with Orunbase</span>
+          <a href="/free-crm.html">Free CRM for small teams</a>
+          <a href="/open-source-crm.html">Open-source CRM</a>
+          <a href="/crm-for-ai-agents.html">CRM for AI agents</a>
           <a href="/terms.html">Terms</a>
           <a href="/privacy.html">Privacy</a>
           <a href="https://github.com/vijayakrishnans/openproduct-crm">GitHub</a>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open-source CRM under Apache 2.0, hosted or self-hosted · BrokeCRM</title>
+    <meta name="description" content="BrokeCRM is a fully open-source CRM under the Apache 2.0 licence. Use the free hosted version, or read the code and run your own copy on Cloudflare Workers and Postgres." />
+    <link rel="canonical" href="https://www.brokecrm.cloud/open-source-crm" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="BrokeCRM" />
+    <meta property="og:url" content="https://www.brokecrm.cloud/open-source-crm" />
+    <meta property="og:title" content="Open-source CRM under Apache 2.0, hosted or self-hosted · BrokeCRM" />
+    <meta property="og:description" content="BrokeCRM is a fully open-source CRM under the Apache 2.0 licence. Use the free hosted version, or read the code and run your own copy on Cloudflare Workers and Postgres." />
+    <meta property="og:image" content="https://www.brokecrm.cloud/img/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "url": "https://www.brokecrm.cloud/open-source-crm",
+      "name": "Open-source CRM under Apache 2.0, hosted or self-hosted \u00b7 BrokeCRM",
+      "description": "BrokeCRM is a fully open-source CRM under the Apache 2.0 licence. Use the free hosted version, or read the code and run your own copy on Cloudflare Workers and Postgres.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "BrokeCRM",
+        "url": "https://www.brokecrm.cloud/"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "BrokeCRM",
+          "item": "https://www.brokecrm.cloud/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "An open-source CRM, all the way down",
+          "item": "https://www.brokecrm.cloud/open-source-crm"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What licence is BrokeCRM under?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Apache License 2.0, for the whole product: the app, the API and the deployment. The interface it builds on, Atomic CRM, is under the MIT licence."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I self-host BrokeCRM?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. It runs on Cloudflare Workers with a Postgres database, and the public repository has the steps to deploy your own copy."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the hosted version different from the code?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The hosted version at brokecrm.cloud is deployed from the same public repository."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use it commercially?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The Apache 2.0 licence allows commercial use, changes and redistribution, as long as you keep the licence and attribution notices."
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+    <style>
+      :root {
+        --bg: #fafaf7; --ink: #17181c; --muted: #5d6068; --line: #e4e3dc; --accent: #1f6f4a;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #111214; --ink: #f1f1ee; --muted: #a4a7ae; --line: #2c2e33; --accent: #5fd39b; }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 17px; line-height: 1.6;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
+      header { display: flex; align-items: center; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+      header a.brand { font-weight: 700; font-size: 20px; text-decoration: none; color: inherit; margin-right: auto; }
+      header a { color: var(--muted); text-decoration: none; font-size: 15px; }
+      header a:hover { color: var(--ink); }
+      h1 { font-size: clamp(30px, 5vw, 40px); letter-spacing: -0.02em; line-height: 1.15; margin: 40px 0 6px; }
+      h2 { font-size: 21px; letter-spacing: -0.01em; margin: 34px 0 8px; }
+      p, li { color: var(--ink); }
+      .muted { color: var(--muted); }
+      .short { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 22px 0 6px; }
+      .short p { margin: 0 0 8px; }
+      .short p:last-child { margin: 0; }
+      a { color: inherit; text-underline-offset: 3px; }
+      a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      table { border-collapse: collapse; width: 100%; font-size: 15.5px; margin: 10px 0; }
+      th, td { text-align: left; vertical-align: top; padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line); }
+      th { color: var(--muted); font-weight: 600; }
+      .table-scroll { overflow-x: auto; }
+      footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+      .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 6px; }
+      .btn { display: inline-block; padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; font-weight: 600; }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+      code { font-size: 0.92em; background: color-mix(in srgb, var(--ink) 8%, transparent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="brand" href="/">BrokeCRM</a>
+        <a href="/free-crm.html">Free CRM</a>
+        <a href="/open-source-crm.html">Open source</a>
+        <a href="/crm-for-ai-agents.html">AI agents</a>
+        <a href="/#/login">Sign in</a>
+      </header>
+      <main>
+        <h1>An open-source CRM, all the way down</h1>
+        <p class="muted">The app, the API and everything that runs them are in one public repository, under one permissive licence.</p>
+        <p>Many products called open source keep the useful parts closed: the hosted version has features the code does not, or the licence forbids running it as a service. BrokeCRM has no closed part. What runs at brokecrm.cloud is what is in the <a href="https://github.com/vijayakrishnans/openproduct-crm">repository</a>, and the Apache 2.0 licence lets you use it, change it and host it, for yourself or for others.</p>
+
+        <h2>What is in the code</h2>
+        <ul>
+          <li><strong>The web app:</strong> contacts, companies, a drag-and-drop deal board, notes with attachments, tasks, tags, search, CSV import and export. It is built with React on top of <a href="https://github.com/marmelab/atomic-crm">Atomic CRM</a> by Marmelab (MIT licence).</li>
+          <li><strong>The API:</strong> every record belongs to an organization, and one organization can never read another's data.</li>
+          <li><strong>Accounts for teams:</strong> sign-in by email code, Google or GitHub, organizations, invitations and roles.</li>
+          <li><strong>The MCP server:</strong> thirteen typed tools that let an <a href="/crm-for-ai-agents.html">AI assistant work in the CRM</a>.</li>
+          <li><strong>Events and webhooks:</strong> changes are recorded and can notify your other tools.</li>
+          <li><strong>The deployment:</strong> the configuration that deploys all of it, so a copy you run is the same product.</li>
+        </ul>
+
+        <h2>Hosted or self-hosted</h2>
+        <p><strong>Hosted:</strong> use BrokeCRM at brokecrm.cloud. It is <a href="/free-crm.html">free</a>, and there is nothing to install.</p>
+        <p><strong>Self-hosted:</strong> BrokeCRM runs on Cloudflare Workers with a Postgres database. The repository has the steps to deploy it to your own Cloudflare account. It is built and deployed with <a href="https://orunbase.com">Orunbase</a>.</p>
+
+        <h2>Why open source matters for a CRM</h2>
+        <p>A CRM holds the one list a business cannot afford to lose. With open code you can see exactly what happens to that list, take it with you, and keep the product running even if the people who host it stop. You can also change it: add a field, rename a stage, connect it to the tool you already use.</p>
+        <div class="cta">
+          <a class="btn primary" href="/#/login">Start free</a>
+          <a class="btn" href="/?demo">Try the demo</a>
+          <a class="btn" href="https://github.com/vijayakrishnans/openproduct-crm">Read the code</a>
+        </div>
+        <h2>Questions people ask</h2>
+        <h3>What licence is BrokeCRM under?</h3>
+        <p>The Apache License 2.0, for the whole product: the app, the API and the deployment. The interface it builds on, Atomic CRM, is under the MIT licence.</p>
+        <h3>Can I self-host BrokeCRM?</h3>
+        <p>Yes. It runs on Cloudflare Workers with a Postgres database, and the public repository has the steps to deploy your own copy.</p>
+        <h3>Is the hosted version different from the code?</h3>
+        <p>No. The hosted version at brokecrm.cloud is deployed from the same public repository.</p>
+        <h3>Can I use it commercially?</h3>
+        <p>Yes. The Apache 2.0 licence allows commercial use, changes and redistribution, as long as you keep the licence and attribution notices.</p>
+      </main>
+      <footer>
+        <a href="/">BrokeCRM</a>
+        <a href="/free-crm.html">Free CRM for small teams</a>
+        <a href="/open-source-crm.html">Open-source CRM</a>
+        <a href="/crm-for-ai-agents.html">CRM for AI agents (MCP)</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="https://github.com/vijayakrishnans/openproduct-crm">GitHub</a>
+      </footer>
+    </div>
+  </body>
+</html>
