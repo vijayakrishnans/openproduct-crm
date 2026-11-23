@@ -1,0 +1,18 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-21
+  title: "The launch strip links to BrokeCRM's Product Hunt page"
+spec:
+  goal: The landing page's Product Hunt strip opens BrokeCRM's own page there, and the landing browser test passes.
+  affects:
+    - apps/crm-web/index.html
+    - apps/crm-web/src/components/atomic-crm/login/LumenLoginPage.tsx
+    - apps/crm-web/CHANGELOG.md
+    - tests/crm-web-e2e/src/**
+    - tasks/CRM-21.TaskContract.yaml
+  doneWhen:
+    - the strip on www.brokecrm.cloud links to https://www.producthunt.com/products/brokecrm
+    - the sign-in page says "Managed by us. Nothing to install."
+    - the landing browser tests pass
+  gates: []

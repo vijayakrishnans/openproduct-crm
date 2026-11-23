@@ -1,3 +1,9 @@
+## crm-web v0.14.1 - 2026-11-23
+
+- The Product Hunt strip on the landing page links to BrokeCRM's page there.
+- The sign-in page says "Managed by us", the landing page's wording, where it
+  said "Hosted for you".
+
 ## crm-web v0.14.0 - 2026-11-23
 
 The landing page says what BrokeCRM commits to:
