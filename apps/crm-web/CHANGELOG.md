@@ -1,3 +1,7 @@
+## crm-web v0.14.1 - 2026-11-23
+
+- The Product Hunt strip on the landing page links to BrokeCRM's page there.
+
 ## crm-web v0.14.0 - 2026-11-23
 
 The landing page says what BrokeCRM commits to:

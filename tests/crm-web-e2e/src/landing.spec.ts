@@ -17,6 +17,7 @@ test.describe("landing page", () => {
     // the commitment, the way to support it, and the assistant's address
     await expect(page.getByRole("heading", { level: 2, name: "Our commitment" })).toBeVisible();
     await expect(page.getByRole("link", { name: "COMMITMENT.md" })).toHaveAttribute("href", /\/COMMITMENT\.md$/);
+    await expect(page.getByRole("link", { name: /^Come say hello/ })).toHaveAttribute("href", "https://www.producthunt.com/products/brokecrm");
     await expect(page.getByRole("link", { name: "Support us on Patreon" })).toHaveAttribute("href", /patreon\.com/);
     await expect(page.getByText("https://mcp.brokecrm.cloud/mcp").first()).toBeVisible();
     await expect(page.getByRole("link", { name: /^The workspace/ })).toHaveAttribute("href", "https://openproduct.live/broke-crm/workspace");
