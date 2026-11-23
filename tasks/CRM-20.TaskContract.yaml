@@ -1,0 +1,20 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-20
+  title: "The landing page commits to forever free"
+spec:
+  goal: The landing page states the forever-free commitment, the free plan's limits, how to support the project and how an AI assistant connects.
+  affects:
+    - apps/crm-web/index.html
+    - apps/crm-web/public/free-crm.html
+    - apps/crm-web/public/terms.html
+    - apps/crm-web/CHANGELOG.md
+    - tests/crm-web-e2e/src/**
+    - COMMITMENT.md
+    - .github/FUNDING.yml
+    - tasks/CRM-20.TaskContract.yaml
+  doneWhen:
+    - www.brokecrm.cloud shows the commitment, the limits 10,000 contacts and 25 seats, the MCP address and the Patreon link
+    - the landing browser tests pass
+  gates: []

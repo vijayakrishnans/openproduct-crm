@@ -1,3 +1,21 @@
+## crm-web v0.14.0 - 2026-11-23
+
+The landing page says what BrokeCRM commits to:
+
+- A written commitment: the managed CRM is free forever, your data is yours,
+  the code stays open, and the work is public. The text is kept in
+  `COMMITMENT.md`.
+- The free plan's limits are on the page: 10,000 contacts and 25 seats per
+  organization. The free-CRM page, the terms and the structured data say the
+  same.
+- An MCP section with the server's address, a copy button and three example
+  conversations that play as tool calls and a reply.
+- A way to support the project (Patreon), and three links to the code, the
+  openproduct listing and the public workspace.
+- A strip for the Product Hunt launch, which can be dismissed.
+- The feature grid is gone; "Start free" on the landing page reads
+  "Free forever".
+
 ## crm-web v0.13.0 - 2026-11-23
 
 Search:

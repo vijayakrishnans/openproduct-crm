@@ -14,7 +14,14 @@ test.describe("landing page", () => {
     // the app has not started behind it
     await expect(page.getByLabel("Email")).toHaveCount(0);
 
-    await page.getByRole("link", { name: "Start free" }).first().click();
+    // the commitment, the way to support it, and the assistant's address
+    await expect(page.getByRole("heading", { level: 2, name: "Our commitment" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "COMMITMENT.md" })).toHaveAttribute("href", /\/COMMITMENT\.md$/);
+    await expect(page.getByRole("link", { name: "Support us on Patreon" })).toHaveAttribute("href", /patreon\.com/);
+    await expect(page.getByText("https://mcp.brokecrm.cloud/mcp").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /^The workspace/ })).toHaveAttribute("href", "https://openproduct.live/broke-crm/workspace");
+
+    await page.getByRole("link", { name: "Free forever" }).first().click();
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1, name: "The CRM for teams with no CRM budget." })).toBeHidden();
   });
