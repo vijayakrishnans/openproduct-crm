@@ -164,7 +164,7 @@ export const LumenLoginPage = () => {
               {[
                 "Free to use. No card, no trial clock.",
                 "Open source under Apache 2.0, so you can read the code or run your own.",
-                "Hosted for you. Nothing to install.",
+                "Managed by us. Nothing to install.",
               ].map((point) => (
                 <li key={point} className="flex gap-3">
                   <Check className="mt-1 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
