@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRM for AI agents: an MCP server for Claude and other assistants · BrokeCRM</title>
+    <meta name="description" content="BrokeCRM has a built-in MCP server, so Claude and other AI assistants can read and update your CRM as you: look up contacts, log notes, move deals, create tasks." />
+    <link rel="canonical" href="https://www.brokecrm.cloud/crm-for-ai-agents" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="BrokeCRM" />
+    <meta property="og:url" content="https://www.brokecrm.cloud/crm-for-ai-agents" />
+    <meta property="og:title" content="CRM for AI agents: an MCP server for Claude and other assistants · BrokeCRM" />
+    <meta property="og:description" content="BrokeCRM has a built-in MCP server, so Claude and other AI assistants can read and update your CRM as you: look up contacts, log notes, move deals, create tasks." />
+    <meta property="og:image" content="https://www.brokecrm.cloud/img/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "url": "https://www.brokecrm.cloud/crm-for-ai-agents",
+      "name": "CRM for AI agents: an MCP server for Claude and other assistants \u00b7 BrokeCRM",
+      "description": "BrokeCRM has a built-in MCP server, so Claude and other AI assistants can read and update your CRM as you: look up contacts, log notes, move deals, create tasks.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "BrokeCRM",
+        "url": "https://www.brokecrm.cloud/"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "BrokeCRM",
+          "item": "https://www.brokecrm.cloud/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "A CRM your AI assistant can work in",
+          "item": "https://www.brokecrm.cloud/crm-for-ai-agents"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the BrokeCRM MCP server address?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "https://mcp.brokecrm.cloud/mcp. It is the same for every account; the sign-in decides which organization the assistant works in."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which AI assistants work with it?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Any client that supports the Model Context Protocol, including Claude. Clients sign in with OAuth, or send an organization API key."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can the assistant delete my data?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. There is no delete tool. An assistant can read, create and update records, and a read-only API key limits it to reading."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the MCP server cost extra?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. It is part of BrokeCRM, which is free and open source."
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+    <style>
+      :root {
+        --bg: #fafaf7; --ink: #17181c; --muted: #5d6068; --line: #e4e3dc; --accent: #1f6f4a;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #111214; --ink: #f1f1ee; --muted: #a4a7ae; --line: #2c2e33; --accent: #5fd39b; }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 17px; line-height: 1.6;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
+      header { display: flex; align-items: center; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+      header a.brand { font-weight: 700; font-size: 20px; text-decoration: none; color: inherit; margin-right: auto; }
+      header a { color: var(--muted); text-decoration: none; font-size: 15px; }
+      header a:hover { color: var(--ink); }
+      h1 { font-size: clamp(30px, 5vw, 40px); letter-spacing: -0.02em; line-height: 1.15; margin: 40px 0 6px; }
+      h2 { font-size: 21px; letter-spacing: -0.01em; margin: 34px 0 8px; }
+      p, li { color: var(--ink); }
+      .muted { color: var(--muted); }
+      .short { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 22px 0 6px; }
+      .short p { margin: 0 0 8px; }
+      .short p:last-child { margin: 0; }
+      a { color: inherit; text-underline-offset: 3px; }
+      a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      table { border-collapse: collapse; width: 100%; font-size: 15.5px; margin: 10px 0; }
+      th, td { text-align: left; vertical-align: top; padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line); }
+      th { color: var(--muted); font-weight: 600; }
+      .table-scroll { overflow-x: auto; }
+      footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+      .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 6px; }
+      .btn { display: inline-block; padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; font-weight: 600; }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+      code { font-size: 0.92em; background: color-mix(in srgb, var(--ink) 8%, transparent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="brand" href="/">BrokeCRM</a>
+        <a href="/free-crm.html">Free CRM</a>
+        <a href="/open-source-crm.html">Open source</a>
+        <a href="/crm-for-ai-agents.html">AI agents</a>
+        <a href="/#/login">Sign in</a>
+      </header>
+      <main>
+        <h1>A CRM your AI assistant can work in</h1>
+        <p class="muted">BrokeCRM speaks the Model Context Protocol (MCP), so an assistant can do the CRM work you would rather not do by hand.</p>
+        <p>Most CRM data goes stale because entering it is a chore. BrokeCRM has an MCP server built in. Connect an assistant such as Claude and ask in plain language: "who do we know at Acme?", "log this call against Priya and remind me to follow up on Friday", "move the Northwind deal to won". The assistant reads and writes the same records you see in the app.</p>
+
+        <h2>How to connect</h2>
+        <ol>
+          <li>In your assistant, add a custom connector with the address <code>https://mcp.brokecrm.cloud/mcp</code>. It is the same address for everyone.</li>
+          <li>Sign in with your BrokeCRM account when asked, and choose the organization the assistant should work in.</li>
+          <li>Ask it something. It works as you, in that organization only.</li>
+        </ol>
+        <p>A client that cannot sign in can send an organization API key as a Bearer token instead. A key with the viewer role can only read; a key with the builder role can also write.</p>
+
+        <h2>What the assistant can do</h2>
+        <ul>
+          <li><strong>Find things:</strong> search across contacts, companies, deals, tasks and notes, or list records with filters.</li>
+          <li><strong>Summarize:</strong> get counts and open deals with totals per stage.</li>
+          <li><strong>Add records:</strong> create contacts, companies and deals.</li>
+          <li><strong>Keep them current:</strong> update a contact, a company or a deal, including moving a deal between stages.</li>
+          <li><strong>Log activity:</strong> add a note, create a task, mark a task done.</li>
+        </ul>
+
+        <h2>What it cannot do</h2>
+        <p>There are thirteen tools, each for one job, and no free-form database access. There is no tool that deletes records. An assistant cannot reach another organization's data, invite people or change settings. Access tokens last an hour and are refreshed while the connection is in use; removing a person from the organization ends their assistant's access at once.</p>
+
+        <h2>Things people use it for</h2>
+        <ul>
+          <li>Pasting meeting notes and asking the assistant to log them against the right people and create the follow-ups.</li>
+          <li>Turning an email thread into a contact, a company and a deal.</li>
+          <li>A weekly review: which deals have gone quiet, which tasks are overdue.</li>
+        </ul>
+        <p>BrokeCRM itself is <a href="/free-crm.html">free</a> and <a href="/open-source-crm.html">open source</a>, MCP server included.</p>
+        <div class="cta">
+          <a class="btn primary" href="/#/login">Start free</a>
+          <a class="btn" href="/?demo">Try the demo</a>
+          <a class="btn" href="https://github.com/vijayakrishnans/openproduct-crm">Read the code</a>
+        </div>
+        <h2>Questions people ask</h2>
+        <h3>What is the BrokeCRM MCP server address?</h3>
+        <p>https://mcp.brokecrm.cloud/mcp. It is the same for every account; the sign-in decides which organization the assistant works in.</p>
+        <h3>Which AI assistants work with it?</h3>
+        <p>Any client that supports the Model Context Protocol, including Claude. Clients sign in with OAuth, or send an organization API key.</p>
+        <h3>Can the assistant delete my data?</h3>
+        <p>No. There is no delete tool. An assistant can read, create and update records, and a read-only API key limits it to reading.</p>
+        <h3>Does the MCP server cost extra?</h3>
+        <p>No. It is part of BrokeCRM, which is free and open source.</p>
+      </main>
+      <footer>
+        <a href="/">BrokeCRM</a>
+        <a href="/free-crm.html">Free CRM for small teams</a>
+        <a href="/open-source-crm.html">Open-source CRM</a>
+        <a href="/crm-for-ai-agents.html">CRM for AI agents (MCP)</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="https://github.com/vijayakrishnans/openproduct-crm">GitHub</a>
+      </footer>
+    </div>
+  </body>
+</html>
