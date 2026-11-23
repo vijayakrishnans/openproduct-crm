@@ -201,5 +201,14 @@ export const manifest: MigrationManifest = {
       description:
         "OAuth 2.1 for the CRM's MCP server: dynamically registered public clients, single-use PKCE authorization codes, and hashed access/refresh tokens that act as one user in one organization",
     },
+    {
+      id: "220_billing_free_plan_limits",
+      context: "billing",
+      path: "220_billing_free_plan_limits/up.sql",
+      checksum:
+        "928b3a82503e134773711c3ddb14997ba1440d40f59037af9ce84d5f39eb618a",
+      description:
+        "The free plan's higher limits for organizations that already have their rows: 10,000 contacts and 25 seats where a plan-derived row still holds the old value",
+    },
   ],
 };

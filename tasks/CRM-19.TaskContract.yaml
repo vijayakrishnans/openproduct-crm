@@ -1,0 +1,18 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: CRM-19
+  title: "The free plan holds 10,000 contacts and 25 seats"
+spec:
+  goal: Every organization on the free plan, new or existing, may hold 10,000 contacts and 25 seats.
+  affects:
+    - apps/billing-worker/src/**
+    - packages/db/src/manifest.ts
+    - packages/db/src/migrations/220_billing_free_plan_limits/**
+    - tests/billing-worker/src/**
+    - tests/db/src/**
+    - tasks/CRM-19.TaskContract.yaml
+  doneWhen:
+    - the plan catalog's free plan grants limit.crm_contacts 10000 and limit.members 25
+    - an organization created before the change answers the new limits from check-entitlement
+  gates: []
