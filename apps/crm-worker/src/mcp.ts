@@ -180,10 +180,23 @@ export const TOOLS: ToolDef[] = [
   {
     name: "dashboard",
     title: "Summarize the CRM",
-    description: "Counts of companies, contacts, notes and tasks (open, overdue), and open deals with totals per stage.",
+    description:
+      "Counts of companies, contacts, notes and tasks (open, overdue), and deals per stage. Open deals are the unarchived deals whose stage is not closed: won, lost and closed by default, or the stages given in closed_stages.",
     writes: false,
-    inputSchema: object({}),
-    run: (ctx) => handleDashboard(ctx),
+    inputSchema: object({
+      closed_stages: {
+        type: "array",
+        items: text,
+        maxItems: 50,
+        description: "Deal stages that end a deal and are left out of the open count (default: won, lost, closed)",
+      },
+    }),
+    run: (ctx, args) => {
+      const stages = args["closed_stages"];
+      const params = new URLSearchParams();
+      if (Array.isArray(stages)) params.set("closedStages", stages.map(String).join(","));
+      return handleDashboard(ctx, params);
+    },
   },
   {
     name: "create_contact",

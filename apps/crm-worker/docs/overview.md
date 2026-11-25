@@ -21,7 +21,7 @@ All under `/v1/organizations/:orgId/crm`, forwarded by `api-edge`'s
 | `DELETE /:resource/:id` | delete; answers the removed record |
 | `POST /contacts/merge` | `{ loserId, winnerId }`, one transaction |
 | `GET /search?q=&resources=&limit=` | global search |
-| `GET /dashboard` | counts and deal totals for the org |
+| `GET /dashboard` | counts and deal totals for the org; a deal is open unless archived or in a closed stage (`won`, `lost`, `closed`, or the comma-separated `?closedStages=`) |
 | `GET /sales/me` | the caller's CRM profile, created on first use |
 | `POST /mcp` | the organization's MCP server: one JSON-RPC message per request |
 | `POST /attachments?filename=` | upload a file (the raw body, at most 25 MB); answers its `path` |

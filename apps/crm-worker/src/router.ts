@@ -145,7 +145,7 @@ async function run(op: Operation, ctx: Ctx, request: Request, url: URL): Promise
     case "search":
       return handleSearch(ctx, url.searchParams);
     case "dashboard":
-      return handleDashboard(ctx);
+      return handleDashboard(ctx, url.searchParams);
     case "merge":
       return handleMergeContacts(ctx, await readBody(request));
     case "mcp":

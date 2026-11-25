@@ -137,6 +137,8 @@ describe("MCP server", () => {
 
       const dashboard = await tool(keyA, A, "dashboard");
       expect(dashboard.data).toMatchObject({ companies: 1, contacts: 1, deals: { open: 1, amount: 5000 }, tasks: { open: 1 } });
+      const custom = await tool(keyA, A, "dashboard", { closed_stages: ["opportunity"] });
+      expect(custom.data).toMatchObject({ deals: { open: 0, amount: 0, closedStages: ["opportunity"] } });
     });
 
     it("updates only the fields given, and completes a task", async () => {

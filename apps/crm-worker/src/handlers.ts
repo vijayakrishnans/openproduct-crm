@@ -421,21 +421,41 @@ export async function handleSearch(ctx: Ctx, search: URLSearchParams): Promise<R
   return successResponse({ items: documents(result.rows) }, ctx.requestId);
 }
 
-export async function handleDashboard(ctx: Ctx): Promise<Response> {
+/** Stages that end a deal when the caller names none. The CRM's own stage list
+ *  lives in the organization's configuration, which this worker cannot read, so
+ *  a caller with a different list passes `closedStages`. */
+export const DEFAULT_CLOSED_STAGES = ["won", "lost", "closed"] as const;
+
+export async function handleDashboard(ctx: Ctx, search: URLSearchParams = new URLSearchParams()): Promise<Response> {
+  let closedStages: string[] = [...DEFAULT_CLOSED_STAGES];
+  const raw = search.get("closedStages");
+  if (raw !== null) {
+    closedStages = [...new Set(raw.split(",").map((stage) => stage.trim()).filter(Boolean))];
+    if (closedStages.length > 50 || closedStages.some((stage) => stage.length > 100)) {
+      return validationError(ctx.requestId, { closedStages: ["must be at most 50 stages of at most 100 characters"] });
+    }
+  }
+
+  // A deal is open while it is not archived and its stage is not a closed one.
   const result = await ctx.tx.execute(
-    `SELECT jsonb_build_object(
+    `WITH live AS (
+       SELECT d.stage, d.amount, d.stage IN (SELECT jsonb_array_elements_text($2::text::jsonb)) AS closed
+       FROM crm.deals d
+       WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL
+     )
+     SELECT jsonb_build_object(
        'companies', (SELECT count(*) FROM crm.companies c WHERE c.org_id = $1::text::uuid),
        'contacts', (SELECT count(*) FROM crm.contacts c WHERE c.org_id = $1::text::uuid),
        'deals', jsonb_build_object(
-         'open', (SELECT count(*) FROM crm.deals d WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL),
-         'amount', (SELECT coalesce(sum(d.amount), 0) FROM crm.deals d WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL),
+         'open', (SELECT count(*) FROM live WHERE NOT live.closed),
+         'amount', (SELECT coalesce(sum(live.amount), 0) FROM live WHERE NOT live.closed),
+         'closedStages', $2::text::jsonb,
          'byStage', (
-           SELECT coalesce(jsonb_agg(jsonb_build_object('stage', x.stage, 'count', x.n, 'amount', x.amount) ORDER BY x.stage), '[]'::jsonb)
+           SELECT coalesce(jsonb_agg(jsonb_build_object('stage', x.stage, 'count', x.n, 'amount', x.amount, 'open', NOT x.closed) ORDER BY x.stage), '[]'::jsonb)
            FROM (
-             SELECT d.stage, count(*) AS n, coalesce(sum(d.amount), 0) AS amount
-             FROM crm.deals d
-             WHERE d.org_id = $1::text::uuid AND d.archived_at IS NULL
-             GROUP BY d.stage
+             SELECT live.stage, bool_or(live.closed) AS closed, count(*) AS n, coalesce(sum(live.amount), 0) AS amount
+             FROM live
+             GROUP BY live.stage
            ) x
          )
        ),
@@ -448,7 +468,7 @@ export async function handleDashboard(ctx: Ctx): Promise<Response> {
          + (SELECT count(*) FROM crm.deal_notes n WHERE n.org_id = $1::text::uuid)
        )
      ) AS doc`,
-    [ctx.scope.orgId],
+    [ctx.scope.orgId, JSON.stringify(closedStages)],
   );
   const [doc] = documents(result.rows);
   return successResponse(doc, ctx.requestId);

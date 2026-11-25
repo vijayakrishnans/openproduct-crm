@@ -428,10 +428,32 @@ describe("crm-worker", () => {
       expect(res.body.data).toEqual({
         companies: 1,
         contacts: 3,
-        deals: { open: 1, amount: 120000, byStage: [{ stage: "won", count: 1, amount: 120000 }] },
+        deals: {
+          open: 0,
+          amount: 0,
+          closedStages: ["won", "lost", "closed"],
+          byStage: [{ stage: "won", count: 1, amount: 120000, open: false }],
+        },
         tasks: { open: 1, overdue: 1 },
         notes: 2,
       });
+    });
+
+    it("counts a deal as open unless its stage is one the caller names closed", async () => {
+      const custom = await h.call(viewer, "GET", `${BASE}/dashboard?closedStages=${encodeURIComponent("lost, signed")}`);
+      expect(custom.status).toBe(200);
+      expect(custom.body.data.deals).toEqual({
+        open: 1,
+        amount: 120000,
+        closedStages: ["lost", "signed"],
+        byStage: [{ stage: "won", count: 1, amount: 120000, open: true }],
+      });
+
+      const none = await h.call(viewer, "GET", `${BASE}/dashboard?closedStages=`);
+      expect(none.body.data.deals).toMatchObject({ open: 1, closedStages: [] });
+
+      const tooMany = Array.from({ length: 51 }, (_, i) => `s${i}`).join(",");
+      expect((await h.call(viewer, "GET", `${BASE}/dashboard?closedStages=${tooMany}`)).status).toBe(422);
     });
   });
 
