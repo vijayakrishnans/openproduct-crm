@@ -20,7 +20,7 @@ TAGS: Security, DevOps, Open Source, Cloudflare, SaaS
 
 ---
 
-The subject line was quiet. They always are.
+The subject line was quiet. They always are. Nobody titles these "lol, bad news".
 
 > **Requests you sent through GMI Cloud may have been read**
 
@@ -30,7 +30,7 @@ Then came the line that made me put my coffee down:
 
 > Your account sent 942 requests to GMI Cloud between October 20 and November 13.
 
-That's a month of coding sessions, pasted logs and pasted configs. And this wasn't theoretical. A security researcher had planted AWS test keys in prompts sent to GMI Cloud, and those keys were later used to try to create new IAM users.
+Nine hundred and forty-two. That's a month of coding sessions, pasted logs and pasted configs, and I could not tell you what was in a single one of them. And this wasn't theoretical. A security researcher had planted AWS test keys in prompts sent to GMI Cloud, and those keys were later used to try to create new IAM users.
 
 The advice at the bottom was the advice we all know by heart:
 
@@ -38,17 +38,21 @@ The advice at the bottom was the advice we all know by heart:
 
 ## "Rotate your keys" assumes you know which keys
 
-Nobody remembers every `.env` they pasted into a chat at 1 a.m., or every curl command with a bearer token they asked an AI to fix. So rotation turns into archaeology: go through every dashboard, regenerate everything, redeploy, and hope you didn't miss the one in the forgotten cron job.
+Nobody remembers every `.env` they pasted into a chat at 1 a.m., or every curl command with a bearer token they asked an AI to fix. The 1 a.m. version of me is not a security professional. He is a raccoon with a keyboard.
+
+So rotation turns into archaeology. You go through every dashboard, regenerate everything, redeploy, and hope you didn't miss the one in the cron job you wrote two years ago and have been afraid to touch ever since.
 
 I started that drill for BrokeCRM, the product I've been building, and found something that felt almost unfair.
 
 **There was nothing to rotate.**
 
-Not because I'm careful. It's because the keys my system uses don't live long enough to be worth stealing.
+Not because I'm careful. Please see the raccoon. It's because the keys my system uses don't live long enough to be worth stealing.
 
 ## A CRM where everything about it is public
 
 > [BrokeCRM](https://www.brokecrm.cloud) is a free CRM. Contacts, companies, deals on a kanban board, notes, tasks, tags, search, CSV import and export. It even has an MCP server, so your AI agent can work with your CRM through typed tools instead of free-form SQL.
+
+Yes, it is called BrokeCRM. It is free. The name is not subtle.
 
 It's built on the open-source [Atomic CRM](https://github.com/marmelab/atomic-crm), reworked so that one deployment serves many organizations, each with its data kept apart. It runs on Cloudflare Workers with Postgres on Supabase.
 
@@ -56,12 +60,12 @@ And **the whole repo is public**: [github.com/vijayakrishnans/openproduct-crm](h
 
 And I mean *every* line. Terraform creates the Supabase projects, the Cloudflare domain, Hyperdrive and KV. The database migrations, the Workers, the web app and the CI pipeline that ties them together are all there too. Every part of the multi-tenant CRM lives in that one repo. Fork it, connect your own Cloudflare and Supabase in your Orunbase workspace, and you have the whole platform.
 
-It goes further than the code. BrokeCRM is an **OpenProduct**: the repo *and* the workspace that builds and deploys it are both public. Anyone can open [openproduct.live/broke-crm/workspace](https://openproduct.live/broke-crm/workspace) and see what I see: the stage and prod URLs, every run, which ones failed, the PRs that went out, and the work still in progress.
+It goes further than the code. BrokeCRM is an **OpenProduct**: the repo *and* the workspace that builds and deploys it are both public. Anyone can open [openproduct.live/broke-crm/workspace](https://openproduct.live/broke-crm/workspace) and see what I see: the stage and prod URLs, every run, which ones failed, the PRs that went out, and the work still in progress. My failed deploys are public too. It is a humbling way to build software.
 
 ![The public BrokeCRM workspace on OpenProduct](IMAGE: paste the workspace screenshot here)
-*The live BrokeCRM workspace, open to anyone: 107 runs in the last 7 days, 14 of them failed, 63 PRs merged. You can read all of it. There isn't a single key on it.*
+*The live BrokeCRM workspace, open to anyone: 107 runs in the last 7 days, 14 of them failed, 63 PRs merged. You can read all of it, including the 14. There isn't a single key on it.*
 
-People ask if that's reckless. I think it's safer than most private repos I've worked in. A private repo is where people get comfortable: where `config.prod.json` gets committed "just for now", and where a do-everything `CLOUDFLARE_API_TOKEN` sits in CI secrets for three years. A public repo and a public workspace force you to assume everything is read by everyone, forever. So you design for it.
+People ask if that's reckless. I think it's safer than most private repos I've worked in. A private repo is where people get comfortable. It's where `config.prod.json` gets committed "just for now", and where a do-everything `CLOUDFLARE_API_TOKEN` sits in CI secrets for three years like leftovers nobody will claim. A public repo and a public workspace force you to assume everything is read by everyone, forever. So you design for it.
 
 ## Orun and Orunbase: where the secrets actually live
 
@@ -89,7 +93,7 @@ That lets the job get an **OIDC token** from GitHub. It's a short-lived, signed 
 - checks that repo against the workspace's allow-list,
 - and only then issues a token bound to one workspace and one project.
 
-The workspace is declared in the committed `intent.yaml` (`workspace: ws_9JAJMRHA`, `requireOrg: true`), so a run can't land in the wrong place by forgetting a flag. A repo that isn't on the allow-list gets a `404`, not a `403`, so there's nothing to probe.
+The workspace is declared in the committed `intent.yaml` (`workspace: ws_9JAJMRHA`, `requireOrg: true`), so a run can't land in the wrong place by forgetting a flag. A repo that isn't on the allow-list gets a `404`, not a `403`. The bouncer doesn't tell you that you're not on the list. He tells you there is no club.
 
 If you fork my repo, your fork's token says *your* repo, and my workspace has never heard of it.
 
@@ -101,7 +105,7 @@ Component files contain lines like this:
 GITHUB_OAUTH_CLIENT_SECRET: "secret://ws_9JAJMRHA/openproduct-crm/{{ .environment }}/GITHUB_OAUTH_CLIENT_SECRET"
 ```
 
-That's an address, not a value. The value lives encrypted in Orunbase. It's only resolved while a job is actually running, checked against what that job is allowed to read, and tied to the job's live lease, so a finished runner can't come back for it later. Values are redacted from logs before they're written.
+That's an address, not a value. Knowing my address does not get you into my house. The value lives encrypted in Orunbase. It's only resolved while a job is actually running, checked against what that job is allowed to read, and tied to the job's live lease, so a finished runner can't come back for it later. Values are redacted from logs before they're written.
 
 ### 3. Cloudflare and Supabase keys are minted per run
 
@@ -114,9 +118,9 @@ My pipeline never holds a standing Cloudflare or Supabase key. When a deploy job
 
 Each mint is scoped down, logged and expires on its own.
 
-So take the worst case. I paste a deploy log into a chat, it passes through a breached provider, and an attacker scrapes the Cloudflare token out of it. By the time they find it, it expired while my deploy was still finishing.
+So take the worst case. I paste a deploy log into a chat, it passes through a breached provider, and an attacker scrapes the Cloudflare token out of it. By the time they find it, it expired while my deploy was still finishing. They are now the proud owner of last week's lottery ticket.
 
-**Rotation shouldn't be an emergency you run after a breach. It should just be how the system works.** If every key is replaced every time the pipeline runs, a leaked key is just a string.
+**Rotation shouldn't be an emergency you run after a breach. It should just be how the system works.** If every key is replaced every time the pipeline runs, a leaked key is just a string. A very boring string.
 
 ## The honest part
 
@@ -126,7 +130,7 @@ So it's not "nothing long-lived anywhere." It's a short list of long-lived thing
 
 ## If you take one thing from this
 
-The next breach email is coming. It always is. Before it does:
+The next breach email is coming. It always is, and it will also arrive on a Saturday. Before it does:
 
 1. **Get static secrets out of CI.** GitHub Actions supports OIDC, and AWS, GCP, Azure and Cloudflare can all trust it.
 2. **Make every credential expire.** Minutes beat days. Days beat never.
@@ -134,7 +138,7 @@ The next breach email is coming. It always is. Before it does:
 
 BrokeCRM is free to use at [brokecrm.cloud](https://www.brokecrm.cloud). The [repo](https://github.com/vijayakrishnans/openproduct-crm) is open if you want to fork it, and the [workspace](https://openproduct.live/broke-crm/workspace) is open if you just want to watch it ship. Your fork comes with the whole platform and no secrets to steal, because mine never had any.
 
-I hope that when your breach email arrives, you have nothing to rotate.
+I hope that when your breach email arrives, you have nothing to rotate, and you get to finish your coffee.
 
 ---
 
